@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { sidebarLinks } from "@/config/dashboard";
 import { getCurrentUser } from "@/lib/session";
+import { hasRole } from "@/lib/roles";
 import { SearchCommand } from "@/components/dashboard/search-command";
 import {
   DashboardSidebar,
@@ -22,9 +23,13 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
 
   const filteredLinks = sidebarLinks.map((section) => ({
     ...section,
-    items: section.items.filter(
-      ({ authorizeOnly }) => !authorizeOnly || authorizeOnly === user.role,
-    ),
+    items: section.items.filter(({ authorizeOnly }) => {
+      // If no authorization required, show to all
+      if (!authorizeOnly) return true;
+      
+      // For specific roles, check if user has sufficient role level
+      return user.role === authorizeOnly;
+    }),
   }));
 
   return (

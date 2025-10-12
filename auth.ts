@@ -40,6 +40,14 @@ export const {
           session.user.role = token.role;
         }
 
+        if (token.organizationId) {
+          session.user.organizationId = token.organizationId;
+        }
+
+        if (token.organizationName) {
+          session.user.organizationName = token.organizationName;
+        }
+
         session.user.name = token.name;
         session.user.image = token.picture;
       }
@@ -58,6 +66,8 @@ export const {
       token.email = dbUser.email;
       token.picture = dbUser.image;
       token.role = dbUser.role;
+      token.organizationId = dbUser.organizationId;
+      token.organizationName = dbUser.organization?.name;
 
       return token;
     },

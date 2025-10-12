@@ -4,11 +4,15 @@ import { JWT } from "next-auth/jwt";
 
 export type ExtendedUser = User & {
   role: UserRole;
+  organizationId?: string;
+  organizationName?: string;
 };
 
 declare module "next-auth/jwt" {
   interface JWT {
     role: UserRole;
+    organizationId?: string;
+    organizationName?: string;
   }
 }
 
