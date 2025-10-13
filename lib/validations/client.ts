@@ -1,8 +1,8 @@
 import * as z from "zod";
 import { ClientType } from "@prisma/client";
 
-// Client form validation
-export const clientFormSchema = z.object({
+// Base client schema without refinements
+const baseClientSchema = z.object({
   clientType: z.nativeEnum(ClientType, {
     required_error: "Client type is required",
   }),
@@ -36,8 +36,10 @@ export const clientFormSchema = z.object({
     )
     .max(20, "Too many tags")
     .optional(),
-})
-.refine(
+});
+
+// Client form validation with refinement
+export const clientFormSchema = baseClientSchema.refine(
   (data) => data.email || data.phone,
   {
     message: "At least one contact method (email or phone) is required",
@@ -45,8 +47,8 @@ export const clientFormSchema = z.object({
   }
 );
 
-// Schema for updating client
-export const updateClientSchema = clientFormSchema.partial().extend({
+// Schema for updating client (partial without refinement, then add id)
+export const updateClientSchema = baseClientSchema.partial().extend({
   id: z.string().min(1, "Client ID is required"),
 });
 

@@ -1,8 +1,8 @@
 import * as z from "zod";
 import { InteractionType } from "@prisma/client";
 
-// Interaction form validation
-export const interactionFormSchema = z.object({
+// Base interaction schema without refinements
+const baseInteractionSchema = z.object({
   interactionType: z.nativeEnum(InteractionType, {
     required_error: "Interaction type is required",
   }),
@@ -21,8 +21,10 @@ export const interactionFormSchema = z.object({
   timestamp: z
     .date({ required_error: "Timestamp is required" })
     .max(new Date(), "Timestamp cannot be in the future"),
-})
-.refine(
+});
+
+// Interaction form validation with refinement
+export const interactionFormSchema = baseInteractionSchema.refine(
   (data) => data.clientId || data.propertyId,
   {
     message: "Either client or property must be selected",
@@ -30,8 +32,8 @@ export const interactionFormSchema = z.object({
   }
 );
 
-// Schema for updating interaction
-export const updateInteractionSchema = interactionFormSchema.partial().extend({
+// Schema for updating interaction (partial without refinement, then add id)
+export const updateInteractionSchema = baseInteractionSchema.partial().extend({
   id: z.string().min(1, "Interaction ID is required"),
 });
 

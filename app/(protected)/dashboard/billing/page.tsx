@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/session";
+import { canAccessBilling } from "@/lib/roles";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { constructMetadata } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -16,12 +17,18 @@ export const metadata = constructMetadata({
 export default async function BillingPage() {
   const user = await getCurrentUser();
 
-  let userSubscriptionPlan;
-  if (user && user.id && user.role === "USER") {
-    userSubscriptionPlan = await getUserSubscriptionPlan(user.id);
-  } else {
+  if (!user) {
     redirect("/login");
   }
+
+  if (!canAccessBilling(user.role)) {
+    redirect("/dashboard");
+  }
+
+  if (!user.id) {
+    redirect("/login");
+  }
+  const userSubscriptionPlan = await getUserSubscriptionPlan(user.id!);
 
   return (
     <>

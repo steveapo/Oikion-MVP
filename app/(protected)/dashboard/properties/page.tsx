@@ -40,8 +40,13 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
 
   const subscriptionPlan = await getUserSubscriptionPlan(user.id);
   
-  // If not subscribed, show limited view
-  if (!subscriptionPlan.isPaid) {
+  // Check if user has role-based access to properties
+  // ORG_OWNER, ADMIN, and AGENT can access properties regardless of subscription status
+  // VIEWER can only view if subscribed
+  const hasRoleAccess = canCreateContent(user.role);
+  
+  // If not subscribed and doesn't have role access, show limited view
+  if (!subscriptionPlan.isPaid && !hasRoleAccess) {
     return (
       <div className="space-y-6">
         <DashboardHeader

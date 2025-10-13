@@ -11,7 +11,12 @@ export type FormData = {
   role: UserRole;
 };
 
-export async function updateUserRole(userId: string, data: FormData) {
+export type UpdateUserRoleResult = {
+  status: "success" | "error";
+  message?: string;
+};
+
+export async function updateUserRole(userId: string, data: FormData): Promise<UpdateUserRoleResult> {
   try {
     const session = await auth();
 
@@ -34,7 +39,10 @@ export async function updateUserRole(userId: string, data: FormData) {
     revalidatePath("/dashboard/settings");
     return { status: "success" };
   } catch (error) {
-    // console.log(error)
-    return { status: "error" };
+    console.error("Error updating user role:", error);
+    return { 
+      status: "error",
+      message: error instanceof Error ? error.message : "Unknown error occurred"
+    };
   }
 }

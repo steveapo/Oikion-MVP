@@ -165,6 +165,8 @@ export function ActivityFilters() {
                   {/* Client Actions */}
                   <SelectItem value={ActionType.CLIENT_CREATED}>Client Created</SelectItem>
                   <SelectItem value={ActionType.CLIENT_UPDATED}>Client Updated</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_CREATED}>Relationship Added</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_DELETED}>Relationship Broke</SelectItem>
                   
                   {/* Interaction Actions */}
                   <SelectItem value={ActionType.INTERACTION_LOGGED}>Interaction Logged</SelectItem>

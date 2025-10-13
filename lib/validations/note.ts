@@ -1,7 +1,7 @@
 import * as z from "zod";
 
-// Note form validation
-export const noteFormSchema = z.object({
+// Base note schema without refinements
+const baseNoteSchema = z.object({
   content: z
     .string({ required_error: "Note content is required" })
     .min(1, "Note content is required")
@@ -14,8 +14,10 @@ export const noteFormSchema = z.object({
     .string()
     .min(1)
     .optional(),
-})
-.refine(
+});
+
+// Note form validation with refinement
+export const noteFormSchema = baseNoteSchema.refine(
   (data) => data.clientId || data.propertyId,
   {
     message: "Note must be associated with either a client or property",
@@ -23,8 +25,8 @@ export const noteFormSchema = z.object({
   }
 );
 
-// Schema for updating note
-export const updateNoteSchema = noteFormSchema.partial().extend({
+// Schema for updating note (partial without refinement, then add id)
+export const updateNoteSchema = baseNoteSchema.partial().extend({
   id: z.string().min(1, "Note ID is required"),
 });
 

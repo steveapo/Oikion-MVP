@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowLeft, Plus, X, Upload } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { createProperty, updateProperty } from "@/actions/properties";
+import { uploadPropertyImages } from "@/actions/media";
 import { propertyFormSchema, PropertyFormData } from "@/lib/validations/property";
 import { PropertyType, PropertyStatus, TransactionType, MarketingStatus } from "@prisma/client";
 import { toast } from "sonner";
+import { ImageUpload } from "./image-upload";
+
+interface ImageFile {
+  id: string;
+  file: File;
+  preview: string;
+  isPrimary: boolean;
+}
 
 interface PropertyFormProps {
   property?: any; // Full property object for editing
@@ -46,6 +55,7 @@ export function PropertyForm({ property }: PropertyFormProps) {
     property?.features ? (Array.isArray(property.features) ? property.features : []) : []
   );
   const [newFeature, setNewFeature] = useState("");
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
@@ -53,10 +63,10 @@ export function PropertyForm({ property }: PropertyFormProps) {
       propertyType: property?.propertyType || PropertyType.APARTMENT,
       status: property?.status || PropertyStatus.AVAILABLE,
       transactionType: property?.transactionType || TransactionType.SALE,
-      price: property?.price || 0,
+      price: property?.price ? Number(property.price) : 0,
       bedrooms: property?.bedrooms || undefined,
       bathrooms: property?.bathrooms || undefined,
-      size: property?.size || undefined,
+      size: property?.size ? Number(property.size) : undefined,
       yearBuilt: property?.yearBuilt || undefined,
       features: features,
       description: property?.description || "",
@@ -68,10 +78,19 @@ export function PropertyForm({ property }: PropertyFormProps) {
       postalCode: property?.address?.postalCode || "",
       locationText: property?.address?.locationText || "",
       marketingStatus: property?.listing?.marketingStatus || MarketingStatus.DRAFT,
-      listPrice: property?.listing?.listPrice || property?.price || 0,
+      listPrice: property?.listing?.listPrice ? Number(property.listing.listPrice) : (property?.price ? Number(property.price) : 0),
       listingNotes: property?.listing?.notes || "",
     },
   });
+
+  const convertFileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
 
   const onSubmit = async (data: PropertyFormData) => {
     setIsSubmitting(true);
@@ -81,10 +100,36 @@ export function PropertyForm({ property }: PropertyFormProps) {
       
       if (property) {
         await updateProperty(property.id, formData);
+        
+        // Upload images if any
+        if (images.length > 0) {
+          const imageDataUrls = await Promise.all(
+            images.map(async (img, index) => ({
+              dataUrl: await convertFileToDataUrl(img.file),
+              isPrimary: img.isPrimary,
+              displayOrder: index,
+            }))
+          );
+          await uploadPropertyImages(property.id, imageDataUrls);
+        }
+        
         toast.success("Property updated successfully");
         router.push(`/dashboard/properties/${property.id}`);
       } else {
         const result = await createProperty(formData);
+        
+        // Upload images if any
+        if (images.length > 0 && result.propertyId) {
+          const imageDataUrls = await Promise.all(
+            images.map(async (img, index) => ({
+              dataUrl: await convertFileToDataUrl(img.file),
+              isPrimary: img.isPrimary,
+              displayOrder: index,
+            }))
+          );
+          await uploadPropertyImages(result.propertyId, imageDataUrls);
+        }
+        
         toast.success("Property created successfully");
         router.push(`/dashboard/properties/${result.propertyId}`);
       }
@@ -588,21 +633,22 @@ export function PropertyForm({ property }: PropertyFormProps) {
               </CardContent>
             </Card>
 
-            {/* Image Upload Placeholder */}
+            {/* Images */}
             <Card>
               <CardHeader>
-                <CardTitle>Images</CardTitle>
+                <CardTitle>Property Images</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 text-center">
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Image upload coming soon
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Add property photos to enhance your listing
-                  </p>
-                </div>
+                <ImageUpload 
+                  onImagesChange={setImages}
+                  existingImages={[]}
+                />
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {images.length > 0 
+                    ? `${images.length} image(s) ready to upload with property` 
+                    : "Upload up to 8 images (max 5MB each). Automatically compressed to AVIF format."
+                  }
+                </p>
               </CardContent>
             </Card>
           </div>

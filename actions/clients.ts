@@ -81,7 +81,7 @@ export async function createClient(data: ClientFormData) {
       }
     );
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     return { success: true, clientId: client.id };
   } catch (error) {
     console.error("Failed to create client:", error);
@@ -142,8 +142,8 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
       }
     );
 
-    revalidatePath("/dashboard/contacts");
-    revalidatePath(`/dashboard/contacts/${id}`);
+    revalidatePath("/dashboard/relations");
+    revalidatePath(`/dashboard/relations/${id}`);
     return { success: true };
   } catch (error) {
     console.error("Failed to update client:", error);
@@ -184,7 +184,7 @@ export async function deleteClient(id: string) {
       where: { id },
     });
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete client:", error);

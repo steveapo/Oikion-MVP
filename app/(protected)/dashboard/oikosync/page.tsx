@@ -37,8 +37,12 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
 
   const subscriptionPlan = await getUserSubscriptionPlan(user.id);
   
-  // If not subscribed, show limited view
-  if (!subscriptionPlan.isPaid) {
+  // Check if user has role-based access to activity feed
+  // All organization members can view the activity feed
+  const hasRoleAccess = true; // Activity feed is available to all roles in an organization
+  
+  // If not subscribed and doesn't have role access, show limited view
+  if (!subscriptionPlan.isPaid && !hasRoleAccess) {
     return (
       <div className="space-y-6">
         <DashboardHeader

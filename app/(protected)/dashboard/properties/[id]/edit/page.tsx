@@ -1,9 +1,10 @@
 import { notFound, redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
-import { canCreateContent } from "@/lib/roles";
+import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { getProperty } from "@/actions/properties";
 import { constructMetadata } from "@/lib/utils";
 import { PropertyForm } from "@/components/properties/property-form";
+import { ArchivePropertyButton } from "@/components/properties/archive-property-button";
 
 interface EditPropertyPageProps {
   params: {
@@ -48,19 +49,29 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
     notFound();
   }
 
+  const canArchive = canDeleteContent(user.role, property.createdBy === user.id);
+
   const displayLocation = property.address 
     ? [property.address.city, property.address.region].filter(Boolean).join(", ")
     : "Unknown Location";
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">
-          Edit {property.propertyType.charAt(0) + property.propertyType.slice(1).toLowerCase()}
-        </h1>
-        <p className="text-muted-foreground">
-          Update property details for {displayLocation}.
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">
+            Edit {property.propertyType.charAt(0) + property.propertyType.slice(1).toLowerCase()}
+          </h1>
+          <p className="text-muted-foreground">
+            Update property details for {displayLocation}.
+          </p>
+        </div>
+        {canArchive && (
+          <ArchivePropertyButton 
+            propertyId={params.id} 
+            propertyName={`${property.propertyType} in ${displayLocation}`}
+          />
+        )}
       </div>
 
       <PropertyForm property={property} />

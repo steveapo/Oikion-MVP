@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { userRoleSchema } from "@/lib/validations/user";
+import { ROLE_DESCRIPTIONS, getRoleDisplayName } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -49,13 +50,13 @@ export function UserRoleForm({ user }: UserNameFormProps) {
     },
   });
 
-  const onSubmit = (data: z.infer<typeof userRoleSchema>) => {
+  const onSubmit = (data: FormData) => {
     startTransition(async () => {
-      const { status } = await updateUserRoleWithId(data);
+      const result = await updateUserRoleWithId(data);
 
-      if (status !== "success") {
+      if (result.status !== "success") {
         toast.error("Something went wrong.", {
-          description: "Your role was not updated. Please try again.",
+          description: result.message || "Your role was not updated. Please try again.",
         });
       } else {
         await update();
@@ -80,24 +81,30 @@ export function UserRoleForm({ user }: UserNameFormProps) {
                 <FormItem className="w-full space-y-0">
                   <FormLabel className="sr-only">Role</FormLabel>
                   <Select
-                    // TODO:(FIX) Option value not update. Use useState for the moment
                     onValueChange={(value: UserRole) => {
                       setUpdated(user.role !== value);
                       setRole(value);
-                      // field.onChange;
+                      field.onChange(value);
                     }}
                     name={field.name}
-                    defaultValue={user.role}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder="Select a role">
+                          {field.value && getRoleDisplayName(field.value)}
+                        </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {roles.map((role) => (
-                        <SelectItem key={role} value={role.toString()}>
-                          {role}
+                      {roles.map((roleOption) => (
+                        <SelectItem key={roleOption} value={roleOption.toString()}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{getRoleDisplayName(roleOption)}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {ROLE_DESCRIPTIONS[roleOption]}
+                            </span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>

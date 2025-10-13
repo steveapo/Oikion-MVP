@@ -1,4 +1,5 @@
 import {
+  Activity,
   AlertTriangle,
   ArrowRight,
   ArrowUpRight,
@@ -30,12 +31,14 @@ import {
   SunMedium,
   Trash,
   User,
+  Users,
   X,
 } from "lucide-react";
 
 export type Icon = LucideIcon;
 
 export const Icons = {
+  activity: Activity,
   add: Plus,
   arrowRight: ArrowRight,
   arrowUpRight: ArrowUpRight,
@@ -133,5 +136,6 @@ export const Icons = {
     </svg>
   ),
   user: User,
+  users: Users,
   warning: AlertTriangle,
 };

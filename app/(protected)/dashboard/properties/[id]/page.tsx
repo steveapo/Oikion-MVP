@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Edit, Archive, Camera, MapPin, Calendar, User } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";
-import { getProperty } from "@/actions/properties";
+import { getProperty, getPropertyClients } from "@/actions/properties";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { PropertyImageGallery } from "@/components/properties/property-image-gallery";
 import { PropertyTimeline } from "@/components/properties/property-timeline";
+import { PropertyClients } from "@/components/properties/property-clients";
+import { ArchivePropertyButton } from "@/components/properties/archive-property-button";
 import { constructMetadata } from "@/lib/utils";
 import { PropertyStatus, TransactionType, PropertyType } from "@prisma/client";
 
@@ -47,10 +49,20 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
   }
 
   let property;
+  let associatedClients: any[] = [];
+  
   try {
     property = await getProperty(params.id);
   } catch {
     notFound();
+  }
+
+  // Fetch associated clients
+  try {
+    associatedClients = await getPropertyClients(params.id);
+  } catch (error) {
+    console.error("Error fetching property clients:", error);
+    // Continue without clients - they're optional
   }
 
   const canEdit = canCreateContent(user.role);
@@ -98,9 +110,26 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
   const displayLocation = property.address 
     ? [property.address.city, property.address.region].filter(Boolean).join(", ")
     : "Location not specified";
+  
+  const isArchived = property.listing?.marketingStatus === "ARCHIVED";
 
   return (
     <div className="space-y-6">
+      {/* Archived Banner */}
+      {isArchived && (
+        <div className="rounded-lg border-2 border-gray-300 bg-gray-50 p-4">
+          <div className="flex items-center gap-3">
+            <Archive className="h-5 w-5 text-gray-600" />
+            <div>
+              <h3 className="font-semibold text-gray-900">This property is archived</h3>
+              <p className="text-sm text-gray-600">
+                This property is hidden from active listings. You can restore it by changing the marketing status.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center space-x-4">
@@ -122,10 +151,10 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
             </Link>
           )}
           {canArchive && (
-            <Button variant="outline">
-              <Archive className="mr-2 h-4 w-4" />
-              Archive
-            </Button>
+            <ArchivePropertyButton 
+              propertyId={property.id}
+              propertyName={`${property.propertyType} in ${displayLocation}`}
+            />
           )}
         </div>
       </div>
@@ -164,9 +193,16 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
                 </div>
                 <div className="text-right">
                   <div className="text-3xl font-bold">{formatPrice(property.price)}</div>
-                  <div className="mt-2 space-x-2">
-                    {getStatusBadge(property.status)}
-                    {getTransactionTypeBadge(property.transactionType)}
+                  <div className="mt-2 flex flex-col gap-2 items-end">
+                    <div className="flex gap-2">
+                      {getStatusBadge(property.status)}
+                      {getTransactionTypeBadge(property.transactionType)}
+                    </div>
+                    {isArchived && (
+                      <Badge className="bg-gray-700 text-white hover:bg-gray-800 px-3 py-1 font-semibold">
+                        Archived
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -275,6 +311,9 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
 
         {/* Sidebar */}
         <div className="space-y-6">
+          {/* Associated Clients */}
+          <PropertyClients clients={associatedClients} />
+          
           {/* Listing Information */}
           {property.listing && (
             <Card>
@@ -284,7 +323,13 @@ export default async function PropertyDetailPage({ params }: PropertyDetailPageP
               <CardContent className="space-y-4">
                 <div>
                   <span className="font-medium">Marketing Status:</span>
-                  <Badge variant="outline" className="ml-2 capitalize">
+                  <Badge 
+                    className={`ml-2 capitalize ${
+                      property.listing.marketingStatus === "ARCHIVED" 
+                        ? 'bg-gray-700 text-white hover:bg-gray-800 font-semibold' 
+                        : 'border border-gray-300 bg-transparent text-gray-700'
+                    }`}
+                  >
                     {property.listing.marketingStatus.toLowerCase()}
                   </Badge>
                 </div>

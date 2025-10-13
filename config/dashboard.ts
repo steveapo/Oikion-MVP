@@ -8,7 +8,7 @@ export const sidebarLinks: SidebarNavItem[] = [
     items: [
       { href: "/dashboard", icon: "dashboard", title: "Dashboard" },
       { href: "/dashboard/properties", icon: "home", title: "Properties" },
-      { href: "/dashboard/contacts", icon: "users", title: "Contacts" },
+      { href: "/dashboard/relations", icon: "users", title: "Relations" },
       { href: "/dashboard/oikosync", icon: "activity", title: "Oikosync" },
       {
         href: "/dashboard/billing",

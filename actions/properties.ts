@@ -388,8 +388,19 @@ export async function getProperties(filters: PropertyFilters = {}) {
       prisma.property.count({ where }),
     ]);
 
+    // Convert Decimal fields to numbers for client components
+    const serializedProperties = properties.map(property => ({
+      ...property,
+      price: Number(property.price),
+      size: property.size ? Number(property.size) : null,
+      listing: property.listing ? {
+        ...property.listing,
+        listPrice: Number(property.listing.listPrice),
+      } : null,
+    }));
+
     return {
-      properties,
+      properties: serializedProperties,
       totalCount,
       page: validatedFilters.page,
       totalPages: Math.ceil(totalCount / validatedFilters.limit),
@@ -465,5 +476,58 @@ export async function getProperty(id: string) {
   } catch (error) {
     console.error("Failed to get property:", error);
     throw new Error("Failed to get property");
+  }
+}
+
+export async function getPropertyClients(propertyId: string) {
+  const session = await auth();
+  
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  if (!session.user.organizationId) {
+    throw new Error("User must belong to an organization");
+  }
+
+  try {
+    // Get all clients who have interactions, notes, or tasks related to this property
+    const clientsWithInteractions = await prisma.client.findMany({
+      where: {
+        organizationId: session.user.organizationId,
+        OR: [
+          { interactions: { some: { propertyId } } },
+          { notes: { some: { propertyId } } },
+          { tasks: { some: { propertyId } } },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        clientType: true,
+        email: true,
+        phone: true,
+        _count: {
+          select: {
+            interactions: {
+              where: { propertyId },
+            },
+          },
+        },
+      },
+    });
+
+    // Transform the data to include interaction count
+    return clientsWithInteractions.map(client => ({
+      id: client.id,
+      name: client.name,
+      clientType: client.clientType,
+      email: client.email,
+      phone: client.phone,
+      interactionCount: client._count.interactions,
+    }));
+  } catch (error) {
+    console.error("Failed to get property clients:", error);
+    throw new Error("Failed to get property clients");
   }
 }

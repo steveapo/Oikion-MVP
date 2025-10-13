@@ -93,9 +93,9 @@ export async function createInteraction(data: InteractionFormData) {
       }
     );
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     if (validatedData.clientId) {
-      revalidatePath(`/dashboard/contacts/${validatedData.clientId}`);
+      revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
     }
     
     return { success: true, interactionId: interaction.id };
@@ -148,9 +148,9 @@ export async function createNote(data: NoteFormData) {
       }
     );
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     if (validatedData.clientId) {
-      revalidatePath(`/dashboard/contacts/${validatedData.clientId}`);
+      revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
     }
     if (validatedData.propertyId) {
       revalidatePath(`/dashboard/properties/${validatedData.propertyId}`);
@@ -208,9 +208,9 @@ export async function createTask(data: TaskFormData) {
       }
     );
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     if (validatedData.clientId) {
-      revalidatePath(`/dashboard/contacts/${validatedData.clientId}`);
+      revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
     }
     
     return { success: true, taskId: task.id };
@@ -266,9 +266,12 @@ export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETE
       );
     }
 
-    revalidatePath("/dashboard/contacts");
+    revalidatePath("/dashboard/relations");
     if (existingTask.clientId) {
-      revalidatePath(`/dashboard/contacts/${existingTask.clientId}`);
+      revalidatePath(`/dashboard/relations/${existingTask.clientId}`);
+    }
+    if (existingTask.propertyId) {
+      revalidatePath(`/dashboard/properties/${existingTask.propertyId}`);
     }
     
     return { success: true };

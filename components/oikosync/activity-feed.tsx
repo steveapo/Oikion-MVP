@@ -15,7 +15,9 @@ import {
   UserPlus,
   Settings,
   CreditCard,
-  Archive
+  Archive,
+  Link2,
+  Unlink
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -195,7 +197,7 @@ function getActivityDisplay(activity: ActivityItem) {
         icon: Users,
         color: "bg-green-100 text-green-600",
         message: `created ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || "Unknown"}"`,
-        linkHref: `/dashboard/contacts/${activity.entityId}`,
+        linkHref: `/dashboard/relations/${activity.entityId}`,
       };
 
     case "CLIENT_UPDATED":
@@ -203,7 +205,23 @@ function getActivityDisplay(activity: ActivityItem) {
         icon: Users,
         color: "bg-green-100 text-green-600",
         message: `updated ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || "Unknown"}"`,
-        linkHref: `/dashboard/contacts/${activity.entityId}`,
+        linkHref: `/dashboard/relations/${activity.entityId}`,
+      };
+
+    case "CLIENT_RELATIONSHIP_CREATED":
+      return {
+        icon: Link2,
+        color: "bg-teal-100 text-teal-600",
+        message: `linked "${payload?.fromClientName || "Unknown"}" with "${payload?.toClientName || "Unknown"}" as ${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || "related"}${payload?.position ? ` (${payload.position})` : ""}`,
+        linkHref: `/dashboard/relations/${payload?.fromClientId}`,
+      };
+
+    case "CLIENT_RELATIONSHIP_DELETED":
+      return {
+        icon: Unlink,
+        color: "bg-red-100 text-red-600",
+        message: `broke link between "${payload?.fromClientName || "Unknown"}" and "${payload?.toClientName || "Unknown"}" (${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || "relationship"})`,
+        linkHref: `/dashboard/relations/${payload?.fromClientId}`,
       };
 
     case "NOTE_ADDED":
@@ -211,7 +229,7 @@ function getActivityDisplay(activity: ActivityItem) {
         icon: FileText,
         color: "bg-yellow-100 text-yellow-600",
         message: `added a note${entityType === "CLIENT" && entityDetails ? ` to ${entityDetails.name}` : ""}`,
-        linkHref: entityType === "CLIENT" ? `/dashboard/contacts/${activity.entityId}` : `/dashboard/properties/${activity.entityId}`,
+        linkHref: entityType === "CLIENT" ? `/dashboard/relations/${activity.entityId}` : `/dashboard/properties/${activity.entityId}`,
       };
 
     case "INTERACTION_LOGGED":
@@ -220,7 +238,7 @@ function getActivityDisplay(activity: ActivityItem) {
         icon: interactionIcon,
         color: "bg-indigo-100 text-indigo-600",
         message: `logged a ${payload?.interactionType?.toLowerCase()?.replace("_", " ") || "interaction"}${payload?.clientName ? ` with ${payload.clientName}` : ""}`,
-        linkHref: `/dashboard/contacts/${activity.entityId}`,
+        linkHref: `/dashboard/relations/${activity.entityId}`,
       };
 
     case "TASK_CREATED":

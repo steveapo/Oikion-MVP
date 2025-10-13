@@ -11,6 +11,8 @@ declare module "next-auth" {
   interface Session {
     user: {
       role: UserRole;
+      organizationId?: string;
+      organizationName?: string;
     } & DefaultSession["user"];
   }
 }
@@ -24,6 +26,31 @@ export const {
   pages: {
     signIn: "/login",
     // error: "/auth/error",
+  },
+  events: {
+    async createUser({ user }) {
+      // Create an organization for new users
+      if (user.id && user.email) {
+        try {
+          const organization = await prisma.organization.create({
+            data: {
+              name: `${user.name || user.email}'s Organization`,
+            },
+          });
+
+          // Update user with organizationId and set role to ORG_OWNER
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              organizationId: organization.id,
+              role: UserRole.ORG_OWNER,
+            },
+          });
+        } catch (error) {
+          console.error("Failed to create organization for new user:", error);
+        }
+      }
+    },
   },
   callbacks: {
     async session({ token, session }) {
@@ -41,11 +68,11 @@ export const {
         }
 
         if (token.organizationId) {
-          session.user.organizationId = token.organizationId;
+          (session.user as any).organizationId = token.organizationId;
         }
 
         if (token.organizationName) {
-          session.user.organizationName = token.organizationName;
+          (session.user as any).organizationName = token.organizationName;
         }
 
         session.user.name = token.name;
@@ -66,7 +93,7 @@ export const {
       token.email = dbUser.email;
       token.picture = dbUser.image;
       token.role = dbUser.role;
-      token.organizationId = dbUser.organizationId;
+      token.organizationId = dbUser.organizationId || undefined;
       token.organizationName = dbUser.organization?.name;
 
       return token;

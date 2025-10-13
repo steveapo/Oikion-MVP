@@ -125,10 +125,18 @@ function PropertyCard({ property, userRole }: { property: Property; userRole: Us
   const displayLocation = property.address 
     ? [property.address.city, property.address.region].filter(Boolean).join(", ")
     : "Location not specified";
+  const isArchived = property.listing?.marketingStatus === "ARCHIVED";
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="p-0">
+      <CardHeader className="p-0 relative">
+        {isArchived && (
+          <div className="absolute left-3 top-3 z-10">
+            <Badge className="bg-gray-700 text-white hover:bg-gray-800 px-3 py-1 text-sm font-semibold">
+              Archived
+            </Badge>
+          </div>
+        )}
         {primaryImage ? (
           <div className="relative aspect-[16/10] w-full">
             <Image
@@ -157,7 +165,7 @@ function PropertyCard({ property, userRole }: { property: Property; userRole: Us
       <CardContent className="p-4">
         <div className="space-y-3">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-lg">
                 {property.propertyType.charAt(0) + property.propertyType.slice(1).toLowerCase()} in {displayLocation}
               </h3>
@@ -167,7 +175,14 @@ function PropertyCard({ property, userRole }: { property: Property; userRole: Us
             </div>
             <div className="text-right">
               <p className="font-bold text-lg">{formatPrice(property.price)}</p>
-              {getStatusBadge(property.status)}
+              <div className="flex flex-col gap-1.5 items-end mt-1">
+                {getStatusBadge(property.status)}
+                {isArchived && (
+                  <Badge className="bg-gray-700 text-white hover:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
+                    Archived
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
 

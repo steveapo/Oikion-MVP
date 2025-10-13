@@ -253,10 +253,53 @@ model Client {
   interactions Interaction[]
   notes        Note[]
   tasks        Task[]
+  
+  // Client-to-Client relationships
+  relationshipsFrom ClientRelationship[] @relation("RelationshipFrom")
+  relationshipsTo   ClientRelationship[] @relation("RelationshipTo")
 
   @@index([organizationId])
   @@index([createdBy])
   @@map(name: "clients")
+}
+
+enum RelationshipType {
+  EMPLOYEE      // Person works for Company
+  PARTNER       // Business partnership
+  VENDOR        // Vendor/Supplier relationship
+  CLIENT        // Client relationship
+  REFERRAL      // Referral source
+  FAMILY        // Family member
+  COLLEAGUE     // Professional colleague
+  OTHER         // Other relationship type
+}
+
+// Client-to-Client relationships (Person-Company, Person-Person, Company-Company)
+model ClientRelationship {
+  id        String   @id @default(cuid())
+  
+  // From client (e.g., Person or Company)
+  fromClientId String
+  fromClient   Client @relation("RelationshipFrom", fields: [fromClientId], references: [id], onDelete: Cascade)
+  
+  // To client (e.g., Company or Person)
+  toClientId String
+  toClient   Client @relation("RelationshipTo", fields: [toClientId], references: [id], onDelete: Cascade)
+  
+  // Relationship type
+  relationshipType RelationshipType @default(OTHER)
+  
+  // Position/Role (only when linking Person to Company)
+  position String?
+  
+  // Metadata
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  createdBy String
+  
+  @@index([fromClientId])
+  @@index([toClientId])
+  @@unique([fromClientId, toClientId])
+  @@map(name: "client_relationships")
 }
 
 enum InteractionType {
@@ -348,6 +391,8 @@ enum ActionType {
   MEDIA_ADDED
   CLIENT_CREATED
   CLIENT_UPDATED
+  CLIENT_RELATIONSHIP_CREATED
+  CLIENT_RELATIONSHIP_DELETED
   NOTE_ADDED
   INTERACTION_LOGGED
   TASK_CREATED
