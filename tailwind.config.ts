@@ -17,10 +17,51 @@ const config = {
   theme: {
     container: {
       center: true,
-      padding: ".8rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1rem",
+        md: "1.5rem",
+        lg: "1.5rem",
+        xl: "2rem",
+        "2xl": "2rem",
+      },
+      screens: {
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1280px",
+        "2xl": "1440px",
+      },
     },
     extend: {
       colors: {
+        /* Design System Tokens */
+        neutral: {
+          1: "hsl(var(--neutral-1))",
+          2: "hsl(var(--neutral-2))",
+          3: "hsl(var(--neutral-3))",
+          6: "hsl(var(--neutral-6))",
+          9: "hsl(var(--neutral-9))",
+          11: "hsl(var(--neutral-11))",
+          12: "hsl(var(--neutral-12))",
+        },
+        bg: "hsl(var(--bg))",
+        surface: "hsl(var(--surface))",
+        "text-primary": "hsl(var(--text-primary))",
+        "text-secondary": "hsl(var(--text-secondary))",
+        brand: {
+          DEFAULT: "hsl(var(--brand))",
+          foreground: "hsl(var(--brand-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        /* Legacy shadcn tokens (preserved for compatibility) */
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -56,9 +97,39 @@ const config = {
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        none: "0px",
+        sm: "var(--radius-sm)",
+        DEFAULT: "var(--radius)",
+        md: "var(--radius)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
+        full: "9999px",
+      },
+      spacing: {
+        /* 8-point grid system - preserved defaults + custom values */
+      },
+      fontSize: {
+        xs: ["12px", { lineHeight: "18px" }],
+        sm: ["14px", { lineHeight: "22px" }],
+        base: ["16px", { lineHeight: "25px" }],
+        lg: ["18px", { lineHeight: "27px" }],
+        xl: ["20px", { lineHeight: "30px" }],
+        "2xl": ["24px", { lineHeight: "34px" }],
+        "3xl": ["30px", { lineHeight: "40px" }],
+        "4xl": ["36px", { lineHeight: "44px" }],
+        "5xl": ["48px", { lineHeight: "56px" }],
+      },
+      boxShadow: {
+        e0: "var(--shadow-e0)",
+        e1: "var(--shadow-e1)",
+        e2: "var(--shadow-e2)",
+        e3: "var(--shadow-e3)",
+      },
+      transitionDuration: {
+        micro: "var(--motion-micro)",
+        fast: "var(--motion-fast)",
+        base: "var(--motion-base)",
+        slow: "var(--motion-slow)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
@@ -127,16 +198,12 @@ const config = {
         },
       },
       animation: {
-        "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-
-        // Fade up and down
-        "fade-up": "fade-up 0.5s",
-        "fade-down": "fade-down 0.5s",
-
-        // Fade in and out
-        "fade-in": "fade-in 0.4s",
-        "fade-out": "fade-out 0.4s",
+        "accordion-down": "accordion-down var(--motion-fast) ease-out",
+        "accordion-up": "accordion-up var(--motion-fast) ease-out",
+        "fade-up": "fade-up 0.5s ease-out",
+        "fade-down": "fade-down 0.5s ease-out",
+        "fade-in": "fade-in var(--motion-base) ease",
+        "fade-out": "fade-out var(--motion-base) ease",
       },
     },
   },

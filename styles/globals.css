@@ -4,12 +4,63 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    /* Primitive Tokens - Neutral Ramp (12-step cool-gray) */
+    --neutral-1: 0 0% 100%;
+    --neutral-2: 0 0% 97%;
+    --neutral-3: 0 0% 95%;
+    --neutral-6: 0 0% 89.8%;
+    --neutral-9: 0 0% 45%;
+    --neutral-11: 0 0% 20%;
+    --neutral-12: 0 0% 3.9%;
+
+    /* Primitive Tokens - Border Radius */
+    --radius-sm: 6px;
+    --radius: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* Primitive Tokens - Shadows (Elevation) */
+    --shadow-e0: none;
+    --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.08), 0 1px 1px rgba(0, 0, 0, 0.06);
+    --shadow-e2: 0 6px 12px rgba(0, 0, 0, 0.10), 0 2px 4px rgba(0, 0, 0, 0.08);
+    --shadow-e3: 0 20px 40px rgba(0, 0, 0, 0.16), 0 8px 16px rgba(0, 0, 0, 0.12);
+
+    /* Primitive Tokens - Motion */
+    --motion-micro: 120ms;
+    --motion-fast: 180ms;
+    --motion-base: 240ms;
+    --motion-slow: 300ms;
+
+    /* Semantic Tokens - Surfaces */
+    --bg: var(--neutral-2);
+    --surface: var(--neutral-1);
+    --background: var(--neutral-2);
+    --foreground: var(--neutral-12);
+
+    /* Semantic Tokens - Text */
+    --text-primary: var(--neutral-12);
+    --text-secondary: 0 0% 3.9% / 0.66;
+
+    /* Semantic Tokens - Borders */
+    --border: 0 0% 89.8% / 0.07;
+    --input: var(--neutral-6);
+    --ring: 217 91% 60%;
+
+    /* Semantic Tokens - Brand & Feedback */
+    --brand: 217 91% 60%;
+    --brand-foreground: 0 0% 100%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Legacy Tokens (preserved for compatibility) */
+    --card: var(--neutral-1);
+    --card-foreground: var(--neutral-12);
+    --popover: var(--neutral-1);
+    --popover-foreground: var(--neutral-12);
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
@@ -18,12 +69,7 @@
     --muted-foreground: 0 0% 45.1%;
     --accent: 0 0% 98%;
     --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --radius: 0.5rem;
+    --radius-legacy: 0.5rem;
     
     --chart-1: 271.5 81.3% 55.9%;
     --chart-2: 270 95% 75%;
@@ -33,12 +79,50 @@
   }
 
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    /* Primitive Tokens - Neutral Ramp (Dark Mode) */
+    --neutral-1: 0 0% 8%;
+    --neutral-2: 0 0% 5.5%;
+    --neutral-3: 0 0% 10%;
+    --neutral-6: 0 0% 14.9%;
+    --neutral-9: 0 0% 64%;
+    --neutral-11: 0 0% 85%;
+    --neutral-12: 0 0% 98%;
+
+    /* Shadows remain the same - could be adjusted for dark mode */
+    --shadow-e1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 1px rgba(0, 0, 0, 0.2);
+    --shadow-e2: 0 6px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-e3: 0 20px 40px rgba(0, 0, 0, 0.6), 0 8px 16px rgba(0, 0, 0, 0.4);
+
+    /* Semantic Tokens - Surfaces (Dark) */
+    --bg: var(--neutral-2);
+    --surface: var(--neutral-1);
+    --background: var(--neutral-2);
+    --foreground: var(--neutral-12);
+
+    /* Semantic Tokens - Text (Dark) */
+    --text-primary: var(--neutral-12);
+    --text-secondary: 0 0% 98% / 0.70;
+
+    /* Semantic Tokens - Borders (Dark) */
+    --border: 0 0% 14.9% / 0.10;
+    --input: var(--neutral-6);
+    --ring: 213 97% 87%;
+
+    /* Semantic Tokens - Brand & Feedback (Dark) */
+    --brand: 217 91% 60%;
+    --brand-foreground: 0 0% 100%;
+    --success: 160 84% 39%;
+    --success-foreground: 0 0% 100%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Legacy Tokens (Dark Mode) */
+    --card: var(--neutral-1);
+    --card-foreground: var(--neutral-12);
+    --popover: var(--neutral-1);
+    --popover-foreground: var(--neutral-12);
     --primary: 0 0% 98%;
     --primary-foreground: 0 0% 9%;
     --secondary: 0 0% 14.9%;
@@ -47,11 +131,6 @@
     --muted-foreground: 0 0% 63.9%;
     --accent: 0 0% 8%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
 
     --chart-1: 271.5 81.3% 55.9%;
     --chart-2: 270 95% 75%;
@@ -73,6 +152,29 @@
 }
 
 @layer utilities {
+  /* Elevation Utilities */
+  .e0 {
+    box-shadow: var(--shadow-e0);
+  }
+
+  .e1 {
+    box-shadow: var(--shadow-e1);
+  }
+
+  .e2 {
+    box-shadow: var(--shadow-e2);
+  }
+
+  .e3 {
+    box-shadow: var(--shadow-e3);
+  }
+
+  /* Focus Ring Utility */
+  .ring-focus {
+    @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Step Utilities (preserved) */
   .step {
     counter-increment: step;
   }
@@ -81,6 +183,18 @@
     @apply absolute w-9 h-9 bg-muted rounded-full font-mono font-medium text-center text-base inline-flex items-center justify-center -indent-px border-4 border-background;
     @apply ml-[-50px] mt-[-4px];
     content: counter(step);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
