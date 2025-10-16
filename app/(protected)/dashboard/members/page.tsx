@@ -70,7 +70,7 @@ export default async function MembersPage() {
         <h2 className="text-xl font-semibold mb-4">Team Members</h2>
         <MembersList 
           members={members} 
-          currentUserId={session.user.id} 
+          currentUserId={session.user.id!} 
           canManage={canManage}
           currentUserRole={session.user.role}
         />

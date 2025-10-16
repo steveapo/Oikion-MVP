@@ -49,6 +49,7 @@ export default async function PagePage({
   const images = await Promise.all(
     page.images.map(async (src: string) => ({
       src,
+      alt: "",
       blurDataURL: await getBlurDataURL(src),
     })),
   );

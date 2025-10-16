@@ -63,6 +63,7 @@ export default async function DocPage({ params }: DocPageProps) {
   const images = await Promise.all(
     doc.images.map(async (src: string) => ({
       src,
+      alt: "",
       blurDataURL: await getBlurDataURL(src),
     })),
   );

@@ -79,6 +79,7 @@ export default async function PostPage({
     await Promise.all(
       post.images.map(async (src: string) => ({
         src,
+        alt: "",
         blurDataURL: await getBlurDataURL(src),
       })),
     ),

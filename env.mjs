@@ -3,8 +3,9 @@ import { z } from "zod";
 
 export const env = createEnv({
   server: {
-    // This is optional because it's only used in development.
-    // See https://next-auth.js.org/deployment.
+    // Auth.js v5 requires AUTH_URL for CSRF token validation
+    AUTH_URL: z.string().url().optional(),
+    // NEXTAUTH_URL is legacy (Auth.js v4), kept for backward compatibility
     NEXTAUTH_URL: z.string().url().optional(),
     AUTH_SECRET: z.string().min(1),
     GOOGLE_CLIENT_ID: z.string().min(1),
@@ -26,6 +27,7 @@ export const env = createEnv({
     NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID: z.string().min(1),
   },
   runtimeEnv: {
+    AUTH_URL: process.env.AUTH_URL,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

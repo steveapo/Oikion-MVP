@@ -19,6 +19,24 @@ export const DELETE = auth(async (req) => {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    // Check if organization is personal
+    const organization = await prisma.organization.findUnique({
+      where: { id: user.organizationId },
+      select: { isPersonal: true },
+    });
+
+    if (!organization) {
+      return NextResponse.json({ error: "Organization not found" }, { status: 404 });
+    }
+
+    // Prevent deletion of personal organizations
+    if (organization.isPersonal) {
+      return NextResponse.json(
+        { error: "Cannot delete your personal organization" },
+        { status: 400 }
+      );
+    }
+
     await prisma.organization.delete({
       where: { id: user.organizationId },
     });

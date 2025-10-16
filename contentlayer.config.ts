@@ -19,11 +19,10 @@ const defaultComputedFields: ComputedFields = {
     resolve: (doc) => doc._raw.flattenedPath.split("/").slice(1).join("/"),
   },
   images: {
-    type: "list",
+    type: "json",
     resolve: (doc) => {
-      return (
-        doc.body.raw.match(/(?<=<Image[^>]*\bsrc=")[^"]+(?="[^>]*\/>)/g) || []
-      );
+      const matches = doc.body.raw.match(/(?<=<Image[^>]*\bsrc=")[^"]+(?="[^>]*\/>)/g);
+      return matches || [];
     },
   },
 };

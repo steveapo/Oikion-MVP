@@ -29,12 +29,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateMemberRole } from "@/actions/members";
-import { canAssignRole } from "@/lib/roles";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { updateMemberRole, transferOwnership } from "@/actions/members";
+import { getAssignableRolesByUser } from "@/lib/roles";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Icons } from "@/components/shared/icons";
+import { AlertTriangle, Crown } from "lucide-react";
 
 interface Member {
   id: string;
@@ -46,6 +48,7 @@ interface Member {
 interface UpdateMemberRoleDialogProps {
   member: Member;
   currentUserRole: UserRole;
+  currentUserId: string; // Added to check if trying to change own role
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -78,10 +81,18 @@ const roleLabels: Record<UserRole, { label: string; description: string }> = {
 export function UpdateMemberRoleDialog({
   member,
   currentUserRole,
+  currentUserId,
   open,
   onOpenChange,
 }: UpdateMemberRoleDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showTransferConfirm, setShowTransferConfirm] = useState(false);
+
+  // Check if this is the user's own profile
+  const isSelf = member.id === currentUserId;
+
+  // Check if trying to change to ORG_OWNER (requires transfer ownership)
+  const isTransferOwnership = !isSelf && currentUserRole === UserRole.ORG_OWNER;
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -97,16 +108,36 @@ export function UpdateMemberRoleDialog({
       return;
     }
 
+    // Handle transfer ownership
+    if (data.role === UserRole.ORG_OWNER) {
+      if (!showTransferConfirm) {
+        setShowTransferConfirm(true);
+        return;
+      }
+
+      setIsLoading(true);
+      const result = await transferOwnership(member.id);
+      setIsLoading(false);
+
+      if (result.success) {
+        toast.success("Ownership transferred successfully");
+        onOpenChange(false);
+        window.location.reload();
+      } else {
+        toast.error(result.error || "Failed to transfer ownership");
+        setShowTransferConfirm(false);
+      }
+      return;
+    }
+
+    // Regular role change
     setIsLoading(true);
-
     const result = await updateMemberRole(member.id, data.role);
-
     setIsLoading(false);
 
     if (result.success) {
       toast.success("Member role updated");
       onOpenChange(false);
-      // Trigger a revalidation
       window.location.reload();
     } else {
       toast.error(result.error || "Failed to update role");
@@ -114,9 +145,41 @@ export function UpdateMemberRoleDialog({
   }
 
   // Get roles that the current user can assign
-  const availableRoles = Object.values(UserRole).filter((role) =>
-    canAssignRole(currentUserRole, role)
-  );
+  const availableRoles = getAssignableRolesByUser(currentUserRole).filter(role => {
+    // Filter out current member's role from dropdown to show it's already assigned
+    // ADMINs cannot assign ORG_OWNER or ADMIN roles
+    if (currentUserRole === UserRole.ADMIN) {
+      return role === UserRole.AGENT || role === UserRole.VIEWER;
+    }
+    return true;
+  });
+
+  // Users cannot change their own role
+  if (isSelf) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Your Role</DialogTitle>
+            <DialogDescription>
+              You cannot change your own role.
+            </DialogDescription>
+          </DialogHeader>
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {currentUserRole === UserRole.ORG_OWNER
+                ? "As an owner, you can transfer ownership to another member if needed."
+                : "Contact an organization owner or administrator to change your role."}
+            </AlertDescription>
+          </Alert>
+          <DialogFooter>
+            <Button onClick={() => onOpenChange(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -128,6 +191,25 @@ export function UpdateMemberRoleDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {showTransferConfirm && (
+          <Alert className="border-orange-500">
+            <Crown className="h-4 w-4 text-orange-500" />
+            <AlertDescription className="space-y-2">
+              <p className="font-semibold">Transfer Ownership</p>
+              <p className="text-sm">
+                You are about to transfer organization ownership to{" "}
+                <strong>{member.name || member.email}</strong>.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                • You will become an Administrator
+                <br />
+                • The new owner will have full control
+                <br />• This action cannot be undone
+              </p>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -137,7 +219,10 @@ export function UpdateMemberRoleDialog({
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      setShowTransferConfirm(false);
+                    }}
                     defaultValue={field.value}
                     disabled={isLoading}
                   >
@@ -152,6 +237,9 @@ export function UpdateMemberRoleDialog({
                           <div className="flex flex-col items-start">
                             <span className="font-medium">
                               {roleLabels[role].label}
+                              {role === UserRole.ORG_OWNER && currentUserRole === UserRole.ORG_OWNER && (
+                                <span className="ml-2 text-xs text-orange-500">(Transfer)</span>
+                              )}
                             </span>
                             <span className="text-xs text-muted-foreground">
                               {roleLabels[role].description}
@@ -173,14 +261,17 @@ export function UpdateMemberRoleDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => {
+                  setShowTransferConfirm(false);
+                  onOpenChange(false);
+                }}
                 disabled={isLoading}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                Update Role
+                {showTransferConfirm ? "Confirm Transfer" : "Update Role"}
               </Button>
             </DialogFooter>
           </form>

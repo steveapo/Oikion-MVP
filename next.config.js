@@ -1,4 +1,5 @@
 const { withContentlayer } = require("next-contentlayer2");
+const FixContentlayerTypesPlugin = require("./lib/fix-contentlayer-types-plugin");
 
 import("./env.mjs");
 
@@ -27,6 +28,12 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: ["@prisma/client"],
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.plugins.push(new FixContentlayerTypesPlugin());
+    }
+    return config;
   },
 };
 

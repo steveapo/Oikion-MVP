@@ -33,7 +33,7 @@ import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { UpdateMemberRoleDialog } from "./update-member-role-dialog";
 import { RemoveMemberDialog } from "./remove-member-dialog";
-import { canAssignRole } from "@/lib/roles";
+import { canManageMembers, getAssignableRolesByUser } from "@/lib/roles";
 
 interface Member {
   id: string;
@@ -93,8 +93,9 @@ export function MembersList({
 
   const canChangeMemberRole = (member: Member) => {
     if (!canModifyMember(member)) return false;
-    // Only show role change if current user can assign at least one other role
-    return Object.values(UserRole).some(role => canAssignRole(currentUserRole, role));
+    // Check if current user has any roles they can assign
+    const assignableRoles = getAssignableRolesByUser(currentUserRole);
+    return assignableRoles.length > 0;
   };
 
   return (
@@ -206,6 +207,7 @@ export function MembersList({
           <UpdateMemberRoleDialog
             member={selectedMember}
             currentUserRole={currentUserRole}
+            currentUserId={currentUserId}
             open={isRoleDialogOpen}
             onOpenChange={setIsRoleDialogOpen}
           />

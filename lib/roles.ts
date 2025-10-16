@@ -92,25 +92,70 @@ export function getRoleDisplayName(role: UserRole): string {
 /**
  * Get all roles that are equal or lower than the given role
  * Useful for role assignment dropdowns
+ * @deprecated Use getAssignableRolesByUser instead
  */
 export function getAssignableRoles(currentUserRole: UserRole): UserRole[] {
-  const currentLevel = ROLE_HIERARCHY[currentUserRole];
-  
-  return Object.entries(ROLE_HIERARCHY)
-    .filter(([, level]) => level <= currentLevel)
-    .map(([role]) => role as UserRole)
-    .sort((a, b) => ROLE_HIERARCHY[b] - ROLE_HIERARCHY[a]); // Sort by level descending
+  return getAssignableRolesByUser(currentUserRole);
 }
 
 /**
  * Check if user can assign a specific role
+ * ORG_OWNER can assign any role
+ * ADMIN can only assign AGENT and VIEWER
  */
 export function canAssignRole(currentUserRole: UserRole, targetRole: UserRole): boolean {
-  // Users can only assign roles equal to or lower than their own
-  const currentLevel = ROLE_HIERARCHY[currentUserRole];
-  const targetLevel = ROLE_HIERARCHY[targetRole];
+  // ORG_OWNER can assign any role (for now, later we'll add transfer ownership)
+  if (currentUserRole === UserRole.ORG_OWNER) {
+    return true;
+  }
   
-  return currentLevel >= targetLevel;
+  // ADMIN can only assign AGENT and VIEWER roles
+  if (currentUserRole === UserRole.ADMIN) {
+    return targetRole === UserRole.AGENT || targetRole === UserRole.VIEWER;
+  }
+  
+  // AGENT and VIEWER cannot assign roles
+  return false;
+}
+
+/**
+ * Check if a user can change another user's role
+ * @param currentUserRole - The role of the user making the change
+ * @param targetUserId - ID of the user whose role is being changed
+ * @param currentUserId - ID of the user making the change
+ * @param targetRole - The new role being assigned
+ * @returns boolean indicating if the action is allowed
+ */
+export function canChangeUserRole(
+  currentUserRole: UserRole,
+  targetUserId: string,
+  currentUserId: string,
+  targetRole: UserRole
+): boolean {
+  // Cannot change own role
+  if (targetUserId === currentUserId) {
+    return false;
+  }
+  
+  // Must have permission to assign the target role
+  return canAssignRole(currentUserRole, targetRole);
+}
+
+/**
+ * Get roles that can be assigned by the current user
+ * ORG_OWNER can assign all roles (except when changing their own - use transfer ownership)
+ * ADMIN can assign AGENT and VIEWER
+ */
+export function getAssignableRolesByUser(currentUserRole: UserRole): UserRole[] {
+  if (currentUserRole === UserRole.ORG_OWNER) {
+    return [UserRole.ORG_OWNER, UserRole.ADMIN, UserRole.AGENT, UserRole.VIEWER];
+  }
+  
+  if (currentUserRole === UserRole.ADMIN) {
+    return [UserRole.AGENT, UserRole.VIEWER];
+  }
+  
+  return [];
 }
 
 /**

@@ -71,7 +71,8 @@ export async function sendInvitationEmail({
   role: UserRole;
   token: string;
 }) {
-  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/register?email=${encodeURIComponent(to)}`;
+  // Invitation acceptance URL - goes to dedicated accept page
+  const acceptUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/accept-invite?token=${token}`;
   const roleDisplay = getRoleDisplayName(role);
   
   // In development, send to your own email for testing

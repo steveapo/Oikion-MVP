@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { canManageMembers, canAssignRole } from "@/lib/roles";
+import { canManageMembers, canChangeUserRole, getAssignableRolesByUser } from "@/lib/roles";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
 
@@ -63,8 +63,10 @@ export async function getMembers(): Promise<{
 
 /**
  * Update a user's role
- * Only ORG_OWNER can assign ORG_OWNER role
- * ORG_OWNER and ADMIN can assign other roles
+ * Rules:
+ * - ORG_OWNER can change anyone's role (except their own - use transfer ownership)
+ * - ADMIN can change AGENT and VIEWER roles to AGENT or VIEWER
+ * - Users cannot change their own role
  */
 export async function updateMemberRole(
   userId: string,
@@ -88,18 +90,17 @@ export async function updateMemberRole(
       throw new Error(validation.error.errors[0].message);
     }
 
-    // Check permissions
+    // Check if user can manage members
     if (!canManageMembers(session.user.role)) {
       throw new Error("Insufficient permissions to update member roles");
     }
 
-    if (!canAssignRole(session.user.role, newRole)) {
+    // Check if user can change this specific user's role to the target role
+    if (!canChangeUserRole(session.user.role, userId, session.user.id, newRole)) {
+      if (userId === session.user.id) {
+        throw new Error("You cannot change your own role. ORG_OWNERs can transfer ownership instead.");
+      }
       throw new Error(`You cannot assign the ${newRole} role`);
-    }
-
-    // Prevent self-demotion
-    if (userId === session.user.id) {
-      throw new Error("You cannot change your own role");
     }
 
     // Find target user
@@ -112,6 +113,13 @@ export async function updateMemberRole(
 
     if (!targetUser) {
       throw new Error("User not found in your organization");
+    }
+
+    // Additional check: ADMIN cannot change ORG_OWNER or other ADMIN roles
+    if (session.user.role === UserRole.ADMIN) {
+      if (targetUser.role === UserRole.ORG_OWNER || targetUser.role === UserRole.ADMIN) {
+        throw new Error("You cannot change the role of owners or other administrators");
+      }
     }
 
     // Update role
@@ -233,6 +241,89 @@ export async function removeMember(
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to remove member",
+    };
+  }
+}
+
+/**
+ * Transfer organization ownership to another member
+ * Only ORG_OWNER can transfer ownership
+ * The current owner becomes an ADMIN
+ */
+export async function transferOwnership(
+  newOwnerId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      throw new Error("Unauthorized");
+    }
+
+    const orgId = session.user.organizationId;
+    if (!orgId) {
+      throw new Error("User must belong to an organization");
+    }
+
+    // Only ORG_OWNER can transfer ownership
+    if (session.user.role !== UserRole.ORG_OWNER) {
+      throw new Error("Only organization owners can transfer ownership");
+    }
+
+    // Cannot transfer to self
+    if (newOwnerId === session.user.id) {
+      throw new Error("You are already the owner");
+    }
+
+    // Find target user
+    const targetUser = await prisma.user.findFirst({
+      where: {
+        id: newOwnerId,
+        organizationId: orgId,
+      },
+    });
+
+    if (!targetUser) {
+      throw new Error("User not found in your organization");
+    }
+
+    // Perform ownership transfer in a transaction
+    await prisma.$transaction([
+      // Demote current owner to ADMIN
+      prisma.user.update({
+        where: { id: session.user.id },
+        data: { role: UserRole.ADMIN },
+      }),
+      // Promote new user to ORG_OWNER
+      prisma.user.update({
+        where: { id: newOwnerId },
+        data: { role: UserRole.ORG_OWNER },
+      }),
+      // Log activity
+      prisma.activity.create({
+        data: {
+          actionType: "MEMBER_ROLE_CHANGED",
+          entityType: "USER",
+          entityId: newOwnerId,
+          payload: { 
+            action: "ownership_transferred",
+            oldOwner: session.user.email,
+            newOwner: targetUser.email,
+            oldRole: targetUser.role,
+            newRole: UserRole.ORG_OWNER,
+          },
+          organizationId: orgId,
+          actorId: session.user.id,
+        },
+      }),
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to transfer ownership:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to transfer ownership",
     };
   }
 }

@@ -43,10 +43,50 @@ export const {
   ],
   events: {
     async createUser({ user }) {
-      // Check for pending invitation first
+      // Every new user gets a personal organization + any invitations they accept
       if (user.id && user.email) {
         try {
-          // Look for a pending invitation
+          // Check if user already has a personal organization (edge case prevention)
+          const existingPersonalOrg = await prisma.organizationMember.findFirst({
+            where: {
+              userId: user.id,
+              organization: {
+                isPersonal: true,
+              },
+            },
+            include: {
+              organization: true,
+            },
+          });
+
+          let personalOrg;
+          
+          if (existingPersonalOrg) {
+            // User already has a personal workspace, use it
+            personalOrg = existingPersonalOrg.organization;
+            console.log(`[AUTH] User ${user.email} already has personal workspace: ${personalOrg.id}`);
+          } else {
+            // ALWAYS create a personal organization for the new user
+            personalOrg = await prisma.organization.create({
+              data: {
+                name: "Private Workspace",
+                isPersonal: true,
+                plan: "FREE",
+              },
+            });
+
+            // Create membership for personal organization
+            await prisma.organizationMember.create({
+              data: {
+                userId: user.id,
+                organizationId: personalOrg.id,
+                role: UserRole.ORG_OWNER,
+              },
+            });
+          }
+
+          // Check for pending invitation (by email OR by token if provided)
+          // Note: Token would be passed during registration flow from invitation link
           const invitation = await prisma.invitation.findFirst({
             where: {
               email: user.email.toLowerCase(),
@@ -57,7 +97,16 @@ export const {
           });
 
           if (invitation) {
-            // User was invited - assign them to the organization
+            // User was invited - create membership for invited organization
+            await prisma.organizationMember.create({
+              data: {
+                userId: user.id,
+                organizationId: invitation.organizationId,
+                role: invitation.role,
+              },
+            });
+
+            // Switch user to the invited organization as active
             await prisma.user.update({
               where: { id: user.id },
               data: {
@@ -84,18 +133,11 @@ export const {
               },
             });
           } else {
-            // No invitation - create a new organization for the user
-            const organization = await prisma.organization.create({
-              data: {
-                name: `${user.name || user.email}'s Organization`,
-              },
-            });
-
-            // Update user with organizationId and set role to ORG_OWNER
+            // No invitation - use personal organization as default
             await prisma.user.update({
               where: { id: user.id },
               data: {
-                organizationId: organization.id,
+                organizationId: personalOrg.id,
                 role: UserRole.ORG_OWNER,
               },
             });

@@ -47,15 +47,17 @@ export async function inviteUser(
       throw new Error(validation.error.errors[0].message);
     }
 
-    // Check if user already exists in the organization
-    const existingUser = await prisma.user.findFirst({
+    // Check if user already exists in the organization (via membership)
+    const existingMembership = await prisma.organizationMember.findFirst({
       where: {
-        email: email.toLowerCase(),
+        user: {
+          email: email.toLowerCase(),
+        },
         organizationId: orgId,
       },
     });
 
-    if (existingUser) {
+    if (existingMembership) {
       throw new Error("User is already a member of this organization");
     }
 
@@ -168,10 +170,19 @@ export async function acceptInvite(
       throw new Error(`Invitation is ${invitation.status.toLowerCase()}`);
     }
 
-    // Update user's organization and role
+    // Update user's current organization and role
     await prisma.user.update({
       where: { id: userId },
       data: {
+        organizationId: invitation.organizationId,
+        role: invitation.role,
+      },
+    });
+
+    // Create organization membership
+    await prisma.organizationMember.create({
+      data: {
+        userId: userId,
         organizationId: invitation.organizationId,
         role: invitation.role,
       },

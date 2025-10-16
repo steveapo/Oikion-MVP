@@ -1,5 +1,16 @@
 "use server";
 
+/**
+ * This file is deprecated.
+ * Users can no longer change their own roles.
+ * 
+ * Role changes are handled by:
+ * - Organization owners and admins via /actions/members.ts (updateMemberRole)
+ * - Ownership transfer via /actions/members.ts (transferOwnership)
+ * 
+ * @deprecated Use updateMemberRole from /actions/members.ts instead
+ */
+
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { UserRole } from "@prisma/client";
@@ -24,20 +35,9 @@ export async function updateUserRole(userId: string, data: FormData): Promise<Up
       throw new Error("Unauthorized");
     }
 
-    const { role } = userRoleSchema.parse(data);
+    // Users can no longer change their own roles
+    throw new Error("You cannot change your own role. Contact an organization owner to change your role.");
 
-    // Update the user role.
-    await prisma.user.update({
-      where: {
-        id: userId,
-      },
-      data: {
-        role: role,
-      },
-    });
-
-    revalidatePath("/dashboard/settings");
-    return { status: "success" };
   } catch (error) {
     console.error("Error updating user role:", error);
     return { 
