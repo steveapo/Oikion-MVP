@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { RelationshipType, ActionType, EntityType } from "@prisma/client";
@@ -28,7 +29,7 @@ async function createActivity(
   payload?: any
 ) {
   try {
-    await prisma.activity.create({
+    await prismaForOrg(organizationId).activity.create({
       data: {
         actionType,
         entityType: EntityType.CLIENT,
@@ -66,13 +67,13 @@ export async function createClientRelationship(data: ClientRelationshipData) {
 
     // Validate that both clients exist and belong to the user's organization
     const [fromClient, toClient] = await Promise.all([
-      prisma.client.findFirst({
+      prismaForOrg(session.user.organizationId).client.findFirst({
         where: {
           id: validatedData.fromClientId,
           organizationId: session.user.organizationId,
         },
       }),
-      prisma.client.findFirst({
+      prismaForOrg(session.user.organizationId).client.findFirst({
         where: {
           id: validatedData.toClientId,
           organizationId: session.user.organizationId,
@@ -90,7 +91,7 @@ export async function createClientRelationship(data: ClientRelationshipData) {
     }
 
     // Create the relationship
-    const relationship = await prisma.clientRelationship.create({
+    const relationship = await prismaForOrg(session.user.organizationId).clientRelationship.create({
       data: {
         fromClientId: validatedData.fromClientId,
         toClientId: validatedData.toClientId,
@@ -146,7 +147,7 @@ export async function deleteClientRelationship(relationshipId: string) {
     }
 
     // Get the relationship to verify ownership
-    const relationship = await prisma.clientRelationship.findFirst({
+    const relationship = await prismaForOrg(session.user.organizationId).clientRelationship.findFirst({
       where: {
         id: relationshipId,
       },
@@ -191,7 +192,7 @@ export async function deleteClientRelationship(relationshipId: string) {
       }
     );
 
-    await prisma.clientRelationship.delete({
+    await prismaForOrg(session.user.organizationId).clientRelationship.delete({
       where: { id: relationshipId },
     });
 
@@ -225,7 +226,7 @@ export async function getClientRelationships(clientId: string) {
     }
 
     // Verify client belongs to user's organization
-    const client = await prisma.client.findFirst({
+    const client = await prismaForOrg(session.user.organizationId).client.findFirst({
       where: {
         id: clientId,
         organizationId: session.user.organizationId,
@@ -238,7 +239,7 @@ export async function getClientRelationships(clientId: string) {
 
     // Get relationships where this client is involved
     const [relationshipsFrom, relationshipsTo] = await Promise.all([
-      prisma.clientRelationship.findMany({
+      prismaForOrg(session.user.organizationId).clientRelationship.findMany({
         where: { fromClientId: clientId },
         include: {
           toClient: {
@@ -253,7 +254,7 @@ export async function getClientRelationships(clientId: string) {
         },
         orderBy: { createdAt: "desc" },
       }),
-      prisma.clientRelationship.findMany({
+      prismaForOrg(session.user.organizationId).clientRelationship.findMany({
         where: { toClientId: clientId },
         include: {
           fromClient: {

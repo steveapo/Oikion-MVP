@@ -122,6 +122,9 @@ importers:
       '@vercel/og':
         specifier: ^0.6.2
         version: 0.6.2
+      '@vercel/speed-insights':
+        specifier: ^1.2.0
+        version: 1.2.0(next@14.2.5(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       browser-image-compression:
         specifier: ^2.0.2
         version: 2.0.2
@@ -161,6 +164,9 @@ importers:
       next-themes:
         specifier: ^0.3.0
         version: 0.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      prisma-field-encryption:
+        specifier: ^1.6.0
+        version: 1.6.0(@prisma/client@5.17.0(prisma@5.17.0))
       prop-types:
         specifier: ^15.8.1
         version: 15.8.1
@@ -308,6 +314,14 @@ importers:
         version: 5.0.0
 
 packages:
+
+  '@47ng/cloak@1.2.0':
+    resolution: {integrity: sha512-kKufIDIfW7+YdW+m/0PIFR9zsoIan04tCiAoWsvd2e/MsIh4HtU//n/xDk8eNTTl9cN/rI78qd1r2zCP0QB7hw==}
+    hasBin: true
+
+  '@47ng/codec@1.1.0':
+    resolution: {integrity: sha512-gvtA2RjijvEiYQbURPM6/Z+ySfS4lmtQ9NovDzzT+5ekeZ3M5pGiotlT94Qd+At4AYwWp7mWJLvxFn3JR+BZbA==}
+    engines: {node: '>=11'}
 
   '@aashutoshrathi/word-wrap@1.2.6':
     resolution: {integrity: sha512-1Yjs2SvM8TflER/OD3cOjhWWOZb58A2t7wpE2S9XfBYTiIl+XFhQG2bjy4Pu1I+EAlCNUzRDYDdFwFYUKvXcIA==}
@@ -1220,6 +1234,9 @@ packages:
   '@prisma/debug@5.17.0':
     resolution: {integrity: sha512-l7+AteR3P8FXiYyo496zkuoiJ5r9jLQEdUuxIxNCN1ud8rdbH3GTxm+f+dCyaSv9l9WY+29L9czaVRXz9mULfg==}
 
+  '@prisma/debug@5.22.0':
+    resolution: {integrity: sha512-AUt44v3YJeggO2ZU5BkXI7M4hu9BF2zzH2iF2V5pyXT/lRTyWiElZ7It+bRH1EshoMRxHgpYg4VB6rCM+mG5jQ==}
+
   '@prisma/engines-version@5.17.0-31.393aa359c9ad4a4bb28630fb5613f9c281cde053':
     resolution: {integrity: sha512-tUuxZZysZDcrk5oaNOdrBnnkoTtmNQPkzINFDjz7eG6vcs9AVDmA/F6K5Plsb2aQc/l5M2EnFqn3htng9FA4hg==}
 
@@ -1228,6 +1245,9 @@ packages:
 
   '@prisma/fetch-engine@5.17.0':
     resolution: {integrity: sha512-ESxiOaHuC488ilLPnrv/tM2KrPhQB5TRris/IeIV4ZvUuKeaicCl4Xj/JCQeG9IlxqOgf1cCg5h5vAzlewN91Q==}
+
+  '@prisma/generator-helper@5.22.0':
+    resolution: {integrity: sha512-LwqcBQ5/QsuAaLNQZAIVIAJDJBMjHwMwn16e06IYx/3Okj/xEEfw9IvrqB2cJCl3b2mCBlh3eVH0w9WGmi4aHg==}
 
   '@prisma/get-platform@5.17.0':
     resolution: {integrity: sha512-UlDgbRozCP1rfJ5Tlkf3Cnftb6srGrEQ4Nm3og+1Se2gWmCZ0hmPIi+tQikGDUVLlvOWx3Gyi9LzgRP+HTXV9w==}
@@ -2206,6 +2226,15 @@ packages:
   '@socket.io/component-emitter@3.1.0':
     resolution: {integrity: sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==}
 
+  '@stablelib/base64@1.0.1':
+    resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
+
+  '@stablelib/hex@1.0.1':
+    resolution: {integrity: sha512-PQOEChVBjhYGgAD+ehO2ow1gSj1slre3jW4oMD4kV8VrhYhzmtsQDWDZej3BQO8qkVezdczDvISxVSF24PuYNA==}
+
+  '@stablelib/utf8@1.0.2':
+    resolution: {integrity: sha512-sDL1aB2U8FIpj7SjQJMxbOFIFkKvDKQGPHSrYejHZhtLNSK3qHe6ZIfa0woWkOiaJsdYslFzrc0VWXJZHmSIQQ==}
+
   '@swc/core-darwin-arm64@1.3.101':
     resolution: {integrity: sha512-mNFK+uHNPRXSnfTOG34zJOeMl2waM4hF4a2NY7dkMXrPqw9CoJn4MwTXJcyMiSz1/BnNjjTCHF3Yhj0jPxmkzQ==}
     engines: {node: '>=10'}
@@ -2508,6 +2537,29 @@ packages:
   '@vercel/og@0.6.2':
     resolution: {integrity: sha512-OTe0KE37F5Y2eTys6eMnfopC+P4qr2ooXUTFyFPTplYSPwowmFk/HLD1FXtbKLjqsIH0SgekcJWad+C5uX4nkg==}
     engines: {node: '>=16'}
+
+  '@vercel/speed-insights@1.2.0':
+    resolution: {integrity: sha512-y9GVzrUJ2xmgtQlzFP2KhVRoCglwfRQgjyfY607aU0hh0Un6d0OUyrJkjuAlsV18qR4zfoFPs/BiIj9YDS6Wzw==}
+    peerDependencies:
+      '@sveltejs/kit': ^1 || ^2
+      next: '>= 13'
+      react: ^18 || ^19 || ^19.0.0-rc
+      svelte: '>= 4'
+      vue: ^3
+      vue-router: ^4
+    peerDependenciesMeta:
+      '@sveltejs/kit':
+        optional: true
+      next:
+        optional: true
+      react:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+      vue-router:
+        optional: true
 
   '@webassemblyjs/ast@1.11.6':
     resolution: {integrity: sha512-IN1xI7PwOvLPgjcf180gC1bqn3q/QaOCwYUahIOhbYUu8KA/3tw2RT/T0Gidi1l7Hhj5D/INhJxiICObqpMu4Q==}
@@ -2917,6 +2969,10 @@ packages:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
 
+  commander@8.3.0:
+    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
+    engines: {node: '>= 12'}
+
   comment-json@4.2.3:
     resolution: {integrity: sha512-SsxdiOf064DWoZLH799Ata6u7iV658A11PlWtZATDlXPpKGJnbJZ5Z24ybixAi+LUUqJ/GKowAejtC5GFUG7Tw==}
     engines: {node: '>= 6'}
@@ -3179,6 +3235,10 @@ packages:
   dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
+
+  dotenv@10.0.0:
+    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
+    engines: {node: '>=10'}
 
   dotenv@16.0.3:
     resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
@@ -3790,6 +3850,9 @@ packages:
   imagescript@1.3.0:
     resolution: {integrity: sha512-lCYzQrWzdnA68K03oMj/BUlBJrVBnslzDOgGFymAp49NmdGEJxGeN7sHh5mCva0nQkq+kkKSuru2zLf1m04+3A==}
     engines: {node: '>=14.0.0'}
+
+  immer@10.1.3:
+    resolution: {integrity: sha512-tmjF/k8QDKydUlm3mZU+tjM6zeq9/fFpPqH9SzWmBnVVKsPBg/V66qsMwb3/Bo90cgUN+ghdVBess+hPsxUyRw==}
 
   import-fresh@3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
@@ -4564,6 +4627,10 @@ packages:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
 
+  object-path@0.11.8:
+    resolution: {integrity: sha512-YJjNZrlXJFM42wTBn6zgOJVar9KFJvzx6sTWDte8sWZF//cnjl0BxHNpfZx+ZffXX63A9q0b1zsFiBX4g4X5KA==}
+    engines: {node: '>= 10.12.0'}
+
   object.assign@4.1.5:
     resolution: {integrity: sha512-byy+U7gp+FVwmyzKPYhW2h5l3crpmGsxl7X2s8y43IgxvG4g3QZ6CffDtsNQy1WsmZpQbO+ybo0AlW7TY6DcBQ==}
     engines: {node: '>= 0.4'}
@@ -4851,6 +4918,12 @@ packages:
     peerDependencies:
       react: '>=16.0.0'
 
+  prisma-field-encryption@1.6.0:
+    resolution: {integrity: sha512-JEKHyq5z0Wn6x74UtQN6n7ppXEGRq7ViyRophzELRAhCVnZv4JGrBOlrX4aWKiU+ZPL2BO9E1HxzcSjAN7pWKQ==}
+    hasBin: true
+    peerDependencies:
+      '@prisma/client': '>= 4.7'
+
   prisma@5.17.0:
     resolution: {integrity: sha512-m4UWkN5lBE6yevqeOxEvmepnL5cNPEjzMw2IqDB59AcEV6w7D8vGljDLd1gPFH+W6gUxw9x7/RmN5dCS/WTPxA==}
     engines: {node: '>=16.13'}
@@ -5112,6 +5185,9 @@ packages:
 
   rxjs@7.8.1:
     resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
+
+  s-ago@2.2.0:
+    resolution: {integrity: sha512-t6Q/aFCCJSBf5UUkR/WH0mDHX8EGm2IBQ7nQLobVLsdxOlkryYMbOlwu2D4Cf7jPUp0v1LhfPgvIZNoi9k8lUA==}
 
   safe-array-concat@1.1.2:
     resolution: {integrity: sha512-vj6RsCsWBCf19jIeHEfkRMw8DPiBb+DMXklQ/1SGDHOMlHdPUkZXFQ2YdplS23zESTijAcurb1aSgJA3AgMu1Q==}
@@ -5780,6 +5856,22 @@ packages:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
 snapshots:
+
+  '@47ng/cloak@1.2.0':
+    dependencies:
+      '@47ng/codec': 1.1.0
+      '@stablelib/base64': 1.0.1
+      '@stablelib/hex': 1.0.1
+      '@stablelib/utf8': 1.0.2
+      chalk: 4.1.2
+      commander: 8.3.0
+      dotenv: 10.0.0
+      s-ago: 2.2.0
+
+  '@47ng/codec@1.1.0':
+    dependencies:
+      '@stablelib/base64': 1.0.1
+      '@stablelib/hex': 1.0.1
 
   '@aashutoshrathi/word-wrap@1.2.6': {}
 
@@ -6719,6 +6811,8 @@ snapshots:
 
   '@prisma/debug@5.17.0': {}
 
+  '@prisma/debug@5.22.0': {}
+
   '@prisma/engines-version@5.17.0-31.393aa359c9ad4a4bb28630fb5613f9c281cde053': {}
 
   '@prisma/engines@5.17.0':
@@ -6733,6 +6827,10 @@ snapshots:
       '@prisma/debug': 5.17.0
       '@prisma/engines-version': 5.17.0-31.393aa359c9ad4a4bb28630fb5613f9c281cde053
       '@prisma/get-platform': 5.17.0
+
+  '@prisma/generator-helper@5.22.0':
+    dependencies:
+      '@prisma/debug': 5.22.0
 
   '@prisma/get-platform@5.17.0':
     dependencies:
@@ -7997,6 +8095,12 @@ snapshots:
 
   '@socket.io/component-emitter@3.1.0': {}
 
+  '@stablelib/base64@1.0.1': {}
+
+  '@stablelib/hex@1.0.1': {}
+
+  '@stablelib/utf8@1.0.2': {}
+
   '@swc/core-darwin-arm64@1.3.101':
     optional: true
 
@@ -8300,6 +8404,11 @@ snapshots:
       '@resvg/resvg-wasm': 2.4.0
       satori: 0.10.9
       yoga-wasm-web: 0.3.3
+
+  '@vercel/speed-insights@1.2.0(next@14.2.5(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)':
+    optionalDependencies:
+      next: 14.2.5(@babel/core@7.24.5)(@opentelemetry/api@1.8.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react: 18.3.1
 
   '@webassemblyjs/ast@1.11.6':
     dependencies:
@@ -8751,6 +8860,8 @@ snapshots:
 
   commander@4.1.1: {}
 
+  commander@8.3.0: {}
+
   comment-json@4.2.3:
     dependencies:
       array-timsort: 1.0.3
@@ -9018,6 +9129,8 @@ snapshots:
     dependencies:
       is-obj: 2.0.0
 
+  dotenv@10.0.0: {}
+
   dotenv@16.0.3: {}
 
   eastasianwidth@0.2.0: {}
@@ -9219,7 +9332,7 @@ snapshots:
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0)
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       eslint-plugin-jsx-a11y: 6.8.0(eslint@8.57.0)
       eslint-plugin-react: 7.35.0(eslint@8.57.0)
       eslint-plugin-react-hooks: 4.6.0(eslint@8.57.0)
@@ -9255,8 +9368,8 @@ snapshots:
       debug: 4.3.4
       enhanced-resolve: 5.15.0
       eslint: 8.57.0
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
-      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
+      eslint-plugin-import: 2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       fast-glob: 3.3.2
       get-tsconfig: 4.7.2
       is-core-module: 2.13.1
@@ -9267,7 +9380,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-module-utils@2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0):
+  eslint-module-utils@2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
@@ -9278,7 +9391,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0):
+  eslint-plugin-import@2.29.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0):
     dependencies:
       array-includes: 3.1.8
       array.prototype.findlastindex: 1.2.3
@@ -9288,7 +9401,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 8.57.0
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-plugin-import@2.29.0(@typescript-eslint/parser@7.17.0(eslint@8.57.0)(typescript@5.5.3))(eslint@8.57.0))(eslint@8.57.0))(eslint@8.57.0)
+      eslint-module-utils: 2.8.0(@typescript-eslint/parser@6.20.0(eslint@8.57.0)(typescript@5.5.3))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.6.1)(eslint@8.57.0)
       hasown: 2.0.2
       is-core-module: 2.13.1
       is-glob: 4.0.3
@@ -9908,6 +10021,8 @@ snapshots:
   ignore@5.3.1: {}
 
   imagescript@1.3.0: {}
+
+  immer@10.1.3: {}
 
   import-fresh@3.3.0:
     dependencies:
@@ -10913,6 +11028,8 @@ snapshots:
 
   object-keys@1.1.1: {}
 
+  object-path@0.11.8: {}
+
   object.assign@4.1.5:
     dependencies:
       call-bind: 1.0.7
@@ -11172,6 +11289,18 @@ snapshots:
       '@types/prismjs': 1.26.3
       clsx: 1.2.1
       react: 18.3.1
+
+  prisma-field-encryption@1.6.0(@prisma/client@5.17.0(prisma@5.17.0)):
+    dependencies:
+      '@47ng/cloak': 1.2.0
+      '@prisma/client': 5.17.0(prisma@5.17.0)
+      '@prisma/generator-helper': 5.22.0
+      debug: 4.3.4
+      immer: 10.1.3
+      object-path: 0.11.8
+      zod: 3.23.8
+    transitivePeerDependencies:
+      - supports-color
 
   prisma@5.17.0:
     dependencies:
@@ -11608,6 +11737,8 @@ snapshots:
   rxjs@7.8.1:
     dependencies:
       tslib: 2.6.2
+
+  s-ago@2.2.0: {}
 
   safe-array-concat@1.1.2:
     dependencies:

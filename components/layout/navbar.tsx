@@ -1,6 +1,5 @@
 "use client";
 
-import { useContext } from "react";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -10,10 +9,9 @@ import { marketingConfig } from "@/config/marketing";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { useScroll } from "@/hooks/use-scroll";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DocsSearch } from "@/components/docs/search";
-import { ModalContext } from "@/components/modals/providers";
 import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
@@ -25,7 +23,6 @@ interface NavBarProps {
 export function NavBar({ scroll = false }: NavBarProps) {
   const scrolled = useScroll(50);
   const { data: session, status } = useSession();
-  const { setShowSignInModal } = useContext(ModalContext);
 
   const selectedLayout = useSelectedLayoutSegment();
   const documentation = selectedLayout === "docs";
@@ -115,16 +112,27 @@ export function NavBar({ scroll = false }: NavBarProps) {
               </Button>
             </Link>
           ) : status === "unauthenticated" ? (
-            <Button
-              className="hidden gap-2 px-5 md:flex"
-              variant="default"
-              size="sm"
-              rounded="full"
-              onClick={() => setShowSignInModal(true)}
-            >
-              <span>Sign In</span>
-              <Icons.arrowRight className="size-4" />
-            </Button>
+            <div className="hidden items-center gap-3 md:flex">
+              <Link
+                href="/register"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm", rounded: "full" }),
+                  "gap-2 px-5"
+                )}
+              >
+                <span>Register</span>
+              </Link>
+              <Link
+                href="/login"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "sm", rounded: "full" }),
+                  "gap-2 px-5"
+                )}
+              >
+                <span>Sign In</span>
+                <Icons.arrowRight className="size-4" />
+              </Link>
+            </div>
           ) : (
             <Skeleton className="hidden h-9 w-28 rounded-full lg:flex" />
           )}

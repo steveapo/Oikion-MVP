@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { infos } from "@/config/landing";
 import BentoGrid from "@/components/sections/bentogrid";
 import Features from "@/components/sections/features";
@@ -6,10 +7,14 @@ import InfoLanding from "@/components/sections/info-landing";
 import Powered from "@/components/sections/powered";
 import PreviewLanding from "@/components/sections/preview-landing";
 import Testimonials from "@/components/sections/testimonials";
+import { SessionErrorAlert } from "@/components/shared/session-error-alert";
 
 export default function IndexPage() {
   return (
     <>
+      <Suspense fallback={null}>
+        <SessionErrorAlert />
+      </Suspense>
       <HeroLanding />
       <PreviewLanding />
       <Powered />

@@ -67,6 +67,7 @@ model User {
 
   accounts Account[]
   sessions Session[]
+  sentInvitations Invitation[] @relation("InvitedBy")
 
   stripeCustomerId       String?   @unique @map(name: "stripe_customer_id")
   stripeSubscriptionId   String?   @unique @map(name: "stripe_subscription_id")
@@ -108,8 +109,39 @@ model Organization {
   clients     Client[]
   tasks       Task[]
   activities  Activity[]
+  invitations Invitation[]
 
   @@map(name: "organizations")
+}
+
+// Invitation model for multi-user org management
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELED
+  EXPIRED
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  email          String
+  role           UserRole
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now()) @map(name: "created_at")
+  updatedAt      DateTime         @default(now()) @map(name: "updated_at")
+
+  // Relationships
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy      String
+  inviter        User         @relation("InvitedBy", fields: [invitedBy], references: [id])
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
+  @@map(name: "invitations")
 }
 
 // Property Management (MLS)

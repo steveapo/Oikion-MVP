@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   clientFormSchema, 
@@ -22,7 +23,7 @@ async function createActivity(
   payload?: any
 ) {
   try {
-    await prisma.activity.create({
+    await prismaForOrg(organizationId).activity.create({
       data: {
         actionType,
         entityType: EntityType.CLIENT,
@@ -56,7 +57,8 @@ export async function createClient(data: ClientFormData) {
   const validatedData = clientFormSchema.parse(data);
 
   try {
-    const client = await prisma.client.create({
+    const db = prismaForOrg(session.user.organizationId);
+    const client = await db.client.create({
       data: {
         clientType: validatedData.clientType,
         name: validatedData.name,
@@ -108,7 +110,8 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
   const validatedData = updateClientSchema.parse({ ...data, id });
 
   try {
-    const existingClient = await prisma.client.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const existingClient = await db.client.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -119,7 +122,7 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
       throw new Error("Client not found or access denied");
     }
 
-    const client = await prisma.client.update({
+    const client = await db.client.update({
       where: { id },
       data: {
         clientType: validatedData.clientType,
@@ -164,7 +167,8 @@ export async function deleteClient(id: string) {
   }
 
   try {
-    const client = await prisma.client.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const client = await db.client.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -180,7 +184,7 @@ export async function deleteClient(id: string) {
       throw new Error("Insufficient permissions to delete this client");
     }
 
-    await prisma.client.delete({
+    await db.client.delete({
       where: { id },
     });
 
@@ -229,8 +233,9 @@ export async function getClients(filters: Partial<ClientFilters> = {}) {
       };
     }
 
+    const db = prismaForOrg(session.user.organizationId);
     const [clients, totalCount] = await Promise.all([
-      prisma.client.findMany({
+      db.client.findMany({
         where,
         include: {
           creator: {
@@ -253,7 +258,7 @@ export async function getClients(filters: Partial<ClientFilters> = {}) {
         skip: (validatedFilters.page - 1) * validatedFilters.limit,
         take: validatedFilters.limit,
       }),
-      prisma.client.count({ where }),
+      db.client.count({ where }),
     ]);
 
     return {
@@ -281,7 +286,8 @@ export async function getClient(id: string) {
   }
 
   try {
-    const client = await prisma.client.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const client = await db.client.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -339,7 +345,8 @@ export async function getClientTags() {
   }
 
   try {
-    const clients = await prisma.client.findMany({
+    const db = prismaForOrg(session.user.organizationId);
+    const clients = await db.client.findMany({
       where: {
         organizationId: session.user.organizationId,
       },

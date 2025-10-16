@@ -103,3 +103,7 @@ Next.js App Router • TypeScript • Node 20 • Tailwind • shadcn/ui • Aut
 2) Repo README/docs
 3) Official docs (authjs.dev, docs.stripe.com, neon.tech, prisma.io)
 Everything else: ignore unless promoted into `/docs/vendor`.
+
+---
+
+**Remember**: Always use `prismaForOrg(session.user.organizationId)` for tenant data! 🔒

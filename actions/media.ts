@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent } from "@/lib/roles";
 import { ActionType } from "@prisma/client";
 
@@ -36,7 +37,8 @@ export async function uploadPropertyImages(
     }
 
     // Verify property belongs to user's organization
-    const property = await prisma.property.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const property = await db.property.findFirst({
       where: {
         id: propertyId,
         organizationId: session.user.organizationId,
@@ -52,13 +54,12 @@ export async function uploadPropertyImages(
       throw new Error("Maximum 8 images allowed");
     }
 
-    // Remove existing media assets if replacing
-    await prisma.mediaAsset.deleteMany({
+    await db.mediaAsset.deleteMany({
       where: { propertyId },
     });
 
     // Create new media assets
-    await prisma.mediaAsset.createMany({
+    await db.mediaAsset.createMany({
       data: images.map((img, index) => ({
         propertyId,
         assetType: "IMAGE",
@@ -69,7 +70,7 @@ export async function uploadPropertyImages(
     });
 
     // Log activity
-    await prisma.activity.create({
+    await prismaForOrg(session.user.organizationId).activity.create({
       data: {
         actionType: ActionType.MEDIA_ADDED,
         entityType: "PROPERTY",
@@ -110,7 +111,8 @@ export async function deletePropertyImage(
     }
 
     // Verify image belongs to user's organization
-    const image = await prisma.mediaAsset.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const image = await db.mediaAsset.findFirst({
       where: {
         id: imageId,
       },
@@ -128,13 +130,13 @@ export async function deletePropertyImage(
     }
 
     // Delete the image
-    await prisma.mediaAsset.delete({
+    await db.mediaAsset.delete({
       where: { id: imageId },
     });
 
     // If this was the primary image, set another as primary
     if (image.isPrimary) {
-      const nextImage = await prisma.mediaAsset.findFirst({
+      const nextImage = await db.mediaAsset.findFirst({
         where: {
           propertyId: image.propertyId,
         },
@@ -144,7 +146,7 @@ export async function deletePropertyImage(
       });
 
       if (nextImage) {
-        await prisma.mediaAsset.update({
+        await db.mediaAsset.update({
           where: { id: nextImage.id },
           data: { isPrimary: true },
         });

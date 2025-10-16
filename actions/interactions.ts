@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent } from "@/lib/roles";
 import { 
   interactionFormSchema,
@@ -25,7 +26,7 @@ async function createActivity(
   payload?: any
 ) {
   try {
-    await prisma.activity.create({
+    await prismaForOrg(organizationId).activity.create({
       data: {
         actionType,
         entityType,
@@ -59,7 +60,8 @@ export async function createInteraction(data: InteractionFormData) {
   const validatedData = interactionFormSchema.parse(data);
 
   try {
-    const interaction = await prisma.interaction.create({
+    const db = prismaForOrg(session.user.organizationId);
+    const interaction = await db.interaction.create({
       data: {
         interactionType: validatedData.interactionType,
         clientId: validatedData.clientId || null,
@@ -73,7 +75,7 @@ export async function createInteraction(data: InteractionFormData) {
     // Get client name for activity log
     let clientName = "";
     if (validatedData.clientId) {
-      const client = await prisma.client.findUnique({
+      const client = await prismaForOrg(session.user.organizationId).client.findUnique({
         where: { id: validatedData.clientId },
         select: { name: true },
       });
@@ -124,7 +126,8 @@ export async function createNote(data: NoteFormData) {
   const validatedData = noteFormSchema.parse(data);
 
   try {
-    const note = await prisma.note.create({
+    const db = prismaForOrg(session.user.organizationId);
+    const note = await db.note.create({
       data: {
         content: validatedData.content,
         clientId: validatedData.clientId || null,
@@ -182,7 +185,8 @@ export async function createTask(data: TaskFormData) {
   const validatedData = taskFormSchema.parse(data);
 
   try {
-    const task = await prisma.task.create({
+    const db = prismaForOrg(session.user.organizationId);
+    const task = await db.task.create({
       data: {
         title: validatedData.title,
         description: validatedData.description || null,
@@ -237,7 +241,8 @@ export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETE
   }
 
   try {
-    const existingTask = await prisma.task.findFirst({
+    const db = prismaForOrg(session.user.organizationId);
+    const existingTask = await db.task.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -248,7 +253,7 @@ export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETE
       throw new Error("Task not found or access denied");
     }
 
-    const task = await prisma.task.update({
+    const task = await db.task.update({
       where: { id },
       data: { status },
     });
@@ -290,7 +295,8 @@ export async function getOrganizationMembers() {
   }
 
   try {
-    const members = await prisma.user.findMany({
+    const db = prismaForOrg(session.user.organizationId);
+    const members = await db.user.findMany({
       where: {
         organizationId: session.user.organizationId,
       },
@@ -319,7 +325,8 @@ export async function getOrganizationProperties() {
   }
 
   try {
-    const properties = await prisma.property.findMany({
+    const db = prismaForOrg(session.user.organizationId);
+    const properties = await db.property.findMany({
       where: {
         organizationId: session.user.organizationId,
       },

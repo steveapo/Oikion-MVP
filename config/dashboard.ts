@@ -11,6 +11,12 @@ export const sidebarLinks: SidebarNavItem[] = [
       { href: "/dashboard/relations", icon: "users", title: "Relations" },
       { href: "/dashboard/oikosync", icon: "activity", title: "Oikosync" },
       {
+        href: "/dashboard/members",
+        icon: "users",
+        title: "Members",
+        authorizeOnly: UserRole.ADMIN,
+      },
+      {
         href: "/dashboard/billing",
         icon: "billing",
         title: "Billing",

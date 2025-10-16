@@ -15,6 +15,8 @@ export const env = createEnv({
     EMAIL_FROM: z.string().min(1),
     STRIPE_API_KEY: z.string().min(1),
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
+    // Optional: Password protect the entire app
+    APP_PASSWORD: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -32,6 +34,7 @@ export const env = createEnv({
     DATABASE_URL: process.env.DATABASE_URL,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
+    APP_PASSWORD: process.env.APP_PASSWORD,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     // Stripe
     STRIPE_API_KEY: process.env.STRIPE_API_KEY,

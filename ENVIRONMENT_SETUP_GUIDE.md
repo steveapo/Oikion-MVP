@@ -3,10 +3,46 @@
 This guide will walk you through setting up all the required environment variables for your Next.js SaaS Stripe Starter application.
 
 ## Table of Contents
-1. [Authentication (NextAuth.js)](#authentication-nextauthjs)
-2. [Database (PostgreSQL - Neon)](#database-postgresql---neon)
-3. [Email (Resend)](#email-resend)
-4. [Subscriptions (Stripe)](#subscriptions-stripe)
+1. [App Password Protection (Optional)](#app-password-protection-optional)
+2. [Authentication (NextAuth.js)](#authentication-nextauthjs)
+3. [Database (PostgreSQL - Neon)](#database-postgresql---neon)
+4. [Email (Resend)](#email-resend)
+5. [Subscriptions (Stripe)](#subscriptions-stripe)
+
+---
+
+## App Password Protection (Optional)
+
+### APP_PASSWORD
+**What it is**: A simple password to protect your entire application from public access. This is useful during development, staging, or before launch.
+
+**Important**: This is a lightweight protection mechanism - not suitable for high-security needs, but perfect for preventing casual visitors from accessing your app during development.
+
+**Steps**:
+1. Open your `.env.local` file
+2. Add the line: `APP_PASSWORD=your-chosen-password`
+3. Choose a password (can be simple like "preview2024" or more secure)
+4. Restart your development server
+
+**How it works**:
+- When `APP_PASSWORD` is set, all visitors must enter this password before accessing any page
+- The password is verified and stored in a cookie for 7 days
+- To disable: Simply remove or comment out the `APP_PASSWORD` line in your `.env`
+
+**Example**:
+```bash
+# Enable password protection
+APP_PASSWORD=staging2024
+
+# Or disable it by commenting out
+# APP_PASSWORD=staging2024
+```
+
+**Use Cases**:
+- 🚧 Protecting staging/preview environments
+- 🎯 Pre-launch testing with select users
+- 👥 Internal team reviews
+- 🔒 Blocking public access during development
 
 ---
 

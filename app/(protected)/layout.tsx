@@ -19,7 +19,9 @@ interface ProtectedLayoutProps {
 export default async function Dashboard({ children }: ProtectedLayoutProps) {
   const user = await getCurrentUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    redirect("/?error=session_invalid");
+  }
 
   const filteredLinks = sidebarLinks.map((section) => ({
     ...section,
@@ -27,8 +29,8 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
       // If no authorization required, show to all
       if (!authorizeOnly) return true;
       
-      // For specific roles, check if user has sufficient role level
-      return user.role === authorizeOnly;
+      // Check if user has sufficient role level (respects hierarchy)
+      return hasRole(user.role, authorizeOnly);
     }),
   }));
 
