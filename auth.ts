@@ -30,8 +30,28 @@ export const {
   events: {
     async createUser({ user }) {
       // Create an organization for new users
+      // Skip if user is accepting an invitation (will be handled in acceptInvitation)
       if (user.id && user.email) {
         try {
+          // Check if there's a pending invitation for this email
+          const pendingInvitation = await prisma.invitation.findFirst({
+            where: {
+              email: user.email,
+              status: "PENDING",
+              expiresAt: {
+                gt: new Date(),
+              },
+            },
+          });
+
+          // If there's a pending invitation, don't create an organization
+          // User will join the organization when they accept the invitation
+          if (pendingInvitation) {
+            console.log(`User ${user.email} has pending invitation, skipping org creation`);
+            return;
+          }
+
+          // No invitation found, create a new organization for the user
           const organization = await prisma.organization.create({
             data: {
               name: `${user.name || user.email}'s Organization`,

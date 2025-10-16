@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   propertyFormSchema, 
@@ -23,7 +24,8 @@ async function createActivity(
   payload?: any
 ) {
   try {
-    await prisma.activity.create({
+    const db = prismaForOrg(organizationId);
+    await db.activity.create({
       data: {
         actionType,
         entityType: EntityType.PROPERTY,
@@ -60,7 +62,8 @@ export async function createProperty(data: PropertyFormData) {
 
   try {
     // Create property with related data in a transaction
-    const property = await prisma.$transaction(async (tx) => {
+    const db = prismaForOrg(session.user.organizationId!);
+    const property = await db.$transaction(async (tx) => {
       // Create property
       const newProperty = await tx.property.create({
         data: {
@@ -148,8 +151,10 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
   const validatedData = updatePropertySchema.parse({ ...data, id });
 
   try {
+    const db = prismaForOrg(session.user.organizationId!);
+    
     // Check if property exists and user has access
-    const existingProperty = await prisma.property.findFirst({
+    const existingProperty = await db.property.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -161,7 +166,7 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
     }
 
     // Update property with related data in a transaction
-    const property = await prisma.$transaction(async (tx) => {
+    const property = await db.$transaction(async (tx) => {
       // Update property
       const updatedProperty = await tx.property.update({
         where: { id },
@@ -271,8 +276,10 @@ export async function archiveProperty(id: string) {
   }
 
   try {
+    const db = prismaForOrg(session.user.organizationId!);
+    
     // Check if property exists and user has access
-    const property = await prisma.property.findFirst({
+    const property = await db.property.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -290,7 +297,7 @@ export async function archiveProperty(id: string) {
     }
 
     // Archive by updating listing status
-    await prisma.listing.update({
+    await db.listing.update({
       where: { propertyId: id },
       data: {
         marketingStatus: MarketingStatus.ARCHIVED,
@@ -367,8 +374,10 @@ export async function getProperties(filters: Partial<PropertyFilters> = {}) {
       where.bedrooms = validatedFilters.bedrooms;
     }
 
+    const db = prismaForOrg(session.user.organizationId!);
+    
     const [properties, totalCount] = await Promise.all([
-      prisma.property.findMany({
+      db.property.findMany({
         where,
         include: {
           address: true,
@@ -385,7 +394,7 @@ export async function getProperties(filters: Partial<PropertyFilters> = {}) {
         skip: (validatedFilters.page - 1) * validatedFilters.limit,
         take: validatedFilters.limit,
       }),
-      prisma.property.count({ where }),
+      db.property.count({ where }),
     ]);
 
     // Convert Decimal fields to numbers for client components
@@ -424,7 +433,9 @@ export async function getProperty(id: string) {
   }
 
   try {
-    const property = await prisma.property.findFirst({
+    const db = prismaForOrg(session.user.organizationId!);
+    
+    const property = await db.property.findFirst({
       where: {
         id,
         organizationId: session.user.organizationId,
@@ -491,8 +502,10 @@ export async function getPropertyClients(propertyId: string) {
   }
 
   try {
+    const db = prismaForOrg(session.user.organizationId!);
+    
     // Get all clients who have interactions, notes, or tasks related to this property
-    const clientsWithInteractions = await prisma.client.findMany({
+    const clientsWithInteractions = await db.client.findMany({
       where: {
         organizationId: session.user.organizationId,
         OR: [

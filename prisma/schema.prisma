@@ -17,6 +17,13 @@ enum UserRole {
   VIEWER
 }
 
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELED
+  EXPIRED
+}
+
 model Account {
   id                String   @id @default(cuid())
   userId            String
@@ -81,6 +88,7 @@ model User {
   createdNotes      Note[]     @relation("NoteCreatedBy")
   createdInteractions Interaction[] @relation("InteractionCreatedBy")
   activities        Activity[] @relation("ActivityActor")
+  sentInvitations   Invitation[] @relation("InvitationInviter")
 
   @@index([organizationId])
   @@map(name: "users")
@@ -108,6 +116,7 @@ model Organization {
   clients     Client[]
   tasks       Task[]
   activities  Activity[]
+  invitations Invitation[]
 
   @@map(name: "organizations")
 }
@@ -398,7 +407,10 @@ enum ActionType {
   TASK_CREATED
   TASK_COMPLETED
   MEMBER_INVITED
+  MEMBER_JOINED
   MEMBER_ROLE_CHANGED
+  MEMBER_REMOVED
+  INVITATION_CANCELED
   SUBSCRIPTION_STARTED
   SUBSCRIPTION_UPDATED
   SUBSCRIPTION_CANCELLED
@@ -430,4 +442,27 @@ model Activity {
   @@index([actorId])
   @@index([createdAt])
   @@map(name: "activities")
+}
+
+// Invitations for organization membership
+model Invitation {
+  id             String           @id @default(cuid())
+  email          String
+  role           UserRole
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now()) @map(name: "created_at")
+
+  // Relationships
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy      String
+  inviter        User         @relation("InvitationInviter", fields: [invitedBy], references: [id])
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
+  @@index([status])
+  @@map(name: "invitations")
 }

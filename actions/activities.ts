@@ -2,6 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { prismaForOrg } from "@/lib/org-prisma";
 import { activityFiltersSchema, type ActivityFilters } from "@/lib/validations/activity";
 
 // Get activities with filters
@@ -45,8 +46,10 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
       where.actionType = validatedFilters.actionType;
     }
 
+    const db = prismaForOrg(session.user.organizationId!);
+    
     const [activities, totalCount] = await Promise.all([
-      prisma.activity.findMany({
+      db.activity.findMany({
         where,
         include: {
           actor: {
@@ -61,7 +64,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
         skip: (validatedFilters.page - 1) * validatedFilters.limit,
         take: validatedFilters.limit,
       }),
-      prisma.activity.count({ where }),
+      db.activity.count({ where }),
     ]);
 
     // Enrich activities with entity details
@@ -72,7 +75,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
         try {
           switch (activity.entityType) {
             case "PROPERTY":
-              entityDetails = await prisma.property.findUnique({
+              entityDetails = await db.property.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -83,7 +86,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
               });
               break;
             case "CLIENT":
-              entityDetails = await prisma.client.findUnique({
+              entityDetails = await db.client.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -93,7 +96,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
               });
               break;
             case "TASK":
-              entityDetails = await prisma.task.findUnique({
+              entityDetails = await db.task.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -103,6 +106,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
               });
               break;
             case "USER":
+              // User table does not have organizationId RLS, use prisma directly
               entityDetails = await prisma.user.findUnique({
                 where: { id: activity.entityId },
                 select: {
