@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Home } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -8,10 +8,13 @@ import { canCreateContent } from "@/lib/roles";
 import { getProperties } from "@/actions/properties";
 import { Button } from "@/components/ui/button";
 import { constructMetadata } from "@/lib/utils";
-import { DashboardHeader } from "@/components/dashboard/header";
+import { Container } from "@/components/ui/container";
+import { Section } from "@/components/ui/section";
+import { PageHeader } from "@/components/ui/page-header";
+import { EmptyState } from "@/components/ui/empty-state";
 import { PropertiesFilters } from "@/components/properties/properties-filters";
 import { PropertiesList } from "@/components/properties/properties-list";
-import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
+import PropertiesLoading from "./loading";
 
 export const metadata = constructMetadata({
   title: "Properties - Oikion",
@@ -52,30 +55,30 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   // If not subscribed and doesn't have role access, show limited view
   if (!subscriptionPlan.isPaid && !hasRoleAccess) {
     return (
-      <div className="space-y-6">
-        <DashboardHeader
-          heading="Properties"
-          text="Manage your property listings and MLS data."
-        >
-          {canCreateContent(user.role) && (
-            <Button disabled>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Property
-            </Button>
-          )}
-        </DashboardHeader>
+      <Container maxWidth="2xl">
+        <Section spacing="comfortable">
+          <PageHeader
+            title="Properties"
+            description="Manage your property listings and MLS data."
+            actions={
+              canCreateContent(user.role) ? (
+                <Button disabled>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Property
+                </Button>
+              ) : undefined
+            }
+          />
 
-        <EmptyPlaceholder>
-          <EmptyPlaceholder.Icon name="home" />
-          <EmptyPlaceholder.Title>Subscribe to manage properties</EmptyPlaceholder.Title>
-          <EmptyPlaceholder.Description>
-            Start managing your property inventory with a subscription.
-            Access full MLS functionality, property tracking, and more.
-          </EmptyPlaceholder.Description>
-          <Link href="/dashboard/billing">
-            <Button>View Subscription Plans</Button>
-          </Link>
-        </EmptyPlaceholder>
+          <EmptyState
+            icon={Home}
+            title="Subscribe to manage properties"
+            description="Start managing your property inventory with a subscription. Access full MLS functionality, property tracking, and more."
+            action={{
+              label: "View Subscription Plans",
+              onClick: () => window.location.href = "/dashboard/billing"
+            }}
+          />
 
         {/* Demo properties for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
@@ -116,7 +119,8 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
             </div>
           </div>
         </div>
-      </div>
+      </Section>
+    </Container>
     );
   }
 
@@ -135,58 +139,60 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   const propertiesData = await getProperties(filters);
 
   return (
-    <div className="space-y-6">
-      <DashboardHeader
-        heading="Properties"
-        text="Manage your property listings and MLS data."
-      >
-        {canCreateContent(user.role) && (
-          <Link href="/dashboard/properties/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Property
-            </Button>
-          </Link>
-        )}
-      </DashboardHeader>
-
-      <PropertiesFilters />
-
-      {propertiesData.properties.length === 0 ? (
-        <EmptyPlaceholder>
-          <EmptyPlaceholder.Icon name="home" />
-          <EmptyPlaceholder.Title>No properties found</EmptyPlaceholder.Title>
-          <EmptyPlaceholder.Description>
-            {Object.keys(filters).some(key => filters[key as keyof typeof filters])
-              ? "Try adjusting your filters to see more results."
-              : "You haven't created any properties yet. Start by adding your first property."
-            }
-          </EmptyPlaceholder.Description>
-          {canCreateContent(user.role) && !Object.keys(filters).some(key => filters[key as keyof typeof filters]) && (
-            <Link href="/dashboard/properties/new">
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Your First Property
-              </Button>
-            </Link>
-          )}
-        </EmptyPlaceholder>
-      ) : (
-        <PropertiesList 
-          properties={propertiesData.properties}
-          totalPages={propertiesData.totalPages}
-          currentPage={propertiesData.page}
-          userRole={user.role}
-          userId={user.id!}
+    <Container maxWidth="2xl">
+      <Section spacing="comfortable">
+        <PageHeader
+          title="Properties"
+          description="Manage your property listings and MLS data."
+          actions={
+            canCreateContent(user.role) ? (
+              <Link href="/dashboard/properties/new">
+                <Button variant="brand">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Property
+                </Button>
+              </Link>
+            ) : undefined
+          }
         />
-      )}
-    </div>
+
+        <PropertiesFilters />
+
+        {propertiesData.properties.length === 0 ? (
+          <EmptyState
+            icon={Home}
+            title="No properties found"
+            description={
+              Object.keys(filters).some(key => filters[key as keyof typeof filters])
+                ? "Try adjusting your filters to see more results."
+                : "You haven't created any properties yet. Start by adding your first property."
+            }
+            action={
+              canCreateContent(user.role) && !Object.keys(filters).some(key => filters[key as keyof typeof filters])
+                ? {
+                    label: "Add Your First Property",
+                    onClick: () => window.location.href = "/dashboard/properties/new"
+                  }
+                : undefined
+            }
+          />
+        ) : (
+          <PropertiesList 
+            properties={propertiesData.properties}
+            totalPages={propertiesData.totalPages}
+            currentPage={propertiesData.page}
+            userRole={user.role}
+            userId={user.id!}
+          />
+        )}
+      </Section>
+    </Container>
   );
 }
 
 export default function PropertiesPage({ searchParams }: PropertiesPageProps) {
   return (
-    <Suspense fallback={<div>Loading properties...</div>}>
+    <Suspense fallback={<PropertiesLoading />}>
       <PropertiesContent searchParams={searchParams} />
     </Suspense>
   );

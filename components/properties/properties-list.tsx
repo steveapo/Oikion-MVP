@@ -129,7 +129,7 @@ function PropertyCard({ property, userRole, userId }: { property: Property; user
   const isArchived = property.listing?.marketingStatus === "ARCHIVED";
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden" elevation="e0" hoverable>
       <CardHeader className="p-0 relative">
         {isArchived && (
           <div className="absolute left-3 top-3 z-10">
