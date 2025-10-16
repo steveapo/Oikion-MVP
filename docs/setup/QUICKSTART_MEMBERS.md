@@ -292,9 +292,9 @@ In `/actions/invitations.ts`:
 
 ## 📚 Related Docs
 
-- [IMPLEMENTATION_COMPLETE.md](./IMPLEMENTATION_COMPLETE.md) - Full implementation details
-- [ORG_INVITATIONS_IMPLEMENTATION.md](./ORG_INVITATIONS_IMPLEMENTATION.md) - Component documentation
-- [RLS_ORG_MANAGEMENT_COMPLETE.md](./RLS_ORG_MANAGEMENT_COMPLETE.md) - Security architecture
+- [IMPLEMENTATION_COMPLETE.md](../implementation/IMPLEMENTATION_COMPLETE.md) - Full implementation details
+- [ORG_INVITATIONS_IMPLEMENTATION.md](../implementation/ORG_INVITATIONS_IMPLEMENTATION.md) - Component documentation
+- [RLS_ORG_MANAGEMENT_COMPLETE.md](../implementation/RLS_ORG_MANAGEMENT_COMPLETE.md) - Security architecture
 
 ---
 

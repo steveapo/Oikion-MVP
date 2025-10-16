@@ -17,6 +17,7 @@
   <a href="#introduction"><strong>Introduction</strong></a> ·
   <a href="#installation"><strong>Installation</strong></a> ·
   <a href="#tech-stack--features"><strong>Tech Stack + Features</strong></a> ·
+  <a href="#documentation"><strong>Documentation</strong></a> ·
   <a href="#author"><strong>Author</strong></a> ·
   <a href="#credits"><strong>Credits</strong></a>
 </p>
@@ -64,6 +65,21 @@ pnpm run dev
 > I use [npm-check-updates](https://www.npmjs.com/package/npm-check-updates) package for update this project.
 >
 > Use this command for update your project: `ncu -i --format group`
+
+## Documentation
+
+Comprehensive documentation is available in the [`/docs`](./docs) directory:
+
+- **[Complete Documentation Index](./docs/README.md)** - Full documentation overview
+- **[Setup Guides](./docs/setup)** - Environment setup, email configuration, quickstart guides
+- **[Implementation Details](./docs/implementation)** - RLS, multi-tenancy, invitations, migrations
+- **[Troubleshooting](./docs/troubleshooting)** - Common issues and solutions
+
+### Quick Links
+- [Environment Setup](./docs/setup/ENVIRONMENT_SETUP_GUIDE.md)
+- [Multi-Tenant Security](./docs/implementation/RLS_ORG_MANAGEMENT_COMPLETE.md)
+- [Member Management](./docs/setup/QUICKSTART_MEMBERS.md)
+- [Email Testing](./docs/setup/DEV_EMAIL_TESTING.md)
 
 ## Roadmap
 - [ ] Upgrade eslint to v9

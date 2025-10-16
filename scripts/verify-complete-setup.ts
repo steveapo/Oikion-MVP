@@ -236,9 +236,9 @@ async function verifyCompleteSetup() {
     console.log("=".repeat(60) + "\n");
 
     console.log("📚 Documentation:");
-    console.log("   - RLS_ORG_MANAGEMENT_COMPLETE.md");
-    console.log("   - MIGRATION_SUMMARY.md");
-    console.log("   - PHASE1_RLS_STATUS.md");
+    console.log("   - docs/implementation/RLS_ORG_MANAGEMENT_COMPLETE.md");
+    console.log("   - docs/implementation/MIGRATION_SUMMARY.md");
+    console.log("   - docs/implementation/PHASE1_RLS_STATUS.md");
 
   } catch (error) {
     console.error("\n❌ VERIFICATION FAILED:", error);
