@@ -1,14 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";
 import { getProperty } from "@/actions/properties";
 import { canCreateContent } from "@/lib/roles";
 import { constructMetadata } from "@/lib/utils";
-import { DashboardHeader } from "@/components/dashboard/header";
-import { Button } from "@/components/ui/button";
-import { PropertyImageManager } from "@/components/properties/property-image-manager";
+import { PropertyImagePageWrapper } from "@/components/properties/property-image-page-wrapper";
 
 export const metadata = constructMetadata({
   title: "Manage Property Images - Oikion",
@@ -36,29 +32,11 @@ export default async function PropertyImagesPage({ params }: PropertyImagesPageP
     const property = await getProperty(params.id);
 
     return (
-      <div className="space-y-6">
-        <DashboardHeader
-          heading="Manage Property Images"
-          text={`Upload photos for ${property.propertyType.toLowerCase()} in ${property.address?.city || "Unknown"}`}
-        >
-          <Link href={`/dashboard/properties/${params.id}`}>
-            <Button variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Property
-            </Button>
-          </Link>
-        </DashboardHeader>
-
-        <div className="mx-auto max-w-4xl">
-          <PropertyImageManager
-            propertyId={params.id}
-            onUploadComplete={() => {
-              // Refresh the page or redirect
-              window.location.href = `/dashboard/properties/${params.id}`;
-            }}
-          />
-        </div>
-      </div>
+      <PropertyImagePageWrapper
+        propertyId={params.id}
+        propertyType={property.propertyType}
+        city={property.address?.city || "Unknown"}
+      />
     );
   } catch (error) {
     redirect("/dashboard/properties");

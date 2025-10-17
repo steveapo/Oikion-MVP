@@ -438,6 +438,7 @@ export async function getProperty(id: string) {
       include: {
         address: true,
         listing: true,
+        // OPTIMIZATION: Load all images (limited by upload UI to 8 max)
         mediaAssets: {
           orderBy: [
             { isPrimary: "desc" },
@@ -448,6 +449,7 @@ export async function getProperty(id: string) {
         creator: {
           select: { name: true, email: true },
         },
+        // OPTIMIZATION: Limit to 10 most recent interactions
         interactions: {
           include: {
             client: { select: { name: true } },
@@ -456,19 +458,24 @@ export async function getProperty(id: string) {
           orderBy: { timestamp: "desc" },
           take: 10,
         },
+        // OPTIMIZATION: Limit to 5 most recent notes
         notes: {
           include: {
             creator: { select: { name: true } },
           },
           orderBy: { createdAt: "desc" },
-          take: 10,
+          take: 5,
         },
+        // OPTIMIZATION: Limit to 10 incomplete tasks
         tasks: {
+          where: {
+            status: { not: "COMPLETED" },
+          },
           include: {
             creator: { select: { name: true } },
             assignee: { select: { name: true } },
           },
-          orderBy: { createdAt: "desc" },
+          orderBy: { dueDate: "asc" },
           take: 10,
         },
       },

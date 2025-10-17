@@ -76,7 +76,7 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
             description="Start managing your property inventory with a subscription. Access full MLS functionality, property tracking, and more."
             action={{
               label: "View Subscription Plans",
-              onClick: () => window.location.href = "/dashboard/billing"
+              href: "/dashboard/billing"
             }}
           />
 
@@ -171,7 +171,7 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
               canCreateContent(user.role) && !Object.keys(filters).some(key => filters[key as keyof typeof filters])
                 ? {
                     label: "Add Your First Property",
-                    onClick: () => window.location.href = "/dashboard/properties/new"
+                    href: "/dashboard/properties/new"
                   }
                 : undefined
             }

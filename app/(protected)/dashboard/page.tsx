@@ -67,7 +67,7 @@ export default async function DashboardPage() {
               description="Begin by adding your first property or importing your existing listings."
               action={{
                 label: "Add Property",
-                onClick: () => {},
+                href: "/dashboard/properties/new",
               }}
             />
           </CardContent>

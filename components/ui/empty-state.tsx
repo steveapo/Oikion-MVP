@@ -1,4 +1,5 @@
 import * as React from "react";
+import Link from "next/link";
 import { LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -10,7 +11,8 @@ export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   description?: string;
   action?: {
     label: string;
-    onClick: () => void;
+    href?: string;
+    onClick?: () => void;
   };
 }
 
@@ -37,9 +39,15 @@ const EmptyState = React.forwardRef<HTMLDivElement, EmptyStateProps>(
           )}
         </div>
         {action && (
-          <Button onClick={action.onClick} className="mt-2">
-            {action.label}
-          </Button>
+          action.href ? (
+            <Button asChild className="mt-2">
+              <Link href={action.href}>{action.label}</Link>
+            </Button>
+          ) : action.onClick ? (
+            <Button onClick={action.onClick} className="mt-2">
+              {action.label}
+            </Button>
+          ) : null
         )}
       </div>
     );
