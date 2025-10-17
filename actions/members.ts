@@ -1,7 +1,13 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { canManageMembers, canChangeUserRole, getAssignableRolesByUser } from "@/lib/roles";
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
@@ -14,9 +20,8 @@ const updateRoleSchema = z.object({
 /**
  * Get all members of the current organization
  */
-export async function getMembers(): Promise<{
-  success: boolean;
-  members?: Array<{
+export async function getMembers(): Promise<ActionResponse<{
+  members: Array<{
     id: string;
     name: string | null;
     email: string | null;
@@ -24,22 +29,15 @@ export async function getMembers(): Promise<{
     image: string | null;
     createdAt: Date;
   }>;
-  error?: string;
-}> {
+}>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
     const members = await prisma.user.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: user.organizationId },
       select: {
         id: true,
         name: true,
@@ -51,13 +49,13 @@ export async function getMembers(): Promise<{
       orderBy: { createdAt: "asc" },
     });
 
-    return { success: true, members };
+    return createSuccessResponse({ members });
   } catch (error) {
     console.error("Failed to get members:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to get members",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load members. Please try again."
+    );
   }
 }
 
@@ -71,54 +69,66 @@ export async function getMembers(): Promise<{
 export async function updateMemberRole(
   userId: string,
   newRole: UserRole
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Validation
+  const validation = updateRoleSchema.safeParse({ userId, role: newRole });
+  if (!validation.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      validation.error.errors[0].message
+    );
+  }
+
+  // Check if user can manage members
+  if (!canManageMembers(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to update member roles."
+    );
+  }
+
+  // Check if user can change this specific user's role to the target role
+  if (!canChangeUserRole(user.role, userId, user.id, newRole)) {
+    if (userId === user.id) {
+      return createErrorResponse(
+        ErrorCode.FORBIDDEN,
+        "You cannot change your own role. ORG_OWNERs can transfer ownership instead."
+      );
+    }
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      `You cannot assign the ${newRole} role.`
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Validate input
-    const validation = updateRoleSchema.safeParse({ userId, role: newRole });
-    if (!validation.success) {
-      throw new Error(validation.error.errors[0].message);
-    }
-
-    // Check if user can manage members
-    if (!canManageMembers(session.user.role)) {
-      throw new Error("Insufficient permissions to update member roles");
-    }
-
-    // Check if user can change this specific user's role to the target role
-    if (!canChangeUserRole(session.user.role, userId, session.user.id, newRole)) {
-      if (userId === session.user.id) {
-        throw new Error("You cannot change your own role. ORG_OWNERs can transfer ownership instead.");
-      }
-      throw new Error(`You cannot assign the ${newRole} role`);
-    }
-
     // Find target user
     const targetUser = await prisma.user.findFirst({
       where: {
         id: userId,
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!targetUser) {
-      throw new Error("User not found in your organization");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "User not found in your organization."
+      );
     }
 
     // Additional check: ADMIN cannot change ORG_OWNER or other ADMIN roles
-    if (session.user.role === UserRole.ADMIN) {
+    if (user.role === UserRole.ADMIN) {
       if (targetUser.role === UserRole.ORG_OWNER || targetUser.role === UserRole.ADMIN) {
-        throw new Error("You cannot change the role of owners or other administrators");
+        return createErrorResponse(
+          ErrorCode.INSUFFICIENT_PERMISSIONS,
+          "You cannot change the role of owners or other administrators."
+        );
       }
     }
 
@@ -139,18 +149,18 @@ export async function updateMemberRole(
           newRole,
           userEmail: targetUser.email 
         },
-        organizationId: orgId,
-        actorId: session.user.id,
+        organizationId: user.organizationId,
+        actorId: user.id,
       },
     });
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to update member role:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update member role",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to update member role. Please try again."
+    );
   }
 }
 
@@ -161,52 +171,58 @@ export async function updateMemberRole(
  */
 export async function removeMember(
   userId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Check permissions
+  if (!canManageMembers(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to remove members."
+    );
+  }
+
+  // Prevent self-removal
+  if (userId === user.id) {
+    return createErrorResponse(
+      ErrorCode.FORBIDDEN,
+      "You cannot remove yourself. Use the delete account option instead."
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Check permissions
-    if (!canManageMembers(session.user.role)) {
-      throw new Error("Insufficient permissions to remove members");
-    }
-
-    // Prevent self-removal
-    if (userId === session.user.id) {
-      throw new Error("You cannot remove yourself. Use the delete account option instead.");
-    }
-
     // Find target user
     const targetUser = await prisma.user.findFirst({
       where: {
         id: userId,
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!targetUser) {
-      throw new Error("User not found in your organization");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "User not found in your organization."
+      );
     }
 
     // Prevent removing the last ORG_OWNER
     if (targetUser.role === UserRole.ORG_OWNER) {
       const ownerCount = await prisma.user.count({
         where: {
-          organizationId: orgId,
+          organizationId: user.organizationId,
           role: UserRole.ORG_OWNER,
         },
       });
 
       if (ownerCount <= 1) {
-        throw new Error("Cannot remove the last organization owner");
+        return createErrorResponse(
+          ErrorCode.CONFLICT,
+          "Cannot remove the last organization owner."
+        );
       }
     }
 
@@ -230,18 +246,18 @@ export async function removeMember(
           userEmail: targetUser.email,
           role: targetUser.role 
         },
-        organizationId: orgId,
-        actorId: session.user.id,
+        organizationId: user.organizationId,
+        actorId: user.id,
       },
     });
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to remove member:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to remove member",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to remove member. Please try again."
+    );
   }
 }
 
@@ -252,46 +268,49 @@ export async function removeMember(
  */
 export async function transferOwnership(
   newOwnerId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Only ORG_OWNER can transfer ownership
+  if (user.role !== UserRole.ORG_OWNER) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "Only organization owners can transfer ownership."
+    );
+  }
+
+  // Cannot transfer to self
+  if (newOwnerId === user.id) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "You are already the owner."
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Only ORG_OWNER can transfer ownership
-    if (session.user.role !== UserRole.ORG_OWNER) {
-      throw new Error("Only organization owners can transfer ownership");
-    }
-
-    // Cannot transfer to self
-    if (newOwnerId === session.user.id) {
-      throw new Error("You are already the owner");
-    }
-
     // Find target user
     const targetUser = await prisma.user.findFirst({
       where: {
         id: newOwnerId,
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!targetUser) {
-      throw new Error("User not found in your organization");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "User not found in your organization."
+      );
     }
 
     // Perform ownership transfer in a transaction
     await prisma.$transaction([
       // Demote current owner to ADMIN
       prisma.user.update({
-        where: { id: session.user.id },
+        where: { id: user.id },
         data: { role: UserRole.ADMIN },
       }),
       // Promote new user to ORG_OWNER
@@ -307,57 +326,47 @@ export async function transferOwnership(
           entityId: newOwnerId,
           payload: { 
             action: "ownership_transferred",
-            oldOwner: session.user.email,
+            oldOwner: user.email,
             newOwner: targetUser.email,
             oldRole: targetUser.role,
             newRole: UserRole.ORG_OWNER,
           },
-          organizationId: orgId,
-          actorId: session.user.id,
+          organizationId: user.organizationId,
+          actorId: user.id,
         },
       }),
     ]);
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to transfer ownership:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to transfer ownership",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to transfer ownership. Please try again."
+    );
   }
 }
 
 /**
  * Get member count for the current organization
  */
-export async function getMemberCount(): Promise<{
-  success: boolean;
-  count?: number;
-  error?: string;
-}> {
+export async function getMemberCount(): Promise<ActionResponse<{ count: number }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
     const count = await prisma.user.count({
-      where: { organizationId: orgId },
+      where: { organizationId: user.organizationId },
     });
 
-    return { success: true, count };
+    return createSuccessResponse({ count });
   } catch (error) {
     console.error("Failed to get member count:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to get member count",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load member count. Please try again."
+    );
   }
 }

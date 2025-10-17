@@ -1,8 +1,14 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { prismaForOrg } from "@/lib/org-prisma";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  zodErrorsToValidationErrors,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { canCreateContent } from "@/lib/roles";
 import { 
   interactionFormSchema,
@@ -42,25 +48,35 @@ async function createActivity(
 }
 
 // Create interaction action
-export async function createInteraction(data: InteractionFormData) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function createInteraction(
+  data: InteractionFormData
+): Promise<ActionResponse<{ interactionId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create interactions."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to create interactions");
+  // Validation
+  const result = interactionFormSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  const validatedData = interactionFormSchema.parse(data);
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const interaction = await db.interaction.create({
       data: {
         interactionType: validatedData.interactionType,
@@ -68,14 +84,14 @@ export async function createInteraction(data: InteractionFormData) {
         propertyId: validatedData.propertyId || null,
         summary: validatedData.summary,
         timestamp: validatedData.timestamp,
-        createdBy: session.user.id,
+        createdBy: user.id,
       },
     });
 
     // Get client name for activity log
     let clientName = "";
     if (validatedData.clientId) {
-      const client = await prismaForOrg(session.user.organizationId).client.findUnique({
+      const client = await db.client.findUnique({
         where: { id: validatedData.clientId },
         select: { name: true },
       });
@@ -86,8 +102,8 @@ export async function createInteraction(data: InteractionFormData) {
       ActionType.INTERACTION_LOGGED,
       EntityType.CLIENT,
       validatedData.clientId || interaction.id,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         interactionType: validatedData.interactionType,
         clientName,
@@ -100,39 +116,52 @@ export async function createInteraction(data: InteractionFormData) {
       revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
     }
     
-    return { success: true, interactionId: interaction.id };
+    return createSuccessResponse({ interactionId: interaction.id });
   } catch (error) {
     console.error("Failed to create interaction:", error);
-    throw new Error("Failed to create interaction");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create interaction. Please try again."
+    );
   }
 }
 
 // Create note action
-export async function createNote(data: NoteFormData) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function createNote(
+  data: NoteFormData
+): Promise<ActionResponse<{ noteId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create notes."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to create notes");
+  // Validation
+  const result = noteFormSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  const validatedData = noteFormSchema.parse(data);
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const note = await db.note.create({
       data: {
         content: validatedData.content,
         clientId: validatedData.clientId || null,
         propertyId: validatedData.propertyId || null,
-        createdBy: session.user.id,
+        createdBy: user.id,
       },
     });
 
@@ -144,8 +173,8 @@ export async function createNote(data: NoteFormData) {
       ActionType.NOTE_ADDED,
       entityType,
       entityId,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         noteLength: validatedData.content.length,
       }
@@ -159,44 +188,57 @@ export async function createNote(data: NoteFormData) {
       revalidatePath(`/dashboard/properties/${validatedData.propertyId}`);
     }
     
-    return { success: true, noteId: note.id };
+    return createSuccessResponse({ noteId: note.id });
   } catch (error) {
     console.error("Failed to create note:", error);
-    throw new Error("Failed to create note");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create note. Please try again."
+    );
   }
 }
 
 // Create task action
-export async function createTask(data: TaskFormData) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function createTask(
+  data: TaskFormData
+): Promise<ActionResponse<{ taskId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create tasks."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to create tasks");
+  // Validation
+  const result = taskFormSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  const validatedData = taskFormSchema.parse(data);
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const task = await db.task.create({
       data: {
         title: validatedData.title,
         description: validatedData.description || null,
         dueDate: validatedData.dueDate || null,
         status: validatedData.status,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
         assignedTo: validatedData.assignedTo || null,
         clientId: validatedData.clientId || null,
         propertyId: validatedData.propertyId || null,
-        createdBy: session.user.id,
+        createdBy: user.id,
       },
     });
 
@@ -204,8 +246,8 @@ export async function createTask(data: TaskFormData) {
       ActionType.TASK_CREATED,
       EntityType.TASK,
       task.id,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         taskTitle: validatedData.title,
         assignedTo: validatedData.assignedTo,
@@ -217,40 +259,48 @@ export async function createTask(data: TaskFormData) {
       revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
     }
     
-    return { success: true, taskId: task.id };
+    return createSuccessResponse({ taskId: task.id });
   } catch (error) {
     console.error("Failed to create task:", error);
-    throw new Error("Failed to create task");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create task. Please try again."
+    );
   }
 }
 
 // Update task status
-export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETED" | "CANCELLED") {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
+export async function updateTaskStatus(
+  id: string, 
+  status: "PENDING" | "COMPLETED" | "CANCELLED"
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to update tasks");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to update tasks."
+    );
   }
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const existingTask = await db.task.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!existingTask) {
-      throw new Error("Task not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Task not found or you don't have access."
+      );
     }
 
     const task = await db.task.update({
@@ -263,8 +313,8 @@ export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETE
         ActionType.TASK_COMPLETED,
         EntityType.TASK,
         task.id,
-        session.user.id,
-        session.user.organizationId,
+        user.id,
+        user.organizationId,
         {
           taskTitle: existingTask.title,
         }
@@ -279,26 +329,28 @@ export async function updateTaskStatus(id: string, status: "PENDING" | "COMPLETE
       revalidatePath(`/dashboard/properties/${existingTask.propertyId}`);
     }
     
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to update task:", error);
-    throw new Error("Failed to update task");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to update task. Please try again."
+    );
   }
 }
 
 // Get organization members for task assignment
 export async function getOrganizationMembers() {
-  const session = await auth();
-  
-  if (!session?.user?.id || !session.user.organizationId) {
-    throw new Error("Unauthorized");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const members = await db.user.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,
@@ -318,17 +370,16 @@ export async function getOrganizationMembers() {
 
 // Get properties for interaction linking
 export async function getOrganizationProperties() {
-  const session = await auth();
-  
-  if (!session?.user?.id || !session.user.organizationId) {
-    throw new Error("Unauthorized");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const properties = await db.property.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,

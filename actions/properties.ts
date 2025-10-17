@@ -1,8 +1,14 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { prismaForOrg } from "@/lib/org-prisma";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  zodErrorsToValidationErrors,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   propertyFormSchema, 
@@ -13,7 +19,6 @@ import {
 } from "@/lib/validations/property";
 import { ActionType, EntityType, MarketingStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 
 // Helper function to create activity log
 async function createActivity(
@@ -41,26 +46,35 @@ async function createActivity(
 }
 
 // Create property action
-export async function createProperty(data: PropertyFormData) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function createProperty(
+  data: PropertyFormData
+): Promise<ActionResponse<{ propertyId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create properties."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to create properties");
+  // Validation
+  const result = propertyFormSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  // Validate input
-  const validatedData = propertyFormSchema.parse(data);
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId!);
+    const db = prismaForOrg(user.organizationId);
     // Create property with related data in a transaction
     const property = await db.$transaction(async (tx) => {
       // Create property
@@ -76,8 +90,8 @@ export async function createProperty(data: PropertyFormData) {
           yearBuilt: validatedData.yearBuilt,
           features: validatedData.features || [],
           description: validatedData.description,
-          organizationId: session.user.organizationId!,
-          createdBy: session.user.id!,
+          organizationId: user.organizationId,
+          createdBy: user.id,
         },
       });
 
@@ -113,8 +127,8 @@ export async function createProperty(data: PropertyFormData) {
     await createActivity(
       ActionType.PROPERTY_CREATED,
       property.id,
-      session.user.id,
-      session.user.organizationId!,
+      user.id,
+      user.organizationId,
       {
         propertyType: validatedData.propertyType,
         price: validatedData.price,
@@ -123,44 +137,60 @@ export async function createProperty(data: PropertyFormData) {
     );
 
     revalidatePath("/dashboard/properties");
-    return { success: true, propertyId: property.id };
+    return createSuccessResponse({ propertyId: property.id });
   } catch (error) {
     console.error("Failed to create property:", error);
-    throw new Error("Failed to create property");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create property. Please try again."
+    );
   }
 }
 
 // Update property action
-export async function updateProperty(id: string, data: Partial<PropertyFormData>) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function updateProperty(
+  id: string, 
+  data: Partial<PropertyFormData>
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to update properties."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to update properties");
+  // Validation
+  const result = updatePropertySchema.safeParse({ ...data, id });
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  // Validate input
-  const validatedData = updatePropertySchema.parse({ ...data, id });
+  const validatedData = result.data;
 
   try {
     // Check if property exists and user has access
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const existingProperty = await db.property.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!existingProperty) {
-      throw new Error("Property not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Property not found or you don't have access."
+      );
     }
 
     // Update property with related data in a transaction
@@ -245,8 +275,8 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
     await createActivity(
       ActionType.PROPERTY_UPDATED,
       property.id,
-      session.user.id,
-      session.user.organizationId!,
+      user.id,
+      user.organizationId,
       {
         updatedFields: Object.keys(data),
       }
@@ -254,43 +284,47 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
 
     revalidatePath("/dashboard/properties");
     revalidatePath(`/dashboard/properties/${id}`);
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to update property:", error);
-    throw new Error("Failed to update property");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to update property. Please try again."
+    );
   }
 }
 
 // Archive property action
-export async function archiveProperty(id: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+export async function archiveProperty(id: string): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
     // Check if property exists and user has access
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const property = await db.property.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!property) {
-      throw new Error("Property not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Property not found or you don't have access."
+      );
     }
 
     // Check permissions for deletion
-    const isOwner = property.createdBy === session.user.id;
-    if (!canDeleteContent(session.user.role, isOwner)) {
-      throw new Error("Insufficient permissions to archive this property");
+    const isOwner = property.createdBy === user.id;
+    if (!canDeleteContent(user.role, isOwner)) {
+      return createErrorResponse(
+        ErrorCode.INSUFFICIENT_PERMISSIONS,
+        "You don't have permission to archive this property."
+      );
     }
 
     // Archive by updating listing status
@@ -306,37 +340,43 @@ export async function archiveProperty(id: string) {
     await createActivity(
       ActionType.PROPERTY_ARCHIVED,
       id,
-      session.user.id,
-      session.user.organizationId!
+      user.id,
+      user.organizationId
     );
 
     revalidatePath("/dashboard/properties");
     revalidatePath(`/dashboard/properties/${id}`);
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to archive property:", error);
-    throw new Error("Failed to archive property");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to archive property. Please try again."
+    );
   }
 }
 
 // Get properties with filters
 export async function getProperties(filters: Partial<PropertyFilters> = {}) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   // Validate filters
-  const validatedFilters = propertyFiltersSchema.parse(filters);
+  const result = propertyFiltersSchema.safeParse(filters);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Invalid filter parameters.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
+  }
+  const validatedFilters = result.data;
 
   try {
     const where: any = {
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     };
 
     // Apply filters
@@ -371,7 +411,7 @@ export async function getProperties(filters: Partial<PropertyFilters> = {}) {
       where.bedrooms = validatedFilters.bedrooms;
     }
 
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const [properties, totalCount] = await Promise.all([
       db.property.findMany({
         where,
@@ -412,28 +452,26 @@ export async function getProperties(filters: Partial<PropertyFilters> = {}) {
     };
   } catch (error) {
     console.error("Failed to get properties:", error);
-    throw new Error("Failed to get properties");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load properties. Please try again."
+    );
   }
 }
 
 // Get single property by ID
 export async function getProperty(id: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const property = await db.property.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         address: true,
@@ -482,33 +520,34 @@ export async function getProperty(id: string) {
     });
 
     if (!property) {
-      throw new Error("Property not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Property not found or you don't have access."
+      );
     }
 
     return property;
   } catch (error) {
     console.error("Failed to get property:", error);
-    throw new Error("Failed to get property");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load property. Please try again."
+    );
   }
 }
 
 export async function getPropertyClients(propertyId: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
     // Get all clients who have interactions, notes, or tasks related to this property
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const clientsWithInteractions = await db.client.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
         OR: [
           { interactions: { some: { propertyId } } },
           { notes: { some: { propertyId } } },
@@ -542,6 +581,9 @@ export async function getPropertyClients(propertyId: string) {
     }));
   } catch (error) {
     console.error("Failed to get property clients:", error);
-    throw new Error("Failed to get property clients");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load property clients. Please try again."
+    );
   }
 }

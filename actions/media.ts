@@ -5,6 +5,14 @@ import { prisma } from "@/lib/db";
 import { prismaForOrg } from "@/lib/org-prisma";
 import { canCreateContent } from "@/lib/roles";
 import { ActionType } from "@prisma/client";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+} from "@/lib/action-response";
+import { requireAuth } from "@/lib/auth-utils";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 interface UploadImageResult {
   success: boolean;
@@ -20,7 +28,28 @@ interface UploadImageResult {
 export async function uploadPropertyImages(
   propertyId: string,
   images: { dataUrl: string; isPrimary: boolean; displayOrder: number }[]
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to upload images."
+    );
+  }
+
+  // Validate image count
+  if (images.length > 8) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Maximum 8 images allowed."
+    );
+  }
+
   try {
     const session = await auth();
 
@@ -37,21 +66,27 @@ export async function uploadPropertyImages(
     }
 
     // Verify property belongs to user's organization
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const property = await db.property.findFirst({
       where: {
         id: propertyId,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!property) {
-      throw new Error("Property not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Property not found or access denied."
+      );
     }
 
     // Validate image count
     if (images.length > 8) {
-      throw new Error("Maximum 8 images allowed");
+      return createErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        "Maximum 8 images allowed."
+      );
     }
 
     await db.mediaAsset.deleteMany({
@@ -70,26 +105,26 @@ export async function uploadPropertyImages(
     });
 
     // Log activity
-    await prismaForOrg(session.user.organizationId).activity.create({
+    await prismaForOrg(user.organizationId).activity.create({
       data: {
         actionType: ActionType.MEDIA_ADDED,
         entityType: "PROPERTY",
         entityId: propertyId,
-        actorId: session.user.id,
-        organizationId: session.user.organizationId,
+        actorId: user.id,
+        organizationId: user.organizationId,
         payload: {
           imageCount: images.length,
         },
       },
     });
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to upload images:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to upload images",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to upload images. Please try again."
+    );
   }
 }
 
@@ -98,20 +133,16 @@ export async function uploadPropertyImages(
  */
 export async function deletePropertyImage(
   imageId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    if (!session.user.organizationId) {
-      throw new Error("User must belong to an organization");
-    }
 
     // Verify image belongs to user's organization
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const image = await db.mediaAsset.findFirst({
       where: {
         id: imageId,
@@ -125,8 +156,11 @@ export async function deletePropertyImage(
       },
     });
 
-    if (!image || image.property.organizationId !== session.user.organizationId) {
-      throw new Error("Image not found or access denied");
+    if (!image || image.property.organizationId !== user.organizationId) {
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Image not found or access denied."
+      );
     }
 
     // Delete the image
@@ -153,12 +187,12 @@ export async function deletePropertyImage(
       }
     }
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to delete image:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete image",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to delete image. Please try again."
+    );
   }
 }

@@ -5,6 +5,12 @@ import { stripe } from "@/lib/stripe";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { absoluteUrl } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+} from "@/lib/action-response";
 
 export type responseAction = {
   status: "success" | "error";
@@ -17,13 +23,15 @@ const billingUrl = absoluteUrl("/pricing")
 export async function generateUserStripe(priceId: string): Promise<responseAction> {
   let redirectUrl: string = "";
 
-  try {
-    const session = await auth()
-    const user = session?.user;
+  // Authentication
+  const session = await auth();
+  const user = session?.user;
 
-    if (!user || !user.email || !user.id) {
-      throw new Error("Unauthorized");
-    }
+  if (!user || !user.email || !user.id) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
 
     const subscriptionPlan = await getUserSubscriptionPlan(user.id)
 

@@ -36,6 +36,7 @@ import { propertyFormSchema, PropertyFormData } from "@/lib/validations/property
 import { PropertyType, PropertyStatus, TransactionType, MarketingStatus } from "@prisma/client";
 import { toast } from "sonner";
 import { ImageUpload } from "./image-upload";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 interface ImageFile {
   id: string;
@@ -99,7 +100,19 @@ export function PropertyForm({ property }: PropertyFormProps) {
       const formData = { ...data, features };
       
       if (property) {
-        await updateProperty(property.id, formData);
+        const result = await updateProperty(property.id, formData);
+        
+        if (!result.success) {
+          // Handle validation errors
+          if (result.validationErrors) {
+            Object.entries(result.validationErrors).forEach(([field, message]) => {
+              form.setError(field as any, { message });
+            });
+          }
+          toast.error(result.error || TOAST_ERROR.PROPERTY_UPDATE_FAILED);
+          setIsSubmitting(false);
+          return;
+        }
         
         // Upload images if any
         if (images.length > 0) {
@@ -110,16 +123,31 @@ export function PropertyForm({ property }: PropertyFormProps) {
               displayOrder: index,
             }))
           );
-          await uploadPropertyImages(property.id, imageDataUrls);
+          const uploadResult = await uploadPropertyImages(property.id, imageDataUrls);
+          if (!uploadResult.success) {
+            toast.warning("Property updated, but image upload failed. Please try uploading images again.");
+          }
         }
         
-        toast.success("Property updated successfully");
+        toast.success(TOAST_SUCCESS.PROPERTY_UPDATED);
         router.push(`/dashboard/properties/${property.id}`);
       } else {
         const result = await createProperty(formData);
         
+        if (!result.success) {
+          // Handle validation errors
+          if (result.validationErrors) {
+            Object.entries(result.validationErrors).forEach(([field, message]) => {
+              form.setError(field as any, { message });
+            });
+          }
+          toast.error(result.error || TOAST_ERROR.PROPERTY_CREATE_FAILED);
+          setIsSubmitting(false);
+          return;
+        }
+        
         // Upload images if any
-        if (images.length > 0 && result.propertyId) {
+        if (images.length > 0 && result.data?.propertyId) {
           const imageDataUrls = await Promise.all(
             images.map(async (img, index) => ({
               dataUrl: await convertFileToDataUrl(img.file),
@@ -127,14 +155,18 @@ export function PropertyForm({ property }: PropertyFormProps) {
               displayOrder: index,
             }))
           );
-          await uploadPropertyImages(result.propertyId, imageDataUrls);
+          const uploadResult = await uploadPropertyImages(result.data.propertyId, imageDataUrls);
+          if (!uploadResult.success) {
+            toast.warning("Property created, but image upload failed. Please try uploading images again.");
+          }
         }
         
-        toast.success("Property created successfully");
-        router.push(`/dashboard/properties/${result.propertyId}`);
+        toast.success(TOAST_SUCCESS.PROPERTY_CREATED);
+        router.push(`/dashboard/properties/${result.data?.propertyId}`);
       }
     } catch (error) {
-      toast.error(property ? "Failed to update property" : "Failed to create property");
+      console.error("Form submission error:", error);
+      toast.error(property ? TOAST_ERROR.PROPERTY_UPDATE_FAILED : TOAST_ERROR.PROPERTY_CREATE_FAILED);
     } finally {
       setIsSubmitting(false);
     }

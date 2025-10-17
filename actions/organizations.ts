@@ -1,7 +1,14 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  zodErrorsToValidationErrors,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -10,20 +17,14 @@ import { z } from "zod";
  * Get the current user's organization.
  */
 export async function getCurrentOrganization() {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return null; // Return null for consistency with existing behavior
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return null;
-    }
-
-    const organizationId = (session.user as any).organizationId;
-    if (!organizationId) {
-      return null;
-    }
-
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: user.organizationId },
       select: {
         id: true,
         name: true,
@@ -46,17 +47,16 @@ export async function getCurrentOrganization() {
  * Ensures no duplicate personal workspaces are returned.
  */
 export async function getUserOrganizations() {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return []; // Return empty array for consistency
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return [];
-    }
-
     // Get all organizations where user is a member (via OrganizationMember table)
     const memberships = await prisma.organizationMember.findMany({
       where: {
-        userId: session.user.id,
+        userId: user.id,
       },
       include: {
         organization: {
@@ -102,7 +102,7 @@ export async function getUserOrganizations() {
     // Double-check: ensure only ONE personal workspace
     const personalWorkspaces = uniqueOrganizations.filter(org => org.isPersonal);
     if (personalWorkspaces.length > 1) {
-      console.error(`[ERROR] User ${session.user.id} has ${personalWorkspaces.length} personal workspaces!`);
+      console.error(`[ERROR] User ${user.id} has ${personalWorkspaces.length} personal workspaces!`);
       // Return only the first personal workspace + all team orgs
       return [
         personalWorkspaces[0],
@@ -128,16 +128,24 @@ const createOrganizationSchema = z.object({
  */
 export async function createOrganization(
   data: z.infer<typeof createOrganizationSchema>
-): Promise<{ success: boolean; organizationId?: string; error?: string }> {
+): Promise<ActionResponse<{ organizationId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Validation
+  const result = createOrganizationSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
+  }
+  const validated = result.data;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const validated = createOrganizationSchema.parse(data);
-
     // Create the organization
     const organization = await prisma.organization.create({
       data: {
@@ -150,7 +158,7 @@ export async function createOrganization(
     // Add user as a member with ORG_OWNER role
     await prisma.organizationMember.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         organizationId: organization.id,
         role: UserRole.ORG_OWNER,
       },
@@ -158,7 +166,7 @@ export async function createOrganization(
 
     // Switch user to this new organization
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         organizationId: organization.id,
         role: UserRole.ORG_OWNER,
@@ -167,13 +175,13 @@ export async function createOrganization(
 
     revalidatePath("/dashboard");
 
-    return { success: true, organizationId: organization.id };
+    return createSuccessResponse({ organizationId: organization.id });
   } catch (error) {
     console.error("Failed to create organization:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create organization",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create organization. Please try again."
+    );
   }
 }
 
@@ -189,27 +197,33 @@ const updateOrganizationSchema = z.object({
 export async function updateOrganization(
   organizationId: string,
   data: z.infer<typeof updateOrganizationSchema>
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Verify user is ORG_OWNER of this organization
+  if (user.organizationId !== organizationId || user.role !== UserRole.ORG_OWNER) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "Only organization owners can update organization settings."
+    );
+  }
+
+  // Validation
+  const result = updateOrganizationSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
+  }
+  const validated = result.data;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    // Verify user is ORG_OWNER of this agency
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true, organizationId: true },
-    });
-
-    if (user?.organizationId !== organizationId || user?.role !== UserRole.ORG_OWNER) {
-      throw new Error("Only organization owners can update organization settings");
-    }
-
-    const validated = updateOrganizationSchema.parse(data);
-
-    // Update the agency
+    // Update the organization
     await prisma.organization.update({
       where: { id: organizationId },
       data: validated,
@@ -218,13 +232,13 @@ export async function updateOrganization(
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/settings");
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to update organization:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update organization",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to update organization. Please try again."
+    );
   }
 }
 
@@ -234,19 +248,18 @@ export async function updateOrganization(
  */
 export async function switchOrganization(
   organizationId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
     // Verify user is a member of the target organization (via OrganizationMember)
     const membership = await prisma.organizationMember.findUnique({
       where: {
         userId_organizationId: {
-          userId: session.user.id,
+          userId: user.id,
           organizationId: organizationId,
         },
       },
@@ -256,12 +269,15 @@ export async function switchOrganization(
     });
 
     if (!membership) {
-      throw new Error("You do not have access to this organization");
+      return createErrorResponse(
+        ErrorCode.FORBIDDEN,
+        "You do not have access to this organization."
+      );
     }
 
     // Update user's current organization
     await prisma.user.update({
-      where: { id: session.user.id },
+      where: { id: user.id },
       data: {
         organizationId: organizationId,
         role: membership.role, // Use their role from the membership
@@ -270,13 +286,13 @@ export async function switchOrganization(
 
     revalidatePath("/dashboard");
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to switch organization:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to switch organization",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to switch organization. Please try again."
+    );
   }
 }
 
@@ -288,50 +304,53 @@ export async function switchOrganization(
  * 
  * Personal organizations cannot be deleted.
  */
-export async function deleteOrganization(): Promise<{ success: boolean; error?: string }> {
+export async function deleteOrganization(): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Only ORG_OWNER may delete the organization
+  if (user.role !== UserRole.ORG_OWNER) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "Only organization owners can delete organizations."
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const organizationId = (session.user as any).organizationId;
-    if (!organizationId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Only ORG_OWNER may delete the agency
-    if (session.user.role !== UserRole.ORG_OWNER) {
-      throw new Error("Insufficient permissions to delete organization");
-    }
-
-    // Fetch the organization to check if it's a personal agency
+    // Fetch the organization to check if it's a personal organization
     const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+      where: { id: user.organizationId },
       select: { isPersonal: true },
     });
 
     if (!organization) {
-      throw new Error("Organization not found");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Organization not found."
+      );
     }
 
     // Prevent deletion of personal organizations
     if (organization.isPersonal) {
-      throw new Error("Cannot delete your personal organization. You can delete other organizations you own.");
+      return createErrorResponse(
+        ErrorCode.FORBIDDEN,
+        "Cannot delete your personal organization. You can delete other organizations you own."
+      );
     }
 
     // Delete the organization; FK CASCADE will clean up tenant data
     await prisma.organization.delete({
-      where: { id: organizationId },
+      where: { id: user.organizationId },
     });
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to delete organization:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete organization",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to delete organization. Please try again."
+    );
   }
 }

@@ -4,18 +4,23 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { prismaForOrg } from "@/lib/org-prisma";
 import { activityFiltersSchema, type ActivityFilters } from "@/lib/validations/activity";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+  zodErrorsToValidationErrors,
+} from "@/lib/action-response";
+import { requireAuth } from "@/lib/auth-utils";
 
 // Get activities with filters
 export async function getActivities(filters: Partial<ActivityFilters> = {}) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) {
+    throw new Error(authResult.error.error);
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+  const { user } = authResult;
 
   // Set default date range if none provided
   const defaultFilters = {
@@ -24,11 +29,16 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
     dateFrom: filters.dateFrom || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
   };
 
-  const validatedFilters = activityFiltersSchema.parse(defaultFilters);
+  // Validation
+  const result = activityFiltersSchema.safeParse(defaultFilters);
+  if (!result.success) {
+    throw new Error("Invalid filters");
+  }
+  const validatedFilters = result.data;
 
   try {
     const where: any = {
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
       createdAt: {
         gte: validatedFilters.dateFrom,
         lte: validatedFilters.dateTo,
@@ -46,7 +56,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
       where.actionType = validatedFilters.actionType;
     }
 
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const [activities, totalCount] = await Promise.all([
       db.activity.findMany({
         where,
@@ -74,7 +84,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
         try {
           switch (activity.entityType) {
             case "PROPERTY":
-              entityDetails = await prismaForOrg(session.user.organizationId!).property.findUnique({
+              entityDetails = await prismaForOrg(user.organizationId).property.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -85,7 +95,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
               });
               break;
             case "CLIENT":
-              entityDetails = await prismaForOrg(session.user.organizationId!).client.findUnique({
+              entityDetails = await prismaForOrg(user.organizationId).client.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -95,7 +105,7 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
               });
               break;
             case "TASK":
-              entityDetails = await prismaForOrg(session.user.organizationId!).task.findUnique({
+              entityDetails = await prismaForOrg(user.organizationId).task.findUnique({
                 where: { id: activity.entityId },
                 select: {
                   id: true,
@@ -141,16 +151,17 @@ export async function getActivities(filters: Partial<ActivityFilters> = {}) {
 
 // Get organization members for actor filter
 export async function getOrganizationActors() {
-  const session = await auth();
-  
-  if (!session?.user?.id || !session.user.organizationId) {
-    throw new Error("Unauthorized");
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) {
+    throw new Error(authResult.error.error);
   }
+  const { user } = authResult;
 
   try {
     const actors = await prisma.user.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         id: true,

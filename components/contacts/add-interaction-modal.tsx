@@ -37,6 +37,7 @@ import { interactionFormSchema, type InteractionFormData } from "@/lib/validatio
 import { InteractionType } from "@prisma/client";
 import { toast } from "sonner";
 import { useEffect } from "react";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 interface AddInteractionModalProps {
   clientId: string;
@@ -87,13 +88,27 @@ export function AddInteractionModal({ clientId, children }: AddInteractionModalP
     setIsSubmitting(true);
     
     try {
-      await createInteraction(data);
+      const result = await createInteraction(data);
+      
+      if (!result.success) {
+        // Handle validation errors
+        if (result.validationErrors) {
+          Object.entries(result.validationErrors).forEach(([field, message]) => {
+            form.setError(field as any, { message });
+          });
+        }
+        toast.error(result.error || TOAST_ERROR.INTERACTION_CREATE_FAILED);
+        setIsSubmitting(false);
+        return;
+      }
+      
       form.reset();
       setOpen(false);
-      toast.success("Interaction logged successfully");
+      toast.success(TOAST_SUCCESS.INTERACTION_LOGGED);
       router.refresh();
     } catch (error) {
-      toast.error("Failed to log interaction");
+      console.error("Form submission error:", error);
+      toast.error(TOAST_ERROR.INTERACTION_CREATE_FAILED);
     } finally {
       setIsSubmitting(false);
     }

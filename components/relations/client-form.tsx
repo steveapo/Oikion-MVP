@@ -11,6 +11,7 @@ import { X } from "lucide-react";
 import { clientFormSchema, type ClientFormData } from "@/lib/validations/client";
 import { createClient, updateClient } from "@/actions/clients";
 import { Button } from "@/components/ui/button";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 import {
   Form,
   FormControl,
@@ -62,24 +63,43 @@ export function ClientForm({ defaultValues, isEditing = false, clientId }: Clien
           // Update existing client
           const result = await updateClient(clientId, data);
           
-          if (result.success) {
-            toast.success("Client updated successfully!");
-            router.push(`/dashboard/relations/${clientId}`);
-            router.refresh();
+          if (!result.success) {
+            // Handle validation errors
+            if (result.validationErrors) {
+              Object.entries(result.validationErrors).forEach(([field, message]) => {
+                form.setError(field as any, { message });
+              });
+            }
+            toast.error(result.error || TOAST_ERROR.CLIENT_UPDATE_FAILED);
+            return;
           }
+          
+          toast.success(TOAST_SUCCESS.CLIENT_UPDATED);
+          router.push(`/dashboard/relations/${clientId}`);
+          router.refresh();
         } else {
           // Create new client
           const result = await createClient(data);
           
-          if (result.success) {
-            toast.success("Client created successfully!");
-            router.push(`/dashboard/relations/${result.clientId}`);
-            router.refresh();
+          if (!result.success) {
+            // Handle validation errors
+            if (result.validationErrors) {
+              Object.entries(result.validationErrors).forEach(([field, message]) => {
+                form.setError(field as any, { message });
+              });
+            }
+            toast.error(result.error || TOAST_ERROR.CLIENT_CREATE_FAILED);
+            return;
           }
+          
+          toast.success(TOAST_SUCCESS.CLIENT_CREATED);
+          router.push(`/dashboard/relations/${result.data?.clientId}`);
+          router.refresh();
         }
       } catch (error) {
+        console.error("Form submission error:", error);
         toast.error(
-          error instanceof Error ? error.message : isEditing ? "Failed to update client" : "Failed to create client"
+          error instanceof Error ? error.message : isEditing ? TOAST_ERROR.CLIENT_UPDATE_FAILED : TOAST_ERROR.CLIENT_CREATE_FAILED
         );
       }
     });

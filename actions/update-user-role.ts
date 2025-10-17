@@ -17,6 +17,12 @@ import { UserRole } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import { userRoleSchema } from "@/lib/validations/user";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+} from "@/lib/action-response";
 
 export type FormData = {
   role: UserRole;
@@ -27,22 +33,23 @@ export type UpdateUserRoleResult = {
   message?: string;
 };
 
-export async function updateUserRole(userId: string, data: FormData): Promise<UpdateUserRoleResult> {
-  try {
-    const session = await auth();
+export async function updateUserRole(
+  userId: string,
+  data: FormData
+): Promise<ActionResponse> {
+  // Authentication
+  const session = await auth();
 
-    if (!session?.user || session?.user.id !== userId) {
-      throw new Error("Unauthorized");
-    }
-
-    // Users can no longer change their own roles
-    throw new Error("You cannot change your own role. Contact an organization owner to change your role.");
-
-  } catch (error) {
-    console.error("Error updating user role:", error);
-    return { 
-      status: "error",
-      message: error instanceof Error ? error.message : "Unknown error occurred"
-    };
+  if (!session?.user || session?.user.id !== userId) {
+    return createErrorResponse(
+      ErrorCode.UNAUTHORIZED,
+      "You are not authorized to update this user's role."
+    );
   }
+
+  // Users can no longer change their own roles
+  return createErrorResponse(
+    ErrorCode.FORBIDDEN,
+    "You cannot change your own role. Contact an organization owner to change your role."
+  );
 }

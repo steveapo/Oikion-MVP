@@ -5,6 +5,12 @@ import { auth } from "@/auth";
 
 import { stripe } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/utils";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+} from "@/lib/action-response";
 
 export type responseAction = {
   status: "success" | "error";
@@ -18,12 +24,14 @@ export async function openCustomerPortal(
 ): Promise<responseAction> {
   let redirectUrl: string = "";
 
-  try {
-    const session = await auth();
+  // Authentication
+  const session = await auth();
 
-    if (!session?.user || !session?.user.email) {
-      throw new Error("Unauthorized");
-    }
+  if (!session?.user || !session?.user.email) {
+    throw new Error("Unauthorized");
+  }
+
+  try {
 
     if (userStripeId) {
       const stripeSession = await stripe.billingPortal.sessions.create({

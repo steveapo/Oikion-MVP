@@ -1,8 +1,14 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/db";
 import { prismaForOrg } from "@/lib/org-prisma";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  zodErrorsToValidationErrors,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   clientFormSchema, 
@@ -39,25 +45,35 @@ async function createActivity(
 }
 
 // Create client action
-export async function createClient(data: ClientFormData) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function createClient(
+  data: ClientFormData
+): Promise<ActionResponse<{ clientId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create clients."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to create clients");
+  // Validation
+  const result = clientFormSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  const validatedData = clientFormSchema.parse(data);
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const client = await db.client.create({
       data: {
         clientType: validatedData.clientType,
@@ -67,16 +83,16 @@ export async function createClient(data: ClientFormData) {
         secondaryEmail: validatedData.secondaryEmail || null,
         secondaryPhone: validatedData.secondaryPhone || null,
         tags: validatedData.tags || [],
-        organizationId: session.user.organizationId,
-        createdBy: session.user.id,
+        organizationId: user.organizationId,
+        createdBy: user.id,
       },
     });
 
     await createActivity(
       ActionType.CLIENT_CREATED,
       client.id,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         clientType: validatedData.clientType,
         name: validatedData.name,
@@ -84,42 +100,59 @@ export async function createClient(data: ClientFormData) {
     );
 
     revalidatePath("/dashboard/relations");
-    return { success: true, clientId: client.id };
+    return createSuccessResponse({ clientId: client.id });
   } catch (error) {
     console.error("Failed to create client:", error);
-    throw new Error("Failed to create client");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create client. Please try again."
+    );
   }
 }
 
 // Update client action
-export async function updateClient(id: string, data: Partial<ClientFormData>) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+export async function updateClient(
+  id: string, 
+  data: Partial<ClientFormData>
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to update clients."
+    );
   }
 
-  if (!canCreateContent(session.user.role)) {
-    throw new Error("Insufficient permissions to update clients");
+  // Validation
+  const result = updateClientSchema.safeParse({ ...data, id });
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Please check the form for errors.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
-
-  const validatedData = updateClientSchema.parse({ ...data, id });
+  const validatedData = result.data;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const existingClient = await db.client.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!existingClient) {
-      throw new Error("Client not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Client not found or you don't have access."
+      );
     }
 
     const client = await db.client.update({
@@ -138,8 +171,8 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
     await createActivity(
       ActionType.CLIENT_UPDATED,
       client.id,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         updatedFields: Object.keys(data),
       }
@@ -147,41 +180,45 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
 
     revalidatePath("/dashboard/relations");
     revalidatePath(`/dashboard/relations/${id}`);
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to update client:", error);
-    throw new Error("Failed to update client");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to update client. Please try again."
+    );
   }
 }
 
 // Delete client action
-export async function deleteClient(id: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+export async function deleteClient(id: string): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const client = await db.client.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!client) {
-      throw new Error("Client not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Client not found or you don't have access."
+      );
     }
 
-    const isOwner = client.createdBy === session.user.id;
-    if (!canDeleteContent(session.user.role, isOwner)) {
-      throw new Error("Insufficient permissions to delete this client");
+    const isOwner = client.createdBy === user.id;
+    if (!canDeleteContent(user.role, isOwner)) {
+      return createErrorResponse(
+        ErrorCode.INSUFFICIENT_PERMISSIONS,
+        "You don't have permission to delete this client."
+      );
     }
 
     await db.client.delete({
@@ -189,30 +226,37 @@ export async function deleteClient(id: string) {
     });
 
     revalidatePath("/dashboard/relations");
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to delete client:", error);
-    throw new Error("Failed to delete client");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to delete client. Please try again."
+    );
   }
 }
 
 // Get clients with filters
 export async function getClients(filters: Partial<ClientFilters> = {}) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
+  // Validation
+  const result = clientFiltersSchema.safeParse(filters);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Invalid filter parameters.",
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
   }
-
-  const validatedFilters = clientFiltersSchema.parse(filters);
+  const validatedFilters = result.data;
 
   try {
     const where: any = {
-      organizationId: session.user.organizationId,
+      organizationId: user.organizationId,
     };
 
     if (validatedFilters.clientType) {
@@ -233,7 +277,7 @@ export async function getClients(filters: Partial<ClientFilters> = {}) {
       };
     }
 
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const [clients, totalCount] = await Promise.all([
       db.client.findMany({
         where,
@@ -269,28 +313,26 @@ export async function getClients(filters: Partial<ClientFilters> = {}) {
     };
   } catch (error) {
     console.error("Failed to get clients:", error);
-    throw new Error("Failed to get clients");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load clients. Please try again."
+    );
   }
 }
 
 // Get single client by ID
 export async function getClient(id: string) {
-  const session = await auth();
-  
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  if (!session.user.organizationId) {
-    throw new Error("User must belong to an organization");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const client = await db.client.findFirst({
       where: {
         id,
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       include: {
         creator: {
@@ -326,29 +368,34 @@ export async function getClient(id: string) {
     });
 
     if (!client) {
-      throw new Error("Client not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Client not found or you don't have access."
+      );
     }
 
     return client;
   } catch (error) {
     console.error("Failed to get client:", error);
-    throw new Error("Failed to get client");
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load client. Please try again."
+    );
   }
 }
 
 // Get all unique tags from organization clients
 export async function getClientTags() {
-  const session = await auth();
-  
-  if (!session?.user?.id || !session.user.organizationId) {
-    throw new Error("Unauthorized");
-  }
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
+    const db = prismaForOrg(user.organizationId);
     const clients = await db.client.findMany({
       where: {
-        organizationId: session.user.organizationId,
+        organizationId: user.organizationId,
       },
       select: {
         tags: true,
