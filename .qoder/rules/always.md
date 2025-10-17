@@ -107,3 +107,7 @@ Everything else: ignore unless promoted into `/docs/vendor`.
 ---
 
 **Remember**: Always use `prismaForOrg(session.user.organizationId)` for tenant data! 🔒
+
+
+**Working directory:**: 'cd /Users/stapo/Desktop/next-saas-stripe-starter-main'
+- DO NOT CD TO THE ROOT IF ALREADY IN ROOT
