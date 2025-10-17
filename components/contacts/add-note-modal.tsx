@@ -26,6 +26,7 @@ import {
 import { createNote } from "@/actions/interactions";
 import { noteFormSchema, type NoteFormData } from "@/lib/validations/note";
 import { toast } from "sonner";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 interface AddNoteModalProps {
   clientId?: string;
@@ -51,13 +52,27 @@ export function AddNoteModal({ clientId, propertyId, children }: AddNoteModalPro
     setIsSubmitting(true);
     
     try {
-      await createNote(data);
+      const result = await createNote(data);
+      
+      if (!result.success) {
+        // Handle validation errors
+        if (result.validationErrors) {
+          Object.entries(result.validationErrors).forEach(([field, message]) => {
+            form.setError(field as any, { message });
+          });
+        }
+        toast.error(result.error || TOAST_ERROR.NOTE_CREATE_FAILED);
+        setIsSubmitting(false);
+        return;
+      }
+      
       form.reset();
       setOpen(false);
-      toast.success("Note added successfully");
+      toast.success(TOAST_SUCCESS.NOTE_CREATED);
       router.refresh();
     } catch (error) {
-      toast.error("Failed to add note");
+      console.error("Form submission error:", error);
+      toast.error(TOAST_ERROR.NOTE_CREATE_FAILED);
     } finally {
       setIsSubmitting(false);
     }

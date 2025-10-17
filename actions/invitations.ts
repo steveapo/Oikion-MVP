@@ -1,7 +1,13 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
+import { requireAuth } from "@/lib/auth-utils";
+import { 
+  createSuccessResponse, 
+  createErrorResponse, 
+  ErrorCode,
+  type ActionResponse 
+} from "@/lib/action-response";
 import { canManageMembers } from "@/lib/roles";
 import { sendInvitationEmail } from "@/lib/email";
 import { UserRole, InvitationStatus } from "@prisma/client";
@@ -23,55 +29,61 @@ const tokenSchema = z.string().min(32, "Invalid token");
 export async function inviteUser(
   email: string,
   role: UserRole
-): Promise<{ success: boolean; error?: string; invitationId?: string }> {
+): Promise<ActionResponse<{ invitationId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Check permissions
+  if (!canManageMembers(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to invite users."
+    );
+  }
+
+  // Validate input
+  const validation = inviteUserSchema.safeParse({ email, role });
+  if (!validation.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      validation.error.errors[0].message
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Check permissions
-    if (!canManageMembers(session.user.role)) {
-      throw new Error("Insufficient permissions to invite users");
-    }
-
-    // Validate input
-    const validation = inviteUserSchema.safeParse({ email, role });
-    if (!validation.success) {
-      throw new Error(validation.error.errors[0].message);
-    }
-
     // Check if user already exists in the organization (via membership)
     const existingMembership = await prisma.organizationMember.findFirst({
       where: {
         user: {
           email: email.toLowerCase(),
         },
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
     });
 
     if (existingMembership) {
-      throw new Error("User is already a member of this organization");
+      return createErrorResponse(
+        ErrorCode.ALREADY_EXISTS,
+        "User is already a member of this organization."
+      );
     }
 
     // Check for pending invitation
     const pendingInvitation = await prisma.invitation.findFirst({
       where: {
         email: email.toLowerCase(),
-        organizationId: orgId,
+        organizationId: user.organizationId,
         status: InvitationStatus.PENDING,
       },
     });
 
     if (pendingInvitation) {
-      throw new Error("An invitation has already been sent to this email");
+      return createErrorResponse(
+        ErrorCode.ALREADY_EXISTS,
+        "An invitation has already been sent to this email."
+      );
     }
 
     // Generate secure token
@@ -85,8 +97,8 @@ export async function inviteUser(
         token,
         status: InvitationStatus.PENDING,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        organizationId: orgId,
-        invitedBy: session.user.id,
+        organizationId: user.organizationId,
+        invitedBy: user.id,
       },
       include: {
         organization: true,
@@ -116,18 +128,18 @@ export async function inviteUser(
         entityType: "USER",
         entityId: invitation.id,
         payload: { email, role },
-        organizationId: orgId,
-        actorId: session.user.id,
+        organizationId: user.organizationId,
+        actorId: user.id,
       },
     });
 
-    return { success: true, invitationId: invitation.id };
+    return createSuccessResponse({ invitationId: invitation.id });
   } catch (error) {
     console.error("Failed to invite user:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to invite user",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to invite user. Please try again."
+    );
   }
 }
 
@@ -138,14 +150,17 @@ export async function inviteUser(
 export async function acceptInvite(
   token: string,
   userId: string
-): Promise<{ success: boolean; error?: string; organizationId?: string }> {
-  try {
-    // Validate token
-    const validation = tokenSchema.safeParse(token);
-    if (!validation.success) {
-      throw new Error("Invalid invitation token");
-    }
+): Promise<ActionResponse<{ organizationId: string }>> {
+  // Validate token
+  const validation = tokenSchema.safeParse(token);
+  if (!validation.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      "Invalid invitation token."
+    );
+  }
 
+  try {
     // Find invitation
     const invitation = await prisma.invitation.findUnique({
       where: { token },
@@ -153,7 +168,10 @@ export async function acceptInvite(
     });
 
     if (!invitation) {
-      throw new Error("Invitation not found");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Invitation not found."
+      );
     }
 
     // Check if expired
@@ -162,12 +180,18 @@ export async function acceptInvite(
         where: { id: invitation.id },
         data: { status: InvitationStatus.EXPIRED },
       });
-      throw new Error("Invitation has expired");
+      return createErrorResponse(
+        ErrorCode.VALIDATION_ERROR,
+        "Invitation has expired."
+      );
     }
 
     // Check if already accepted
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new Error(`Invitation is ${invitation.status.toLowerCase()}`);
+      return createErrorResponse(
+        ErrorCode.CONFLICT,
+        `Invitation is ${invitation.status.toLowerCase()}.`
+      );
     }
 
     // Update user's current organization and role
@@ -206,13 +230,13 @@ export async function acceptInvite(
       },
     });
 
-    return { success: true, organizationId: invitation.organizationId };
+    return createSuccessResponse({ organizationId: invitation.organizationId });
   } catch (error) {
     console.error("Failed to accept invitation:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to accept invitation",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to accept invitation. Please try again."
+    );
   }
 }
 
@@ -221,38 +245,41 @@ export async function acceptInvite(
  */
 export async function cancelInvite(
   invitationId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Check permissions
+  if (!canManageMembers(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to cancel invitations."
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Check permissions
-    if (!canManageMembers(session.user.role)) {
-      throw new Error("Insufficient permissions to cancel invitations");
-    }
-
     // Find invitation
     const invitation = await prisma.invitation.findFirst({
       where: {
         id: invitationId,
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
     });
 
     if (!invitation) {
-      throw new Error("Invitation not found");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Invitation not found."
+      );
     }
 
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new Error("Can only cancel pending invitations");
+      return createErrorResponse(
+        ErrorCode.CONFLICT,
+        "Can only cancel pending invitations."
+      );
     }
 
     // Update status
@@ -261,13 +288,13 @@ export async function cancelInvite(
       data: { status: InvitationStatus.CANCELED },
     });
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to cancel invitation:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to cancel invitation",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to cancel invitation. Please try again."
+    );
   }
 }
 
@@ -276,29 +303,26 @@ export async function cancelInvite(
  */
 export async function resendInvite(
   invitationId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Check permissions
+  if (!canManageMembers(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to resend invitations."
+    );
+  }
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    // Check permissions
-    if (!canManageMembers(session.user.role)) {
-      throw new Error("Insufficient permissions to resend invitations");
-    }
-
     // Find invitation
     const invitation = await prisma.invitation.findFirst({
       where: {
         id: invitationId,
-        organizationId: orgId,
+        organizationId: user.organizationId,
       },
       include: {
         organization: true,
@@ -307,11 +331,17 @@ export async function resendInvite(
     });
 
     if (!invitation) {
-      throw new Error("Invitation not found");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Invitation not found."
+      );
     }
 
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new Error("Can only resend pending invitations");
+      return createErrorResponse(
+        ErrorCode.CONFLICT,
+        "Can only resend pending invitations."
+      );
     }
 
     // Extend expiration
@@ -334,25 +364,27 @@ export async function resendInvite(
       });
     } catch (emailError) {
       console.error("Failed to resend invitation email:", emailError);
-      throw new Error("Failed to send email. Please try again.");
+      return createErrorResponse(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        "Failed to send email. Please try again."
+      );
     }
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to resend invitation:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to resend invitation",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to resend invitation. Please try again."
+    );
   }
 }
 
 /**
  * Get all invitations for the current organization
  */
-export async function getInvitations(): Promise<{
-  success: boolean;
-  invitations?: Array<{
+export async function getInvitations(): Promise<ActionResponse<{
+  invitations: Array<{
     id: string;
     email: string;
     role: UserRole;
@@ -361,34 +393,27 @@ export async function getInvitations(): Promise<{
     createdAt: Date;
     inviter: { name: string | null; email: string | null };
   }>;
-  error?: string;
-}> {
+}>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    const orgId = session.user.organizationId;
-    if (!orgId) {
-      throw new Error("User must belong to an organization");
-    }
-
     const invitations = await prisma.invitation.findMany({
-      where: { organizationId: orgId },
+      where: { organizationId: user.organizationId },
       include: {
         inviter: { select: { name: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return { success: true, invitations };
+    return createSuccessResponse({ invitations });
   } catch (error) {
     console.error("Failed to get invitations:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to get invitations",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to load invitations. Please try again."
+    );
   }
 }

@@ -6,6 +6,15 @@ import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { revalidatePath } from "next/cache";
 import { PropertyRelationType, ActionType, EntityType } from "@prisma/client";
 import * as z from "zod";
+import {
+  ActionResponse,
+  createSuccessResponse,
+  createErrorResponse,
+  ErrorCode,
+  zodErrorsToValidationErrors,
+} from "@/lib/action-response";
+import { requireAuth } from "@/lib/auth-utils";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 // Validation schema for property relationship
 const propertyRelationshipSchema = z.object({
@@ -46,30 +55,41 @@ async function createActivity(
 /**
  * Create a relationship between a property and a client
  */
-export async function createPropertyRelationship(data: PropertyRelationshipData) {
+export async function createPropertyRelationship(
+  data: PropertyRelationshipData
+): Promise<ActionResponse<{ relationshipId: string }>> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
+  // Permission check
+  if (!canCreateContent(user.role)) {
+    return createErrorResponse(
+      ErrorCode.INSUFFICIENT_PERMISSIONS,
+      "You don't have permission to create relationships."
+    );
+  }
+
+  // Validation
+  const result = propertyRelationshipSchema.safeParse(data);
+  if (!result.success) {
+    return createErrorResponse(
+      ErrorCode.VALIDATION_ERROR,
+      TOAST_ERROR.VALIDATION_FAILED,
+      { validationErrors: zodErrorsToValidationErrors(result.error) }
+    );
+  }
+  const validatedData = result.data;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    if (!canCreateContent(session.user.role)) {
-      throw new Error("Insufficient permissions to create relationships");
-    }
-
-    if (!session.user.organizationId) {
-      throw new Error("User must belong to an organization");
-    }
-
-    const validatedData = propertyRelationshipSchema.parse(data);
 
     // Validate that both property and client exist and belong to the user's organization
     const [property, client] = await Promise.all([
-      prismaForOrg(session.user.organizationId).property.findFirst({
+      prismaForOrg(user.organizationId).property.findFirst({
         where: {
           id: validatedData.propertyId,
-          organizationId: session.user.organizationId,
+          organizationId: user.organizationId,
         },
         include: {
           address: {
@@ -77,26 +97,29 @@ export async function createPropertyRelationship(data: PropertyRelationshipData)
           },
         },
       }),
-      prismaForOrg(session.user.organizationId).client.findFirst({
+      prismaForOrg(user.organizationId).client.findFirst({
         where: {
           id: validatedData.clientId,
-          organizationId: session.user.organizationId,
+          organizationId: user.organizationId,
         },
       }),
     ]);
 
     if (!property || !client) {
-      throw new Error("Property or client not found or access denied");
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Property or client not found or access denied."
+      );
     }
 
     // Create the relationship
-    const relationship = await prismaForOrg(session.user.organizationId).propertyRelationship.create({
+    const relationship = await prismaForOrg(user.organizationId).propertyRelationship.create({
       data: {
         propertyId: validatedData.propertyId,
         clientId: validatedData.clientId,
         relationshipType: validatedData.relationshipType,
         notes: validatedData.notes || null,
-        createdBy: session.user.id,
+        createdBy: user.id,
       },
     });
 
@@ -104,8 +127,8 @@ export async function createPropertyRelationship(data: PropertyRelationshipData)
     await createActivity(
       ActionType.PROPERTY_RELATIONSHIP_CREATED,
       validatedData.propertyId,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         propertyId: validatedData.propertyId,
         propertyAddress: `${property.address?.city || ""}, ${property.address?.region || ""}`.trim(),
@@ -120,33 +143,31 @@ export async function createPropertyRelationship(data: PropertyRelationshipData)
     revalidatePath(`/dashboard/properties/${validatedData.propertyId}`);
     revalidatePath(`/dashboard/relations/${validatedData.clientId}`);
 
-    return { success: true, relationshipId: relationship.id };
+    return createSuccessResponse({ relationshipId: relationship.id });
   } catch (error) {
     console.error("Failed to create property relationship:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to create relationship",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to create relationship. Please try again."
+    );
   }
 }
 
 /**
  * Delete a property relationship
  */
-export async function deletePropertyRelationship(relationshipId: string) {
+export async function deletePropertyRelationship(
+  relationshipId: string
+): Promise<ActionResponse> {
+  // Authentication
+  const authResult = await requireAuth();
+  if (!authResult.success) return authResult.error;
+  const { user } = authResult;
+
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      throw new Error("Unauthorized");
-    }
-
-    if (!session.user.organizationId) {
-      throw new Error("User must belong to an organization");
-    }
 
     // Get the relationship to verify ownership
-    const relationship = await prismaForOrg(session.user.organizationId).propertyRelationship.findFirst({
+    const relationship = await prismaForOrg(user.organizationId).propertyRelationship.findFirst({
       where: {
         id: relationshipId,
       },
@@ -167,22 +188,28 @@ export async function deletePropertyRelationship(relationshipId: string) {
       },
     });
 
-    if (!relationship || relationship.property.organizationId !== session.user.organizationId) {
-      throw new Error("Relationship not found or access denied");
+    if (!relationship || relationship.property.organizationId !== user.organizationId) {
+      return createErrorResponse(
+        ErrorCode.NOT_FOUND,
+        "Relationship not found or access denied."
+      );
     }
 
     // Check permissions
-    const canDelete = canDeleteContent(session.user.role, relationship.createdBy === session.user.id);
+    const canDelete = canDeleteContent(user.role, relationship.createdBy === user.id);
     if (!canDelete) {
-      throw new Error("Insufficient permissions to delete this relationship");
+      return createErrorResponse(
+        ErrorCode.INSUFFICIENT_PERMISSIONS,
+        "You don't have permission to delete this relationship."
+      );
     }
 
     // Log activity before deletion
     await createActivity(
       ActionType.PROPERTY_RELATIONSHIP_DELETED,
       relationship.propertyId,
-      session.user.id,
-      session.user.organizationId,
+      user.id,
+      user.organizationId,
       {
         propertyId: relationship.propertyId,
         propertyAddress: `${relationship.property.address?.city || ""}, ${relationship.property.address?.region || ""}`.trim(),
@@ -193,7 +220,7 @@ export async function deletePropertyRelationship(relationshipId: string) {
       }
     );
 
-    await prismaForOrg(session.user.organizationId).propertyRelationship.delete({
+    await prismaForOrg(user.organizationId).propertyRelationship.delete({
       where: { id: relationshipId },
     });
 
@@ -201,13 +228,13 @@ export async function deletePropertyRelationship(relationshipId: string) {
     revalidatePath(`/dashboard/properties/${relationship.propertyId}`);
     revalidatePath(`/dashboard/relations/${relationship.clientId}`);
 
-    return { success: true };
+    return createSuccessResponse();
   } catch (error) {
     console.error("Failed to delete property relationship:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to delete relationship",
-    };
+    return createErrorResponse(
+      ErrorCode.DATABASE_ERROR,
+      "Failed to delete relationship. Please try again."
+    );
   }
 }
 

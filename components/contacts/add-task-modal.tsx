@@ -35,6 +35,7 @@ import { createTask, getOrganizationMembers } from "@/actions/interactions";
 import { taskFormSchema, type TaskFormData } from "@/lib/validations/task";
 import { TaskStatus } from "@prisma/client";
 import { toast } from "sonner";
+import { TOAST_SUCCESS, TOAST_ERROR } from "@/lib/toast-messages";
 
 interface AddTaskModalProps {
   clientId?: string;
@@ -84,13 +85,27 @@ export function AddTaskModal({ clientId, propertyId, children }: AddTaskModalPro
     setIsSubmitting(true);
     
     try {
-      await createTask(data);
+      const result = await createTask(data);
+      
+      if (!result.success) {
+        // Handle validation errors
+        if (result.validationErrors) {
+          Object.entries(result.validationErrors).forEach(([field, message]) => {
+            form.setError(field as any, { message });
+          });
+        }
+        toast.error(result.error || TOAST_ERROR.TASK_CREATE_FAILED);
+        setIsSubmitting(false);
+        return;
+      }
+      
       form.reset();
       setOpen(false);
-      toast.success("Task created successfully");
+      toast.success(TOAST_SUCCESS.TASK_CREATED);
       router.refresh();
     } catch (error) {
-      toast.error("Failed to create task");
+      console.error("Form submission error:", error);
+      toast.error(TOAST_ERROR.TASK_CREATE_FAILED);
     } finally {
       setIsSubmitting(false);
     }

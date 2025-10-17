@@ -2,8 +2,16 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { env } from "@/env.mjs";
+import { strictRateLimit, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
+  // Apply strict rate limiting (5 attempts per minute)
+  const rateLimitResult = await strictRateLimit.check(req, 5);
+  
+  if (!rateLimitResult.success) {
+    return rateLimitResponse(rateLimitResult);
+  }
+
   try {
     const { password } = await req.json();
 
