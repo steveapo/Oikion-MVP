@@ -188,12 +188,63 @@ export const {
         return null;
       }
 
+      // Ensure the user is always assigned to a valid organization.
+      // If user's current organization no longer exists (or is null),
+      // fallback to their personal workspace (create if missing).
+      let effectiveOrgId = dbUser.organizationId ?? undefined;
+      let effectiveOrgName = dbUser.organization?.name;
+
+      if (!effectiveOrgId || !dbUser.organization) {
+        // Try to find an existing personal workspace membership
+        const existingPersonal = await prisma.organizationMember.findFirst({
+          where: { userId: token.sub, organization: { isPersonal: true } },
+          include: { organization: true },
+        });
+
+        if (existingPersonal?.organization) {
+          effectiveOrgId = existingPersonal.organization.id;
+          effectiveOrgName = existingPersonal.organization.name;
+
+          await prisma.user.update({
+            where: { id: token.sub },
+            data: {
+              organizationId: effectiveOrgId,
+              role: existingPersonal.role ?? dbUser.role ?? UserRole.ORG_OWNER,
+            },
+          });
+        } else {
+          // Create a new personal workspace for the user
+          const personalOrg = await prisma.organization.create({
+            data: { name: "Private Workspace", isPersonal: true, plan: "FREE" },
+          });
+
+          await prisma.organizationMember.create({
+            data: {
+              userId: token.sub,
+              organizationId: personalOrg.id,
+              role: UserRole.ORG_OWNER,
+            },
+          });
+
+          await prisma.user.update({
+            where: { id: token.sub },
+            data: {
+              organizationId: personalOrg.id,
+              role: UserRole.ORG_OWNER,
+            },
+          });
+
+          effectiveOrgId = personalOrg.id;
+          effectiveOrgName = personalOrg.name;
+        }
+      }
+
       token.name = dbUser.name;
       token.email = dbUser.email;
       token.picture = dbUser.image;
       token.role = dbUser.role;
-      token.organizationId = dbUser.organizationId || undefined;
-      token.organizationName = dbUser.organization?.name;
+      token.organizationId = effectiveOrgId;
+      token.organizationName = effectiveOrgName;
 
       return token;
     },
