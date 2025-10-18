@@ -1,7 +1,11 @@
 {
   "header": {
     "title": "Properties",
-    "description": "Manage your property listings"
+    "description": "Manage your property listings and MLS data."
+  },
+  "actions": {
+    "add": "Add Property",
+    "addFirst": "Add Your First Property"
   },
   "filters": {
     "status": "Status",
@@ -21,7 +25,28 @@
   },
   "empty": {
     "title": "No properties found",
-    "description": "Create your first property listing to get started.",
-    "button": "Add Property"
+    "description": "You haven't created any properties yet. Start by adding your first property.",
+    "descriptionFiltered": "Try adjusting your filters to see more results."
+  },
+  "subscription": {
+    "title": "Subscribe to manage properties",
+    "description": "Start managing your property inventory with a subscription. Access full MLS functionality, property tracking, and more.",
+    "action": "View Subscription Plans",
+    "demoTitle": "Demo Properties",
+    "demoDescription": "Here's what your property list will look like:",
+    "demoProperty1": {
+      "title": "Modern Apartment in Kolonaki",
+      "location": "Athens, Attica",
+      "details": "2 bed, 1 bath • 85m²",
+      "price": "€320,000",
+      "status": "Available"
+    },
+    "demoProperty2": {
+      "title": "Villa with Sea View",
+      "location": "Mykonos",
+      "details": "4 bed, 3 bath • 220m²",
+      "price": "€1,250,000",
+      "status": "Under Offer"
+    }
   }
 }

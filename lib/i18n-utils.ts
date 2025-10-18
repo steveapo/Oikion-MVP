@@ -5,7 +5,7 @@
  * and language switching throughout the application.
  */
 
-import { locales, type Locale } from '@/i18n';
+import { locales, type Locale, localeNames, localeFlags } from '@/i18n/config';
 
 export type { Locale };
 export { locales };
@@ -28,24 +28,14 @@ export function getDefaultLocale(): Locale {
  * Get locale display name
  */
 export function getLocaleDisplayName(locale: Locale): string {
-  const displayNames: Record<Locale, string> = {
-    en: 'English',
-    el: 'Ελληνικά'
-  };
-  
-  return displayNames[locale];
+  return localeNames[locale];
 }
 
 /**
  * Get locale flag emoji
  */
 export function getLocaleFlag(locale: Locale): string {
-  const flags: Record<Locale, string> = {
-    en: '🇬🇧',
-    el: '🇬🇷'
-  };
-  
-  return flags[locale];
+  return localeFlags[locale];
 }
 
 /**

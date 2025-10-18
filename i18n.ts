@@ -1,9 +1,19 @@
+/**
+ * @deprecated This file is deprecated. Please import from the new locations:
+ * - Request configuration: @/i18n/request.ts
+ * - Shared config (locales, types): @/i18n/config.ts
+ * - Navigation (Link, useRouter, etc): @/i18n/navigation.ts
+ * 
+ * This file is kept for backward compatibility only.
+ */
+
 import { notFound } from 'next/navigation';
 import { getRequestConfig } from 'next-intl/server';
 
 // Can be imported from a shared config
 export const locales = ['en', 'el'] as const;
 export type Locale = (typeof locales)[number];
+export const defaultLocale: Locale = 'en';
 
 export default getRequestConfig(async ({ locale }) => {
   // Validate that the incoming `locale` parameter is valid
@@ -25,6 +35,8 @@ export default getRequestConfig(async ({ locale }) => {
   };
 
   return {
-    messages
+    messages,
+    timeZone: 'Europe/Athens', // Default timezone for Greece
+    now: new Date(),
   };
 });

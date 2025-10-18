@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import createIntlMiddleware from 'next-intl/middleware';
-import { locales } from './i18n';
+import { locales } from './i18n/config';
 
 /**
  * Edge Runtime middleware uses the minimal auth.config.ts

@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { LayoutDashboard, Lock, LogOut, Settings } from "lucide-react";
+import { useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
+import { LayoutDashboard, Lock, LogOut, Settings, Globe, Check, Loader2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
 import { Drawer } from "vaul";
+import { toast } from "sonner";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
 import {
@@ -13,12 +16,21 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { updateUserLocale } from "@/actions/locale";
+import { locales, getLocaleDisplayName, getLocaleFlag } from "@/lib/i18n-utils";
 
 export function UserAccountNav() {
   const { data: session } = useSession();
   const user = session?.user;
+  const router = useRouter();
+  const pathname = usePathname();
+  const currentLocale = useLocale();
+  const [isPending, startTransition] = useTransition();
 
   const [open, setOpen] = useState(false);
   const closeDrawer = () => {
@@ -26,6 +38,31 @@ export function UserAccountNav() {
   };
 
   const { isMobile } = useMediaQuery();
+
+  const handleLocaleChange = (newLocale: string) => {
+    if (newLocale === currentLocale) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        // Update user preference in database
+        const result = await updateUserLocale(newLocale, pathname);
+
+        if (!result.success) {
+          toast.error("Failed to change language");
+          return;
+        }
+
+        setOpen(false);
+        // Use router.replace with locale parameter for proper locale routing
+        router.replace(pathname, { locale: newLocale });
+      } catch (error) {
+        console.error("Failed to change language:", error);
+        toast.error("Failed to change language");
+      }
+    });
+  };
 
   if (!user)
     return (
@@ -98,6 +135,35 @@ export function UserAccountNav() {
                 </Link>
               </li>
 
+              <li className="my-1">
+                <div className="px-2.5 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Language
+                </div>
+              </li>
+              {locales.map((locale) => (
+                <li
+                  key={locale}
+                  className="rounded-lg text-foreground hover:bg-muted"
+                  onClick={() => handleLocaleChange(locale)}
+                >
+                  <div className="flex w-full items-center justify-between gap-3 px-2.5 py-2">
+                    <div className="flex items-center gap-3">
+                      {isPending && locale === currentLocale ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <span className="text-base">{getLocaleFlag(locale)}</span>
+                      )}
+                      <p className="text-sm">{getLocaleDisplayName(locale)}</p>
+                    </div>
+                    {currentLocale === locale && !isPending && (
+                      <Check className="size-4" />
+                    )}
+                  </div>
+                </li>
+              ))}
+
+              <li className="my-1 h-px bg-border" />
+
               <li
                 className="rounded-lg text-foreground hover:bg-muted"
                 onClick={(event) => {
@@ -166,6 +232,37 @@ export function UserAccountNav() {
             <p className="text-sm">Settings</p>
           </Link>
         </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center space-x-2.5">
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Globe className="size-4" />
+            )}
+            <p className="text-sm">Language</p>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            {locales.map((locale) => (
+              <DropdownMenuItem
+                key={locale}
+                onClick={() => handleLocaleChange(locale)}
+                className="flex items-center justify-between cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="text-base">{getLocaleFlag(locale)}</span>
+                  <span>{getLocaleDisplayName(locale)}</span>
+                </span>
+                {currentLocale === locale && (
+                  <Check className="ml-2 size-4" />
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="cursor-pointer"

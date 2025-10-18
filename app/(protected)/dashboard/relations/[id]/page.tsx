@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { redirect } from "next/navigation";
-import Link from "next/link";
+import { redirect } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { Edit, Mail, Phone, Tag, Trash2 } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";

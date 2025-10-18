@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/session";
 import { canCreateContent } from "@/lib/roles";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { constructMetadata } from "@/lib/utils";
 import { PropertyForm } from "@/components/properties/property-form";
 

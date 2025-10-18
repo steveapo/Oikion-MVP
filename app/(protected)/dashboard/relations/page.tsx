@@ -1,7 +1,8 @@
 import { Suspense } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
 import { ClientType } from "@prisma/client";
+import { getTranslations } from 'next-intl/server';
 
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -14,10 +15,14 @@ import { ContactsFilters } from "@/components/relations/contacts-filters";
 import { ContactsList } from "@/components/relations/contacts-list";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
-export const metadata = constructMetadata({
-  title: "Relations - Oikion",
-  description: "Manage your business relationships and network.",
-});
+export async function generateMetadata() {
+  const t = await getTranslations('relations');
+  
+  return constructMetadata({
+    title: `${t('header.title')} - Oikion`,
+    description: t('header.description'),
+  });
+}
 
 interface ContactsPageProps {
   searchParams: {
@@ -30,52 +35,46 @@ interface ContactsPageProps {
 
 async function ContactsContent({ searchParams }: ContactsPageProps) {
   const user = await getCurrentUser();
+  const t = await getTranslations('relations');
   
   if (!user?.id) {
     return null;
   }
 
   const subscriptionPlan = await getUserSubscriptionPlan(user.id);
-  
-  // Check if user has role-based access to contacts
-  // ORG_OWNER, ADMIN, and AGENT can access contacts regardless of subscription status
-  // VIEWER can only view if subscribed
   const hasRoleAccess = canCreateContent(user.role);
   
-  // If not subscribed and doesn't have role access, show limited view
   if (!subscriptionPlan.isPaid && !hasRoleAccess) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading="Relations"
-          text="Manage your business relationships and network."
+          heading={t('header.title')}
+          text={t('header.description')}
         >
           {canCreateContent(user.role) && (
             <Button disabled>
               <Plus className="mr-2 h-4 w-4" />
-              Add Relation
+              {t('actions.add')}
             </Button>
           )}
         </DashboardHeader>
 
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="users" />
-          <EmptyPlaceholder.Title>Subscribe to manage relations</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t('subscription.title')}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            Start managing your business relationships with a subscription.
-            Track interactions, notes, tasks, and more.
+            {t('subscription.description')}
           </EmptyPlaceholder.Description>
           <Link href="/dashboard/billing">
-            <Button>View Subscription Plans</Button>
+            <Button>{t('subscription.action')}</Button>
           </Link>
         </EmptyPlaceholder>
 
-        {/* Demo contacts for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
           <div className="mx-auto max-w-md text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">Demo Relations</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">{t('subscription.demoTitle')}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Here's what your relation list will look like:
+              {t('subscription.demoDescription')}
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded border bg-muted/50 p-3 text-left">
@@ -93,8 +92,8 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
                     </div>
                   </div>
                   <div className="text-right text-sm text-muted-foreground">
-                    <p>Last contact: 2 days ago</p>
-                    <p>5 interactions</p>
+                    <p>{t('subscription.lastContact', { time: '2 days ago' })}</p>
+                    <p>{t('subscription.interactions', { count: 5 })}</p>
                   </div>
                 </div>
               </div>
@@ -110,8 +109,8 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
                     </div>
                   </div>
                   <div className="text-right text-sm text-muted-foreground">
-                    <p>Last contact: 1 week ago</p>
-                    <p>12 interactions</p>
+                    <p>{t('subscription.lastContact', { time: '1 week ago' })}</p>
+                    <p>{t('subscription.interactions', { count: 12 })}</p>
                   </div>
                 </div>
               </div>
@@ -122,7 +121,6 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
     );
   }
 
-  // Parse search params for filters
   const filters = {
     clientType: searchParams.clientType as ClientType | undefined,
     search: searchParams.search,
@@ -136,14 +134,14 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading="Relations"
-        text="Manage your business relationships and network."
+        heading={t('header.title')}
+        text={t('header.description')}
       >
         {canCreateContent(user.role) && (
           <Link href="/dashboard/relations/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Relation
+              {t('actions.add')}
             </Button>
           </Link>
         )}
@@ -154,18 +152,18 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
       {contactsData.clients.length === 0 ? (
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="users" />
-          <EmptyPlaceholder.Title>No relations found</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t('empty.title')}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {Object.keys(filters).some(key => filters[key as keyof typeof filters])
-              ? "Try adjusting your filters to see more results."
-              : "You haven't added any relations yet. Start by adding your first person or company."
+              ? t('empty.descriptionFiltered')
+              : t('empty.description')
             }
           </EmptyPlaceholder.Description>
           {canCreateContent(user.role) && !Object.keys(filters).some(key => filters[key as keyof typeof filters]) && (
             <Link href="/dashboard/relations/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Your First Relation
+                {t('actions.addFirst')}
               </Button>
             </Link>
           )}
@@ -183,9 +181,11 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
   );
 }
 
-export default function ContactsPage({ searchParams }: ContactsPageProps) {
+export default async function ContactsPage({ searchParams }: ContactsPageProps) {
+  const t = await getTranslations('relations');
+  
   return (
-    <Suspense fallback={<div>Loading relations...</div>}>
+    <Suspense fallback={<div>{t('loading')}</div>}>
       <ContactsContent searchParams={searchParams} />
     </Suspense>
   );

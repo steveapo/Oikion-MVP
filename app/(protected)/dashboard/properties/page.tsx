@@ -1,6 +1,7 @@
 import { Suspense } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
+import { getTranslations } from 'next-intl/server';
 
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -15,10 +16,14 @@ import { PropertiesListServer } from "@/components/properties/properties-list-se
 import { PropertyListSkeleton } from "@/components/properties/property-card-skeleton";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
-export const metadata = constructMetadata({
-  title: "Properties - Oikion",
-  description: "Manage your property listings and MLS data.",
-});
+export async function generateMetadata() {
+  const t = await getTranslations('properties');
+  
+  return constructMetadata({
+    title: `${t('header.title')} - Oikion`,
+    description: t('header.description'),
+  });
+}
 
 interface PropertiesPageProps {
   searchParams: {
@@ -35,6 +40,7 @@ interface PropertiesPageProps {
 
 async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   const user = await getCurrentUser();
+  const t = await getTranslations('properties');
   
   if (!user) {
     return null;
@@ -56,47 +62,46 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading="Properties"
-          text="Manage your property listings and MLS data."
+          heading={t('header.title')}
+          text={t('header.description')}
         >
           {canCreateContent(user.role) && (
             <Button disabled>
               <Plus className="mr-2 h-4 w-4" />
-              Add Property
+              {t('actions.add')}
             </Button>
           )}
         </DashboardHeader>
 
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="home" />
-          <EmptyPlaceholder.Title>Subscribe to manage properties</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t('subscription.title')}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            Start managing your property inventory with a subscription.
-            Access full MLS functionality, property tracking, and more.
+            {t('subscription.description')}
           </EmptyPlaceholder.Description>
           <Link href="/dashboard/billing">
-            <Button>View Subscription Plans</Button>
+            <Button>{t('subscription.action')}</Button>
           </Link>
         </EmptyPlaceholder>
 
         {/* Demo properties for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
           <div className="mx-auto max-w-md text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">Demo Properties</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">{t('subscription.demoTitle')}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Here's what your property list will look like:
+              {t('subscription.demoDescription')}
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded border bg-muted/50 p-3 text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Modern Apartment in Kolonaki</h4>
-                    <p className="text-sm text-muted-foreground">Athens, Attica • 2 bed, 1 bath • 85m²</p>
+                    <h4 className="font-medium">{t('subscription.demoProperty1.title')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('subscription.demoProperty1.location')} • {t('subscription.demoProperty1.details')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">€320,000</p>
+                    <p className="font-semibold">{t('subscription.demoProperty1.price')}</p>
                     <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800">
-                      Available
+                      {t('subscription.demoProperty1.status')}
                     </span>
                   </div>
                 </div>
@@ -104,13 +109,13 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
               <div className="rounded border bg-muted/50 p-3 text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">Villa with Sea View</h4>
-                    <p className="text-sm text-muted-foreground">Mykonos • 4 bed, 3 bath • 220m²</p>
+                    <h4 className="font-medium">{t('subscription.demoProperty2.title')}</h4>
+                    <p className="text-sm text-muted-foreground">{t('subscription.demoProperty2.location')} • {t('subscription.demoProperty2.details')}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold">€1,250,000</p>
+                    <p className="font-semibold">{t('subscription.demoProperty2.price')}</p>
                     <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                      Under Offer  
+                      {t('subscription.demoProperty2.status')}
                     </span>
                   </div>
                 </div>
@@ -139,14 +144,14 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading="Properties"
-        text="Manage your property listings and MLS data."
+        heading={t('header.title')}
+        text={t('header.description')}
       >
         {canCreateContent(user.role) && (
           <Link href="/dashboard/properties/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add Property
+              {t('actions.add')}
             </Button>
           </Link>
         )}
@@ -157,18 +162,18 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
       {propertiesData.properties.length === 0 ? (
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="home" />
-          <EmptyPlaceholder.Title>No properties found</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t('empty.title')}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {Object.keys(filters).some(key => filters[key as keyof typeof filters])
-              ? "Try adjusting your filters to see more results."
-              : "You haven't created any properties yet. Start by adding your first property."
+              ? t('empty.descriptionFiltered')
+              : t('empty.description')
             }
           </EmptyPlaceholder.Description>
           {canCreateContent(user.role) && !Object.keys(filters).some(key => filters[key as keyof typeof filters]) && (
             <Link href="/dashboard/properties/new">
               <Button>
                 <Plus className="mr-2 h-4 w-4" />
-                Add Your First Property
+                {t('actions.addFirst')}
               </Button>
             </Link>
           )}

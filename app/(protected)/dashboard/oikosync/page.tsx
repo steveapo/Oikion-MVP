@@ -9,7 +9,7 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { ActivityFilters } from "@/components/oikosync/activity-filters";
 import { ActivityFeed } from "@/components/oikosync/activity-feed";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 
 export const metadata = constructMetadata({

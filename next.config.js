@@ -1,6 +1,6 @@
 const { withContentlayer } = require("next-contentlayer2");
 const FixContentlayerTypesPlugin = require("./lib/fix-contentlayer-types-plugin");
-const withNextIntl = require('next-intl/plugin')();
+const withNextIntl = require('next-intl/plugin')('./i18n/request.ts');
 
 import("./env.mjs");
 

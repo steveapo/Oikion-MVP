@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { MoreHorizontal, Edit, Trash2, Eye, User, Building, Phone, Mail } from "lucide-react";
 import { UserRole, ClientType } from "@prisma/client";
 import { formatDistanceToNow } from "date-fns";

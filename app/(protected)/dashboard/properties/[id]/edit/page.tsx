@@ -1,4 +1,5 @@
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
+import { notFound } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { getProperty } from "@/actions/properties";

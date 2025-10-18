@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, List } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { Drawer } from "vaul";

@@ -8,7 +8,7 @@
  */
 
 import { useState, useTransition } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { Check, Globe, Loader2 } from "lucide-react";
 import {
@@ -45,25 +45,9 @@ export function LanguageSwitcher() {
           return;
         }
 
-        // Update URL to reflect new locale
-        // Remove current locale prefix if it exists
-        let newPathname = pathname;
-        
-        for (const locale of locales) {
-          if (pathname.startsWith(`/${locale}`)) {
-            newPathname = pathname.slice(`/${locale}`.length) || '/';
-            break;
-          }
-        }
-
-        // Add new locale prefix (unless it's the default 'en')
-        if (newLocale !== 'en') {
-          newPathname = `/${newLocale}${newPathname}`;
-        }
-
         setIsOpen(false);
-        router.push(newPathname);
-        router.refresh();
+        // Use locale-aware router with locale parameter
+        router.replace(pathname, { locale: newLocale });
       } catch (error) {
         console.error("Failed to change language:", error);
         toast.error("Failed to change language");

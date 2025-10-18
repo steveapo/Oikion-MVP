@@ -7,7 +7,7 @@
  */
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { isValidLocale, type Locale } from "@/lib/i18n-utils";
