@@ -288,7 +288,11 @@ export async function switchOrganization(
  * 
  * Personal organizations cannot be deleted.
  */
-export async function deleteOrganization(): Promise<{ success: boolean; error?: string }> {
+export async function deleteOrganization(): Promise<{ 
+  success: boolean; 
+  personalWorkspaceId?: string;
+  error?: string;
+}> {
   try {
     const session = await auth();
 
@@ -354,7 +358,10 @@ export async function deleteOrganization(): Promise<{ success: boolean; error?: 
 
     revalidatePath("/dashboard");
 
-    return { success: true };
+    return { 
+      success: true,
+      personalWorkspaceId: personalWorkspace.organization.id,
+    };
   } catch (error) {
     console.error("Failed to delete organization:", error);
     return {

@@ -6,14 +6,13 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { deleteOrganization } from "@/actions/organizations";
-import { getUserOrganizations, getCurrentOrganization } from "@/actions/organizations";
 
 function DeleteOrganizationModal({
   showDeleteOrganizationModal,
@@ -23,7 +22,7 @@ function DeleteOrganizationModal({
   setShowDeleteOrganizationModal: Dispatch<SetStateAction<boolean>>;
 }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, update: updateSession } = useSession();
   const [deleting, setDeleting] = useState(false);
 
   async function handleDeleteOrganization() {
@@ -33,26 +32,32 @@ function DeleteOrganizationModal({
     try {
       const result = await deleteOrganization();
 
-      if (result.success) {
+      if (result.success && result.personalWorkspaceId) {
+        console.log('[DELETE ORG] Successfully deleted, switched to Personal workspace:', result.personalWorkspaceId);
+        
         toast.success("Organization deleted successfully", { id: "org-delete" });
         
         // Close the modal
         setShowDeleteOrganizationModal(false);
         
-        // Wait a moment for the backend to update
+        // Force session refresh to get updated organization
+        console.log('[DELETE ORG] Updating session...');
+        await updateSession();
+        
+        // Wait for session to fully update
         await new Promise((resolve) => setTimeout(resolve, 500));
         
-        // Navigate to dashboard (will be in personal workspace)
-        router.push("/dashboard");
-        router.refresh();
+        console.log('[DELETE ORG] Reloading to dashboard...');
         
-        // Force reload to ensure all state is fresh
+        // Force a hard reload to ensure all state is completely fresh
+        // This ensures the org switcher and all components see the new Personal workspace
         window.location.href = "/dashboard";
       } else {
         toast.error(result.error || "Failed to delete organization", { id: "org-delete" });
         setDeleting(false);
       }
     } catch (error) {
+      console.error('[DELETE ORG] Error:', error);
       toast.error("Failed to delete organization", { id: "org-delete" });
       setDeleting(false);
     }
