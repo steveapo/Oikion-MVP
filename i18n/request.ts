@@ -1,10 +1,15 @@
 import { notFound } from 'next/navigation';
 import { getRequestConfig } from 'next-intl/server';
 
-export default getRequestConfig(async ({ locale }) => {
-  // Validate that the incoming `locale` parameter is valid
+export default getRequestConfig(async ({ requestLocale }) => {
+  // Wait for the locale from the middleware
+  let locale = await requestLocale;
+  
+  // Validate that the incoming locale is valid
   const locales = ['en', 'el'];
-  if (!locales.includes(locale)) notFound();
+  if (!locale || !locales.includes(locale)) {
+    locale = 'en'; // Fallback to default
+  }
 
   // Load all message files for the locale
   const messages = {
@@ -22,6 +27,7 @@ export default getRequestConfig(async ({ locale }) => {
   };
 
   return {
+    locale,  // CRITICAL: Must return locale
     messages,
     timeZone: 'Europe/Athens', // Default timezone for Greece
     now: new Date(),
