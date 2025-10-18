@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { prismaForOrg } from "@/lib/org-prisma";
+import { prismaForOrg, withOrgContext } from "@/lib/org-prisma";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   clientFormSchema, 
@@ -12,7 +12,7 @@ import {
   type ClientFilters 
 } from "@/lib/validations/client";
 import { ActionType, EntityType } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 // Helper function to create activity log
 async function createActivity(
@@ -83,7 +83,8 @@ export async function createClient(data: ClientFormData) {
       }
     );
 
-    revalidatePath("/dashboard/relations");
+    revalidateTag("clients:list");
+    revalidateTag("activities:feed");
     return { success: true, clientId: client.id };
   } catch (error) {
     console.error("Failed to create client:", error);
@@ -145,8 +146,9 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
       }
     );
 
-    revalidatePath("/dashboard/relations");
-    revalidatePath(`/dashboard/relations/${id}`);
+    revalidateTag("clients:list");
+    revalidateTag(`clients:detail:${id}`);
+    revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
     console.error("Failed to update client:", error);
@@ -188,7 +190,8 @@ export async function deleteClient(id: string) {
       where: { id },
     });
 
-    revalidatePath("/dashboard/relations");
+    revalidateTag("clients:list");
+    revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
     console.error("Failed to delete client:", error);

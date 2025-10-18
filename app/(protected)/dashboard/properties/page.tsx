@@ -11,6 +11,8 @@ import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { PropertiesFilters } from "@/components/properties/properties-filters";
 import { PropertiesList } from "@/components/properties/properties-list";
+import { PropertiesListServer } from "@/components/properties/properties-list-server";
+import { PropertyListSkeleton } from "@/components/properties/property-card-skeleton";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export const metadata = constructMetadata({
@@ -172,7 +174,7 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
           )}
         </EmptyPlaceholder>
       ) : (
-        <PropertiesList 
+        <PropertiesListServer 
           properties={propertiesData.properties}
           totalPages={propertiesData.totalPages}
           currentPage={propertiesData.page}
@@ -186,7 +188,7 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
 
 export default function PropertiesPage({ searchParams }: PropertiesPageProps) {
   return (
-    <Suspense fallback={<div>Loading properties...</div>}>
+    <Suspense fallback={<PropertyListSkeleton count={6} />}>
       <PropertiesContent searchParams={searchParams} />
     </Suspense>
   );
