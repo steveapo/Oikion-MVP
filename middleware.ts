@@ -62,9 +62,11 @@ export default auth((req) => {
     }
   }
   
-  // Apply i18n middleware for non-public, non-API routes
+  // ALWAYS apply i18n middleware for non-public, non-API routes
+  // This is critical for getLocale() to work
   if (!isPublicFile && !isApiRoute) {
-    return intlMiddleware(req);
+    const response = intlMiddleware(req);
+    return response;
   }
   
   // Continue with normal NextAuth middleware behavior
