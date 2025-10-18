@@ -99,6 +99,8 @@ export function PropertyForm({ property }: PropertyFormProps) {
       const formData = { ...data, features };
       
       if (property) {
+        toast.loading("Updating property...", { id: "property-update" });
+        
         await updateProperty(property.id, formData);
         
         // Upload images if any
@@ -113,9 +115,11 @@ export function PropertyForm({ property }: PropertyFormProps) {
           await uploadPropertyImages(property.id, imageDataUrls);
         }
         
-        toast.success("Property updated successfully");
+        toast.success("Property updated successfully", { id: "property-update" });
         router.push(`/dashboard/properties/${property.id}`);
       } else {
+        toast.loading("Creating property...", { id: "property-create" });
+        
         const result = await createProperty(formData);
         
         // Upload images if any
@@ -130,11 +134,12 @@ export function PropertyForm({ property }: PropertyFormProps) {
           await uploadPropertyImages(result.propertyId, imageDataUrls);
         }
         
-        toast.success("Property created successfully");
+        toast.success("Property created successfully", { id: "property-create" });
         router.push(`/dashboard/properties/${result.propertyId}`);
       }
     } catch (error) {
-      toast.error(property ? "Failed to update property" : "Failed to create property");
+      const toastId = property ? "property-update" : "property-create";
+      toast.error(property ? "Failed to update property" : "Failed to create property", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
