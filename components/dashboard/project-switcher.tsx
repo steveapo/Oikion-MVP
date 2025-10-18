@@ -112,15 +112,26 @@ export default function ProjectSwitcher({
     }
 
     setCreating(true);
+    toast.loading("Creating agency...", { id: "org-create" });
+    
     const result = await createOrganization({ name: newOrgName, isPersonal: false });
 
     if (result.success) {
-      toast.success("Agency created successfully");
+      toast.success("Agency created successfully", { id: "org-create" });
       setNewAgencyName("");
       setOpenCreateDialog(false);
+      
+      // Redirect to the new organization's dashboard
+      if (result.organizationId) {
+        // Switch to the new organization first
+        await switchOrganization(result.organizationId);
+        // Then redirect to dashboard
+        router.push("/dashboard");
+      }
+      
       router.refresh();
     } else {
-      toast.error(result.error || "Failed to create agency");
+      toast.error(result.error || "Failed to create agency", { id: "org-create" });
     }
     setCreating(false);
   };

@@ -60,26 +60,32 @@ export function ClientForm({ defaultValues, isEditing = false, clientId }: Clien
       try {
         if (isEditing && clientId) {
           // Update existing client
+          toast.loading("Updating client...", { id: "client-update" });
+          
           const result = await updateClient(clientId, data);
           
           if (result.success) {
-            toast.success("Client updated successfully!");
+            toast.success("Client updated successfully!", { id: "client-update" });
             router.push(`/dashboard/relations/${clientId}`);
             router.refresh();
           }
         } else {
           // Create new client
+          toast.loading("Creating client...", { id: "client-create" });
+          
           const result = await createClient(data);
           
           if (result.success) {
-            toast.success("Client created successfully!");
+            toast.success("Client created successfully!", { id: "client-create" });
             router.push(`/dashboard/relations/${result.clientId}`);
             router.refresh();
           }
         }
       } catch (error) {
+        const toastId = isEditing ? "client-update" : "client-create";
         toast.error(
-          error instanceof Error ? error.message : isEditing ? "Failed to update client" : "Failed to create client"
+          error instanceof Error ? error.message : isEditing ? "Failed to update client" : "Failed to create client",
+          { id: toastId }
         );
       }
     });
