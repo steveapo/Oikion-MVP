@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Billing",
+    "description": "Manage your subscription"
+  },
+  "plans": {
+    "free": "Free",
+    "starter": "Starter",
+    "professional": "Professional",
+    "enterprise": "Enterprise"
+  },
+  "actions": {
+    "subscribe": "Subscribe",
+    "manageSubscription": "Manage Subscription",
+    "cancelSubscription": "Cancel Subscription"
+  },
+  "messages": {
+    "testMode": "Test mode enabled - no real charges will be made",
+    "active": "Your subscription is active",
+    "expired": "Your subscription has expired"
+  }
+}

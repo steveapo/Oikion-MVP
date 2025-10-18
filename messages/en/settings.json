@@ -1,0 +1,23 @@
+{
+  "header": {
+    "title": "Settings",
+    "description": "Manage your account settings"
+  },
+  "sections": {
+    "profile": "Profile",
+    "organization": "Organization",
+    "preferences": "Preferences",
+    "danger": "Danger Zone"
+  },
+  "fields": {
+    "displayName": "Display Name",
+    "organizationName": "Organization Name",
+    "language": "Language",
+    "timezone": "Timezone"
+  },
+  "actions": {
+    "saveChanges": "Save Changes",
+    "deleteAccount": "Delete Account",
+    "deleteOrganization": "Delete Organization"
+  }
+}

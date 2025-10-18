@@ -1,0 +1,27 @@
+{
+  "header": {
+    "title": "Properties",
+    "description": "Manage your property listings"
+  },
+  "filters": {
+    "status": "Status",
+    "type": "Type",
+    "price": "Price",
+    "location": "Location",
+    "bedrooms": "Bedrooms",
+    "clear": "Clear Filters"
+  },
+  "card": {
+    "bedrooms": "{{count}} bed",
+    "bedrooms_plural": "{{count}} beds",
+    "bathrooms": "{{count}} bath",
+    "bathrooms_plural": "{{count}} baths",
+    "size": "{{size}} m²",
+    "viewDetails": "View Details"
+  },
+  "empty": {
+    "title": "No properties found",
+    "description": "Create your first property listing to get started.",
+    "button": "Add Property"
+  }
+}

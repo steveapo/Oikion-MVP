@@ -1,0 +1,15 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "properties": "Properties",
+    "relations": "Relations",
+    "oikosync": "Oikosync",
+    "members": "Members",
+    "billing": "Billing",
+    "settings": "Settings"
+  },
+  "user": {
+    "profile": "Profile",
+    "signOut": "Sign Out"
+  }
+}

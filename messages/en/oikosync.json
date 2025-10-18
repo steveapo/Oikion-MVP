@@ -1,0 +1,18 @@
+{
+  "header": {
+    "title": "Oikosync",
+    "description": "Activity feed for your organization"
+  },
+  "filters": {
+    "all": "All Activities",
+    "properties": "Properties",
+    "clients": "Clients",
+    "tasks": "Tasks",
+    "members": "Members"
+  },
+  "empty": {
+    "title": "No activities yet",
+    "description": "Activities will appear here as your team works.",
+    "button": "Refresh"
+  }
+}

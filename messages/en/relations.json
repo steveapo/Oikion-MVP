@@ -1,0 +1,16 @@
+{
+  "header": {
+    "title": "Relations",
+    "description": "Manage your client relationships"
+  },
+  "tabs": {
+    "clients": "Clients",
+    "interactions": "Interactions",
+    "tasks": "Tasks"
+  },
+  "empty": {
+    "title": "No clients found",
+    "description": "Add your first client to start managing relationships.",
+    "button": "Add Client"
+  }
+}

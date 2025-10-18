@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
+import createIntlMiddleware from 'next-intl/middleware';
+import { locales } from './i18n';
 
 /**
  * Edge Runtime middleware uses the minimal auth.config.ts
@@ -12,26 +14,38 @@ import authConfig from "@/auth.config";
  */
 const { auth } = NextAuth(authConfig);
 
+// Create i18n middleware
+const intlMiddleware = createIntlMiddleware({
+  locales: locales,
+  defaultLocale: 'en',
+  localePrefix: 'as-needed' // Don't prefix default locale (en)
+});
+
 /**
  * Middleware to handle:
- * 1. App-level password protection (if APP_PASSWORD is set)
- * 2. NextAuth authentication
+ * 1. Internationalization (i18n) routing
+ * 2. App-level password protection (if APP_PASSWORD is set)
+ * 3. NextAuth authentication
  */
 export default auth((req) => {
   const { pathname } = req.nextUrl;
+  
+  // Skip i18n for public files and API routes (except auth API)
+  const isPublicFile = pathname.startsWith("/_next") || 
+                       pathname.startsWith("/favicon") ||
+                       pathname.startsWith("/opengraph-image") ||
+                       pathname.includes("."); // Allow any file with extension
+  
+  // Skip i18n for API routes except auth
+  const isApiRoute = pathname.startsWith("/api") && !pathname.startsWith("/api/auth");
   
   // Check if APP_PASSWORD is configured in the environment
   const appPassword = process.env.APP_PASSWORD;
   
   if (appPassword) {
     // Skip password check for the password gate page and verification API
-    const isPasswordGatePage = pathname === "/password-gate";
+    const isPasswordGatePage = pathname === "/password-gate" || pathname.startsWith("/el/password-gate");
     const isPasswordVerifyApi = pathname === "/api/verify-password";
-    const isPublicFile = pathname.startsWith("/_next") || 
-                         pathname.startsWith("/favicon") ||
-                         pathname.startsWith("/opengraph-image") ||
-                         pathname.startsWith("/api/auth") ||
-                         pathname.includes("."); // Allow any file with extension
     
     if (!isPasswordGatePage && !isPasswordVerifyApi && !isPublicFile) {
       // Check if the user has verified the password via cookie
@@ -44,6 +58,11 @@ export default auth((req) => {
         return NextResponse.redirect(url);
       }
     }
+  }
+  
+  // Apply i18n middleware for non-public, non-API routes
+  if (!isPublicFile && !isApiRoute) {
+    return intlMiddleware(req);
   }
   
   // Continue with normal NextAuth middleware behavior

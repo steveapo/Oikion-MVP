@@ -1,0 +1,17 @@
+{
+  "notFound": {
+    "title": "404 - Page Not Found",
+    "description": "The page you're looking for doesn't exist.",
+    "button": "Go Home"
+  },
+  "serverError": {
+    "title": "500 - Server Error",
+    "description": "Something went wrong on our end.",
+    "button": "Try Again"
+  },
+  "unauthorized": {
+    "title": "Unauthorized",
+    "description": "You don't have permission to access this resource."
+  },
+  "generic": "An unexpected error occurred"
+}

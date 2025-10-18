@@ -1,0 +1,15 @@
+{
+  "menu": {
+    "dashboard": "Πίνακας Ελέγχου",
+    "properties": "Ακίνητα",
+    "relations": "Σχέσεις",
+    "oikosync": "Oikosync",
+    "members": "Μέλη",
+    "billing": "Χρεώσεις",
+    "settings": "Ρυθμίσεις"
+  },
+  "user": {
+    "profile": "Προφίλ",
+    "signOut": "Αποσύνδεση"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Members",
+    "description": "Manage your organization members"
+  },
+  "roles": {
+    "ORG_OWNER": "Owner",
+    "ADMIN": "Admin",
+    "AGENT": "Agent",
+    "VIEWER": "Viewer"
+  },
+  "actions": {
+    "invite": "Invite Member",
+    "remove": "Remove Member",
+    "changeRole": "Change Role"
+  },
+  "empty": {
+    "title": "No members yet",
+    "description": "Invite team members to collaborate.",
+    "button": "Invite Member"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "header": {
+    "title": "Ρυθμίσεις",
+    "description": "Διαχειριστείτε τις ρυθμίσεις του λογαριασμού σας"
+  },
+  "sections": {
+    "profile": "Προφίλ",
+    "organization": "Οργανισμός",
+    "preferences": "Προτιμήσεις",
+    "danger": "Ζώνη Κινδύνου"
+  },
+  "fields": {
+    "displayName": "Εμφανιζόμενο Όνομα",
+    "organizationName": "Όνομα Οργανισμού",
+    "language": "Γλώσσα",
+    "timezone": "Ζώνη Ώρας"
+  },
+  "actions": {
+    "saveChanges": "Αποθήκευση Αλλαγών",
+    "deleteAccount": "Διαγραφή Λογαριασμού",
+    "deleteOrganization": "Διαγραφή Οργανισμού"
+  }
+}

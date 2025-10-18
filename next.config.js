@@ -1,5 +1,6 @@
 const { withContentlayer } = require("next-contentlayer2");
 const FixContentlayerTypesPlugin = require("./lib/fix-contentlayer-types-plugin");
+const withNextIntl = require('next-intl/plugin')();
 
 import("./env.mjs");
 
@@ -41,4 +42,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withContentlayer(nextConfig);
+module.exports = withNextIntl(withContentlayer(nextConfig));

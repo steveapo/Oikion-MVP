@@ -1,0 +1,11 @@
+{
+  "header": {
+    "title": "Dashboard",
+    "description": "Current Role: {{role}} — Change your role in settings."
+  },
+  "placeholder": {
+    "title": "No content created",
+    "description": "You don't have any content yet. Start creating content.",
+    "button": "Add Content"
+  }
+}
