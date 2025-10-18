@@ -1,0 +1,3 @@
+-- This migration was applied directly to the database
+-- It added CASCADE rules for user deletion
+-- Marking as resolved to sync local state with database

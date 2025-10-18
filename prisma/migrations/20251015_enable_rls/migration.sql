@@ -1,0 +1,3 @@
+-- This migration was created but never had content
+-- Policies were applied via 20251015_rls_policies instead
+-- Marking as resolved

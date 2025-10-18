@@ -1,0 +1,439 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @map("updated_at")
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model User {
+  id                     String                 @id @default(cuid())
+  name                   String?
+  email                  String?                @unique
+  emailVerified          DateTime?
+  image                  String?
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime               @default(now()) @map("updated_at")
+  stripeCustomerId       String?                @unique @map("stripe_customer_id")
+  stripeSubscriptionId   String?                @unique @map("stripe_subscription_id")
+  stripePriceId          String?                @map("stripe_price_id")
+  stripeCurrentPeriodEnd DateTime?              @map("stripe_current_period_end")
+  role                   UserRole               @default(AGENT)
+  organizationId         String?                // Current active organization
+  accounts               Account[]
+  activities             Activity[]             @relation("ActivityActor")
+  createdClients         Client[]               @relation("ClientCreatedBy")
+  createdInteractions    Interaction[]          @relation("InteractionCreatedBy")
+  sentInvitations        Invitation[]           @relation("InvitedBy")
+  createdNotes           Note[]                 @relation("NoteCreatedBy")
+  createdProperties      Property[]             @relation("PropertyCreatedBy")
+  sessions               Session[]
+  assignedTasks          Task[]                 @relation("TaskAssignedTo")
+  createdTasks           Task[]                 @relation("TaskCreatedBy")
+  organization           Organization?          @relation(fields: [organizationId], references: [id])
+  memberships            OrganizationMember[]   // All organizations user is a member of
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Organization {
+  id          String                 @id @default(cuid())
+  name        String
+  createdAt   DateTime               @default(now()) @map("created_at")
+  updatedAt   DateTime               @default(now()) @map("updated_at")
+  isPersonal  Boolean                @default(false)
+  plan        OrganizationPlan       @default(FREE)
+  activities  Activity[]
+  clients     Client[]
+  invitations Invitation[]
+  properties  Property[]
+  tasks       Task[]
+  users       User[]                 // Users with this as their CURRENT organization
+  members     OrganizationMember[]   // All members (many-to-many)
+
+  @@map("organizations")
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  email          String
+  role           UserRole
+  token          String           @unique
+  status         InvitationStatus @default(PENDING)
+  expiresAt      DateTime
+  organizationId String
+  invitedBy      String
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @default(now()) @map("updated_at")
+  inviter        User             @relation("InvitedBy", fields: [invitedBy], references: [id])
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
+  @@map("invitations")
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  organizationId String
+  role           UserRole     @default(AGENT)
+  joinedAt       DateTime     @default(now()) @map("joined_at")
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("organization_members")
+}
+
+model Property {
+  id              String          @id @default(cuid())
+  price           Decimal         @db.Decimal(12, 2)
+  bedrooms        Int?
+  bathrooms       Int?
+  size            Decimal?        @db.Decimal(10, 2)
+  yearBuilt       Int?
+  features        Json?
+  description     String?
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @default(now()) @map("updated_at")
+  organizationId  String
+  createdBy       String
+  propertyType    PropertyType
+  status          PropertyStatus
+  transactionType TransactionType
+  address         Address?
+  interactions    Interaction[]
+  listing         Listing?
+  mediaAssets     MediaAsset[]
+  notes           Note[]
+  creator         User            @relation("PropertyCreatedBy", fields: [createdBy], references: [id])
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tasks           Task[]
+
+  @@index([organizationId])
+  @@index([createdBy])
+  @@map("properties")
+}
+
+model Address {
+  id           String   @id @default(cuid())
+  country      String   @default("Greece")
+  region       String?
+  city         String
+  street       String?
+  number       String?
+  postalCode   String?
+  locationText String?
+  propertyId   String   @unique
+  property     Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+model Listing {
+  id              String          @id @default(cuid())
+  listPrice       Decimal         @db.Decimal(12, 2)
+  publishedAt     DateTime?
+  archivedAt      DateTime?
+  notes           String?
+  propertyId      String          @unique
+  marketingStatus MarketingStatus @default(DRAFT)
+  property        Property        @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@map("listings")
+}
+
+model MediaAsset {
+  id           String    @id @default(cuid())
+  url          String
+  isPrimary    Boolean   @default(false)
+  displayOrder Int?
+  uploadedAt   DateTime  @default(now()) @map("uploaded_at")
+  propertyId   String
+  assetType    AssetType
+  property     Property  @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([propertyId])
+  @@map("media_assets")
+}
+
+model Client {
+  id                String               @id @default(cuid())
+  name              String
+  email             String?
+  phone             String?
+  secondaryEmail    String?
+  secondaryPhone    String?
+  tags              Json?
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @default(now()) @map("updated_at")
+  organizationId    String
+  createdBy         String
+  clientType        ClientType
+  relationshipsFrom ClientRelationship[] @relation("RelationshipFrom")
+  relationshipsTo   ClientRelationship[] @relation("RelationshipTo")
+  creator           User                 @relation("ClientCreatedBy", fields: [createdBy], references: [id])
+  organization      Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  interactions      Interaction[]
+  notes             Note[]
+  tasks             Task[]
+
+  @@index([organizationId])
+  @@index([createdBy])
+  @@map("clients")
+}
+
+model ClientRelationship {
+  id               String           @id @default(cuid())
+  fromClientId     String
+  toClientId       String
+  position         String?
+  createdAt        DateTime         @default(now()) @map("created_at")
+  createdBy        String
+  relationshipType RelationshipType @default(OTHER)
+  fromClient       Client           @relation("RelationshipFrom", fields: [fromClientId], references: [id], onDelete: Cascade)
+  toClient         Client           @relation("RelationshipTo", fields: [toClientId], references: [id], onDelete: Cascade)
+
+  @@unique([fromClientId, toClientId])
+  @@index([fromClientId])
+  @@index([toClientId])
+  @@map("client_relationships")
+}
+
+model Interaction {
+  id              String          @id @default(cuid())
+  summary         String
+  timestamp       DateTime
+  createdAt       DateTime        @default(now()) @map("created_at")
+  clientId        String?
+  propertyId      String?
+  createdBy       String
+  interactionType InteractionType
+  client          Client?         @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator         User            @relation("InteractionCreatedBy", fields: [createdBy], references: [id])
+  property        Property?       @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([propertyId])
+  @@index([createdBy])
+  @@map("interactions")
+}
+
+model Task {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  dueDate        DateTime?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organizationId String
+  assignedTo     String?
+  createdBy      String
+  clientId       String?
+  propertyId     String?
+  status         TaskStatus   @default(PENDING)
+  assignee       User?        @relation("TaskAssignedTo", fields: [assignedTo], references: [id])
+  client         Client?      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator        User         @relation("TaskCreatedBy", fields: [createdBy], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  property       Property?    @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([assignedTo])
+  @@index([createdBy])
+  @@index([clientId])
+  @@index([propertyId])
+  @@map("tasks")
+}
+
+model Note {
+  id         String    @id @default(cuid())
+  content    String
+  createdAt  DateTime  @default(now()) @map("created_at")
+  clientId   String?
+  propertyId String?
+  createdBy  String
+  client     Client?   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  creator    User      @relation("NoteCreatedBy", fields: [createdBy], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+  @@index([propertyId])
+  @@index([createdBy])
+  @@map("notes")
+}
+
+model Activity {
+  id             String       @id @default(cuid())
+  entityId       String
+  payload        Json?
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organizationId String
+  actorId        String
+  actionType     ActionType
+  entityType     EntityType
+  actor          User         @relation("ActivityActor", fields: [actorId], references: [id])
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("activities")
+}
+
+enum UserRole {
+  ORG_OWNER
+  ADMIN
+  AGENT
+  VIEWER
+}
+
+enum OrganizationPlan {
+  FREE
+  STARTER
+  PROFESSIONAL
+  ENTERPRISE
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  CANCELED
+  EXPIRED
+}
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  LAND
+  COMMERCIAL
+  OTHER
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  UNDER_OFFER
+  SOLD
+  RENTED
+}
+
+enum TransactionType {
+  SALE
+  RENT
+  LEASE
+}
+
+enum MarketingStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum AssetType {
+  IMAGE
+  VIDEO
+}
+
+enum ClientType {
+  PERSON
+  COMPANY
+}
+
+enum RelationshipType {
+  EMPLOYEE
+  PARTNER
+  VENDOR
+  CLIENT
+  REFERRAL
+  FAMILY
+  COLLEAGUE
+  OTHER
+}
+
+enum InteractionType {
+  CALL
+  EMAIL
+  MEETING
+  VIEWING
+}
+
+enum TaskStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum ActionType {
+  PROPERTY_CREATED
+  PROPERTY_UPDATED
+  PROPERTY_ARCHIVED
+  MEDIA_ADDED
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  NOTE_ADDED
+  INTERACTION_LOGGED
+  TASK_CREATED
+  TASK_COMPLETED
+  MEMBER_INVITED
+  MEMBER_ROLE_CHANGED
+  SUBSCRIPTION_STARTED
+  SUBSCRIPTION_UPDATED
+  SUBSCRIPTION_CANCELLED
+  CLIENT_RELATIONSHIP_CREATED
+  CLIENT_RELATIONSHIP_DELETED
+}
+
+enum EntityType {
+  PROPERTY
+  CLIENT
+  TASK
+  USER
+  SUBSCRIPTION
+}
