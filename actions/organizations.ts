@@ -284,7 +284,7 @@ export async function switchOrganization(
  * Delete the current user's organization.
  * This will cascade-delete all tenant data (properties, clients, interactions,
  * notes, tasks, activities, listings, addresses, media assets) via FK CASCADE rules.
- * Users are retained with organizationId set to NULL (per FK ON DELETE SET NULL).
+ * After deletion, switches the user to their personal workspace.
  * 
  * Personal organizations cannot be deleted.
  */
@@ -321,10 +321,38 @@ export async function deleteOrganization(): Promise<{ success: boolean; error?: 
       throw new Error("Cannot delete your personal organization. You can delete other organizations you own.");
     }
 
+    // Find user's personal workspace to switch to after deletion
+    const personalWorkspace = await prisma.organizationMember.findFirst({
+      where: {
+        userId: session.user.id,
+        organization: {
+          isPersonal: true,
+        },
+      },
+      include: {
+        organization: true,
+      },
+    });
+
+    if (!personalWorkspace) {
+      throw new Error("Personal workspace not found. Please contact support.");
+    }
+
     // Delete the organization; FK CASCADE will clean up tenant data
     await prisma.organization.delete({
       where: { id: organizationId },
     });
+
+    // Switch user to their personal workspace
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        organizationId: personalWorkspace.organization.id,
+        role: personalWorkspace.role,
+      },
+    });
+
+    revalidatePath("/dashboard");
 
     return { success: true };
   } catch (error) {

@@ -5,12 +5,15 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { deleteOrganization } from "@/actions/organizations";
+import { getUserOrganizations, getCurrentOrganization } from "@/actions/organizations";
 
 function DeleteOrganizationModal({
   showDeleteOrganizationModal,
@@ -19,28 +22,40 @@ function DeleteOrganizationModal({
   showDeleteOrganizationModal: boolean;
   setShowDeleteOrganizationModal: Dispatch<SetStateAction<boolean>>;
 }) {
+  const router = useRouter();
   const { data: session } = useSession();
   const [deleting, setDeleting] = useState(false);
 
-  async function deleteOrganization() {
+  async function handleDeleteOrganization() {
     setDeleting(true);
-    await fetch(`/api/organization`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then(async (res) => {
-      if (res.status === 200) {
-        // Brief delay to allow revalidation/navigation
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        // Reload to reflect new org-less state
-        window.location.assign("/dashboard");
+    toast.loading("Deleting organization...", { id: "org-delete" });
+
+    try {
+      const result = await deleteOrganization();
+
+      if (result.success) {
+        toast.success("Organization deleted successfully", { id: "org-delete" });
+        
+        // Close the modal
+        setShowDeleteOrganizationModal(false);
+        
+        // Wait a moment for the backend to update
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        // Navigate to dashboard (will be in personal workspace)
+        router.push("/dashboard");
+        router.refresh();
+        
+        // Force reload to ensure all state is fresh
+        window.location.href = "/dashboard";
       } else {
+        toast.error(result.error || "Failed to delete organization", { id: "org-delete" });
         setDeleting(false);
-        const error = await res.text();
-        throw error;
       }
-    });
+    } catch (error) {
+      toast.error("Failed to delete organization", { id: "org-delete" });
+      setDeleting(false);
+    }
   }
 
   return (
@@ -61,11 +76,7 @@ function DeleteOrganizationModal({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          toast.promise(deleteOrganization(), {
-            loading: "Deleting organization...",
-            success: "Organization deleted successfully!",
-            error: (err) => err,
-          });
+          await handleDeleteOrganization();
         }}
         className="flex flex-col space-y-6 bg-accent px-4 py-8 text-left sm:px-16"
       >
