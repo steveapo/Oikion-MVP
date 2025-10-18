@@ -1,0 +1,30 @@
+{
+  "home": {
+    "metadata": {
+      "title": "Oikion - Operating System for Greek Real Estate Agencies",
+      "description": "Complete MLS, CRM, and activity feed solution for real estate agencies in Greece. Manage properties, clients, and team collaboration in one platform."
+    },
+    "hero": {
+      "badge": "Built for Greek Real Estate",
+      "title": "Operating System for",
+      "titleHighlight": "Real Estate Agencies",
+      "description": "Complete MLS, CRM, and internal activity feed. Manage properties, clients, and team collaboration in one powerful platform designed for Greek real estate professionals."
+    }
+  },
+  "pricing": {
+    "metadata": {
+      "title": "Pricing - Oikion",
+      "description": "Choose the perfect plan for your real estate agency. Transparent pricing with all features included."
+    },
+    "hero": {
+      "title": "Simple, Transparent Pricing",
+      "description": "Choose the plan that fits your agency's needs. All plans include core MLS and CRM features."
+    }
+  },
+  "blog": {
+    "metadata": {
+      "title": "Blog - Oikion",
+      "description": "Latest news, updates, and insights about real estate technology and property management."
+    }
+  }
+}

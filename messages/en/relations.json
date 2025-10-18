@@ -23,8 +23,8 @@
     "action": "View Subscription Plans",
     "demoTitle": "Demo Relations",
     "demoDescription": "Here's what your relation list will look like:",
-    "lastContact": "Last contact: {{time}}",
-    "interactions": "{{count}} interactions"
+    "lastContact": "Last contact: {time}",
+    "interactions": "{count} interactions"
   },
   "loading": "Loading relations..."
 }

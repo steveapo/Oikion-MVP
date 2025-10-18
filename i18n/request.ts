@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { getRequestConfig } from 'next-intl/server';
 
 export default getRequestConfig(async ({ requestLocale }) => {
@@ -8,7 +9,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Validate that the incoming locale is valid
   const locales = ['en', 'el'];
   if (!locale || !locales.includes(locale)) {
-    locale = 'en'; // Fallback to default
+    const cookieLocale = cookies().get('NEXT_LOCALE')?.value;
+    if (cookieLocale && locales.includes(cookieLocale)) {
+      locale = cookieLocale;
+    } else {
+      locale = 'en';
+    }
   }
 
   // Load all message files for the locale

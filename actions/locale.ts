@@ -9,6 +9,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "@/i18n/navigation";
 import { auth } from "@/auth";
+import { cookies } from "next/headers";
 import { prisma } from "@/lib/db";
 import { isValidLocale, type Locale } from "@/lib/i18n-utils";
 
@@ -39,6 +40,15 @@ export async function updateUserLocale(locale: string, currentPath?: string) {
     await prisma.user.update({
       where: { id: session.user.id },
       data: { preferredLocale: locale }
+    });
+
+    // Persist locale in cookie for next-intl
+    const cookieStore = cookies();
+    cookieStore.set("NEXT_LOCALE", locale, {
+      path: "/",
+      httpOnly: false,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365 // 1 year
     });
 
     // Revalidate the current path

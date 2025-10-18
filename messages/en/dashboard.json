@@ -1,7 +1,7 @@
 {
   "header": {
     "title": "Dashboard",
-    "description": "Current Role: {{role}} — Change your role in settings."
+    "description": "Current Role: {role} — Change your role in settings."
   },
   "placeholder": {
     "title": "No content created",

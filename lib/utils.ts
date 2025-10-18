@@ -16,13 +16,25 @@ export function constructMetadata({
   image = siteConfig.ogImage,
   icons = "/favicon.ico",
   noIndex = false,
+  locale = 'en',
+  pathname = '/',
 }: {
   title?: string;
   description?: string;
   image?: string;
   icons?: string;
   noIndex?: boolean;
+  locale?: string;
+  pathname?: string;
 } = {}): Metadata {
+  // Map locale to OpenGraph format
+  const ogLocale = locale === 'el' ? 'el_GR' : 'en_US';
+  
+  // Build canonical and alternate URLs
+  const canonicalPath = locale === 'en' ? pathname : `/el${pathname}`;
+  const alternateEnPath = pathname;
+  const alternateElPath = `/el${pathname}`;
+  
   return {
     title,
     description,
@@ -45,11 +57,12 @@ export function constructMetadata({
     creator: "mickasmt",
     openGraph: {
       type: "website",
-      locale: "en_US",
-      url: siteConfig.url,
+      locale: ogLocale,
+      url: `${siteConfig.url}${canonicalPath}`,
       title,
       description,
       siteName: title,
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
@@ -57,6 +70,14 @@ export function constructMetadata({
       description,
       images: [image],
       creator: "@miickasmt",
+    },
+    alternates: {
+      canonical: `${siteConfig.url}${canonicalPath}`,
+      languages: {
+        'en': `${siteConfig.url}${alternateEnPath}`,
+        'el': `${siteConfig.url}${alternateElPath}`,
+        'x-default': `${siteConfig.url}${alternateEnPath}`,
+      },
     },
     icons,
     metadataBase: new URL(siteConfig.url),

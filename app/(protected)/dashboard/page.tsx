@@ -7,10 +7,11 @@ import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
   const t = await getTranslations('dashboard');
+  const user = await getCurrentUser();
   
   return constructMetadata({
     title: t('header.title'),
-    description: t('header.description'),
+    description: t('header.description', { role: user?.role || 'User' }),
   });
 }
 

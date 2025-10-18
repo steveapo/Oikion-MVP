@@ -46,8 +46,8 @@ export function LanguageSwitcher() {
         }
 
         setIsOpen(false);
-        // Use locale-aware router with locale parameter
-        router.replace(pathname, { locale: newLocale });
+        // Refresh in place; URL stays unprefixed. Locale comes from cookie.
+        router.refresh();
       } catch (error) {
         console.error("Failed to change language:", error);
         toast.error("Failed to change language");

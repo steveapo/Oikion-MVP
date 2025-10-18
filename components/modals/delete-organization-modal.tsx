@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { deleteOrganization } from "@/actions/organizations";
+import { useOrganizationContext } from "@/lib/organization-context";
 
 function DeleteOrganizationModal({
   showDeleteOrganizationModal,
@@ -23,6 +24,7 @@ function DeleteOrganizationModal({
 }) {
   const router = useRouter();
   const { data: session, update: updateSession } = useSession();
+  const { triggerReload } = useOrganizationContext();
   const [deleting, setDeleting] = useState(false);
 
   async function handleDeleteOrganization() {
@@ -39,6 +41,9 @@ function DeleteOrganizationModal({
         
         // Close the modal
         setShowDeleteOrganizationModal(false);
+        
+        // Trigger reload to update org switcher
+        triggerReload("delete");
         
         // Force session refresh to get updated organization
         console.log('[DELETE ORG] Updating session...');

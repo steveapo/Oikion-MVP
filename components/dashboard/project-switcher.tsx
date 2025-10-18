@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Building2, Check, ChevronsUpDown, Plus, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 
 import { getCurrentOrganization, getUserOrganizations, switchOrganization, createOrganization } from "@/actions/organizations";
 import { cn } from "@/lib/utils";
+import { useOrganizationContext } from "@/lib/organization-context";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Popover,
@@ -41,6 +42,7 @@ export default function ProjectSwitcher({
 }) {
   const router = useRouter();
   const { data: session, status } = useSession();
+  const { eventCounter, triggerReload } = useOrganizationContext();
   const [openPopover, setOpenPopover] = useState(false);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [currentOrg, setCurrentAgency] = useState<OrganizationType | null>(null);
@@ -49,7 +51,10 @@ export default function ProjectSwitcher({
   const [creating, setCreating] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [newOrgName, setNewAgencyName] = useState("");
+  const hasLoadedOnce = useRef(false);
 
+  // Only load organizations on initial mount or when eventCounter changes
+  // This prevents unnecessary reloads on window focus/tab changes
   useEffect(() => {
     async function loadOrganizations() {
       setLoading(true);
@@ -67,12 +72,23 @@ export default function ProjectSwitcher({
           });
         }
         setAllAgencies(all as OrganizationType[]);
+        hasLoadedOnce.current = true;
       }
       setLoading(false);
     }
 
-    loadOrganizations();
-  }, [session?.user, status]);
+    // Only load if:
+    // 1. Never loaded before (initial mount)
+    // 2. eventCounter changed (org switch, create, update, delete)
+    // 3. Status changed to authenticated (user just logged in)
+    if (!hasLoadedOnce.current || eventCounter > 0) {
+      loadOrganizations();
+    }
+    // Note: session?.user is intentionally NOT in dependencies to prevent
+    // unnecessary reloads on window focus (when SessionProvider refetches)
+    // We only reload when actual org operations occur (tracked by eventCounter)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, eventCounter]);
 
   const handleSwitchOrg = async (agencyId: string) => {
     if (agencyId === currentOrg?.id) return;
@@ -83,20 +99,8 @@ export default function ProjectSwitcher({
     
     if (result.success) {
       toast.success("Switched agency");
-      // Reload data immediately after switch
-      const [current, all] = await Promise.all([
-        getCurrentOrganization(),
-        getUserOrganizations(),
-      ]);
-      
-      if (current) {
-        setCurrentAgency({ 
-          id: current.id, 
-          name: current.name,
-          isPersonal: (current as any).isPersonal,
-        });
-      }
-      setAllAgencies(all as OrganizationType[]);
+      // Trigger reload via context
+      triggerReload("switch");
       setSwitching(false);
       router.refresh();
     } else {
@@ -121,24 +125,12 @@ export default function ProjectSwitcher({
       const switchResult = await switchOrganization(result.organizationId);
       
       if (switchResult.success) {
-        // Reload organizations to get the updated list
-        const [current, all] = await Promise.all([
-          getCurrentOrganization(),
-          getUserOrganizations(),
-        ]);
-        
-        if (current) {
-          setCurrentAgency({ 
-            id: current.id, 
-            name: current.name,
-            isPersonal: (current as any).isPersonal,
-          });
-        }
-        setAllAgencies(all as OrganizationType[]);
-        
         toast.success("Agency created successfully", { id: "org-create" });
         setNewAgencyName("");
         setOpenCreateDialog(false);
+        
+        // Trigger reload via context
+        triggerReload("create");
         
         // Navigate to dashboard of new organization
         router.push("/dashboard");

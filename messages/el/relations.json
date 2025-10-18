@@ -23,8 +23,8 @@
     "action": "Προβολή Πακέτων Συνδρομής",
     "demoTitle": "Δείγμα Σχέσεων",
     "demoDescription": "Έτσι θα φαίνεται η λίστα σχέσεών σας:",
-    "lastContact": "Τελευταία επικοινωνία: {{time}}",
-    "interactions": "{{count}} αλληλεπιδράσεις"
+    "lastContact": "Τελευταία επικοινωνία: {time}",
+    "interactions": "{count} αλληλεπιδράσεις"
   },
   "loading": "Φόρτωση σχέσεων..."
 }

@@ -10,6 +10,7 @@ import { cn, constructMetadata } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import { Analytics } from "@/components/analytics";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
+import { OrganizationProvider } from "@/lib/organization-context";
 
 interface RootLayoutProps {
   children: React.ReactNode;
@@ -34,18 +35,20 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         )}
       >
         <NextIntlClientProvider messages={messages} locale={locale}>
-          <SessionProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <Analytics />
-              <Toaster richColors closeButton />
-              <TailwindIndicator />
-            </ThemeProvider>
+          <SessionProvider refetchOnWindowFocus={false}>
+            <OrganizationProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <Analytics />
+                <Toaster richColors closeButton />
+                <TailwindIndicator />
+              </ThemeProvider>
+            </OrganizationProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>

@@ -33,7 +33,8 @@ const CRITICAL_PAGES = [
   'settings',
   'navigation',
   'validation',
-  'errors'
+  'errors',
+  'marketing'
 ];
 
 // ANSI color codes for terminal output

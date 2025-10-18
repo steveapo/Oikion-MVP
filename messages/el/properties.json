@@ -16,11 +16,11 @@
     "clear": "Εκκαθάριση Φίλτρων"
   },
   "card": {
-    "bedrooms": "{{count}} υπνοδωμάτιο",
-    "bedrooms_plural": "{{count}} υπνοδωμάτια",
-    "bathrooms": "{{count}} μπάνιο",
-    "bathrooms_plural": "{{count}} μπάνια",
-    "size": "{{size}} τ.μ.",
+    "bedrooms": "{count} υπνοδωμάτιο",
+    "bedrooms_plural": "{count} υπνοδωμάτια",
+    "bathrooms": "{count} μπάνιο",
+    "bathrooms_plural": "{count} μπάνια",
+    "size": "{size} τ.μ.",
     "viewDetails": "Προβολή Λεπτομερειών"
   },
   "empty": {

@@ -7,6 +7,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 
 import { updateOrganization } from "@/actions/organizations";
+import { useOrganizationContext } from "@/lib/organization-context";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -68,6 +69,7 @@ export function OrganizationSettingsForm({
   organization,
 }: OrganizationSettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const { triggerReload } = useOrganizationContext();
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -84,6 +86,8 @@ export function OrganizationSettingsForm({
 
     if (result.success) {
       toast.success("Organization settings updated");
+      // Trigger reload to update org name in switcher
+      triggerReload("update");
     } else {
       toast.error(result.error || "Failed to update organization");
     }

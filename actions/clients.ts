@@ -305,6 +305,7 @@ export async function getClient(id: string) {
               select: { 
                 id: true,
                 propertyType: true,
+                price: true,
                 address: { select: { city: true, region: true } },
               },
             },
@@ -332,7 +333,19 @@ export async function getClient(id: string) {
       throw new Error("Client not found or access denied");
     }
 
-    return client;
+    // Serialize Decimal fields in property data for client components
+    const serializedClient = {
+      ...client,
+      interactions: client.interactions.map(interaction => ({
+        ...interaction,
+        property: interaction.property ? {
+          ...interaction.property,
+          price: Number(interaction.property.price),
+        } : null,
+      })),
+    };
+
+    return serializedClient;
   } catch (error) {
     console.error("Failed to get client:", error);
     throw new Error("Failed to get client");
