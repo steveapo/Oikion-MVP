@@ -8,3 +8,4 @@ export * from "./task";
 export * from "./note";
 export * from "./activity";
 export * from "./organization";
+export * from "./search";

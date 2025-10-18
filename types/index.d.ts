@@ -100,3 +100,34 @@ export type TestimonialType = {
   image: string;
   review: string;
 };
+
+// CMD+K Search Types
+export type SearchResultType = 'property' | 'client' | 'link';
+
+export interface BaseSearchResult {
+  type: SearchResultType;
+  id: string;
+  label: string;
+  subtitle: string;
+  href: string;
+  icon: keyof typeof Icons;
+}
+
+export interface PropertySearchResult extends BaseSearchResult {
+  type: 'property';
+}
+
+export interface ClientSearchResult extends BaseSearchResult {
+  type: 'client';
+}
+
+export interface LinkSearchResult extends BaseSearchResult {
+  type: 'link';
+}
+
+export type SearchResult = PropertySearchResult | ClientSearchResult | LinkSearchResult;
+
+export interface SearchResults {
+  properties: PropertySearchResult[];
+  clients: ClientSearchResult[];
+}
