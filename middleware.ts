@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import NextAuth from "next-auth";
 import authConfig from "@/auth.config";
 import createIntlMiddleware from 'next-intl/middleware';
-import { locales } from './i18n/config';
+import { routing } from './i18n/routing';
 
 /**
  * Edge Runtime middleware uses the minimal auth.config.ts
@@ -14,14 +14,9 @@ import { locales } from './i18n/config';
  */
 const { auth } = NextAuth(authConfig);
 
-// Create i18n middleware with NO automatic locale detection
-// This prevents redirects based on browser Accept-Language header
-const intlMiddleware = createIntlMiddleware({
-  locales: locales,
-  defaultLocale: 'en',
-  localePrefix: 'as-needed', // Don't prefix default locale (en)
-  localeDetection: false // CRITICAL: Disable automatic locale detection to prevent unwanted redirects
-});
+// Create i18n middleware with centralized routing configuration
+// CRITICAL: Uses the same config as i18n/navigation.ts and next.config.js
+const intlMiddleware = createIntlMiddleware(routing);
 
 /**
  * Middleware to handle:
