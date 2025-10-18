@@ -1,4 +1,3 @@
-import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
