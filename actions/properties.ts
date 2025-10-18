@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { prismaForOrg } from "@/lib/org-prisma";
+import { prismaForOrg, withOrgContext } from "@/lib/org-prisma";
 import { canCreateContent, canDeleteContent } from "@/lib/roles";
 import { 
   propertyFormSchema, 
@@ -12,7 +12,7 @@ import {
   type PropertyFilters 
 } from "@/lib/validations/property";
 import { ActionType, EntityType, MarketingStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
 
 // Helper function to create activity log
@@ -60,9 +60,8 @@ export async function createProperty(data: PropertyFormData) {
   const validatedData = propertyFormSchema.parse(data);
 
   try {
-    const db = prismaForOrg(session.user.organizationId!);
     // Create property with related data in a transaction
-    const property = await db.$transaction(async (tx) => {
+    const property = await withOrgContext(session.user.organizationId, async (tx) => {
       // Create property
       const newProperty = await tx.property.create({
         data: {
@@ -122,7 +121,9 @@ export async function createProperty(data: PropertyFormData) {
       }
     );
 
-    revalidatePath("/dashboard/properties");
+    revalidateTag("properties:list");
+    revalidateTag("properties:filters");
+    revalidateTag("activities:feed");
     return { success: true, propertyId: property.id };
   } catch (error) {
     console.error("Failed to create property:", error);
@@ -164,7 +165,7 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
     }
 
     // Update property with related data in a transaction
-    const property = await db.$transaction(async (tx) => {
+    const property = await withOrgContext(session.user.organizationId, async (tx) => {
       // Update property
       const updatedProperty = await tx.property.update({
         where: { id },
@@ -252,8 +253,9 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
       }
     );
 
-    revalidatePath("/dashboard/properties");
-    revalidatePath(`/dashboard/properties/${id}`);
+    revalidateTag("properties:list");
+    revalidateTag(`properties:detail:${id}`);
+    revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
     console.error("Failed to update property:", error);
@@ -310,8 +312,9 @@ export async function archiveProperty(id: string) {
       session.user.organizationId!
     );
 
-    revalidatePath("/dashboard/properties");
-    revalidatePath(`/dashboard/properties/${id}`);
+    revalidateTag("properties:list");
+    revalidateTag(`properties:detail:${id}`);
+    revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
     console.error("Failed to archive property:", error);

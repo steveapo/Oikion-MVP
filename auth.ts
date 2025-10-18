@@ -188,12 +188,121 @@ export const {
         return null;
       }
 
+      // SAFETY CHECK: Verify user's current organization exists
+      // If it doesn't exist (deleted), auto-switch to Personal workspace
+      if (dbUser.organizationId) {
+        const orgExists = await prisma.organization.findUnique({
+          where: { id: dbUser.organizationId },
+          select: { id: true, name: true },
+        });
+
+        if (!orgExists) {
+          // Organization was deleted! Auto-switch user to their Personal workspace
+          console.warn(`[AUTH SAFETY] User ${dbUser.email} is in deleted org ${dbUser.organizationId} - switching to Personal workspace`);
+          
+          // Find user's personal workspace
+          const personalWorkspace = await prisma.organizationMember.findFirst({
+            where: {
+              userId: dbUser.id,
+              organization: {
+                isPersonal: true,
+              },
+            },
+            include: {
+              organization: true,
+            },
+          });
+
+          if (personalWorkspace) {
+            // Switch user to Personal workspace
+            await prisma.user.update({
+              where: { id: dbUser.id },
+              data: {
+                organizationId: personalWorkspace.organization.id,
+                role: personalWorkspace.role,
+              },
+            });
+
+            // Update token with new org info
+            token.organizationId = personalWorkspace.organization.id;
+            token.organizationName = personalWorkspace.organization.name;
+            token.role = personalWorkspace.role;
+          } else {
+            // No personal workspace found - critical error
+            console.error(`[AUTH CRITICAL] User ${dbUser.email} has no Personal workspace - creating one`);
+            
+            // Create emergency personal workspace
+            const emergencyOrg = await prisma.organization.create({
+              data: {
+                name: "Private Workspace",
+                isPersonal: true,
+                plan: "FREE",
+              },
+            });
+
+            // Create membership
+            await prisma.organizationMember.create({
+              data: {
+                userId: dbUser.id,
+                organizationId: emergencyOrg.id,
+                role: UserRole.ORG_OWNER,
+              },
+            });
+
+            // Update user
+            await prisma.user.update({
+              where: { id: dbUser.id },
+              data: {
+                organizationId: emergencyOrg.id,
+                role: UserRole.ORG_OWNER,
+              },
+            });
+
+            // Update token
+            token.organizationId = emergencyOrg.id;
+            token.organizationName = emergencyOrg.name;
+            token.role = UserRole.ORG_OWNER;
+          }
+        } else {
+          // Organization exists - normal flow
+          token.organizationId = dbUser.organizationId;
+          token.organizationName = orgExists.name;
+          token.role = dbUser.role;
+        }
+      } else {
+        // User has no organization set - this shouldn't happen, but handle it
+        console.warn(`[AUTH SAFETY] User ${dbUser.email} has no organizationId - finding Personal workspace`);
+        
+        const personalWorkspace = await prisma.organizationMember.findFirst({
+          where: {
+            userId: dbUser.id,
+            organization: {
+              isPersonal: true,
+            },
+          },
+          include: {
+            organization: true,
+          },
+        });
+
+        if (personalWorkspace) {
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: {
+              organizationId: personalWorkspace.organization.id,
+              role: personalWorkspace.role,
+            },
+          });
+
+          token.organizationId = personalWorkspace.organization.id;
+          token.organizationName = personalWorkspace.organization.name;
+          token.role = personalWorkspace.role;
+        }
+      }
+
       token.name = dbUser.name;
       token.email = dbUser.email;
       token.picture = dbUser.image;
-      token.role = dbUser.role;
-      token.organizationId = dbUser.organizationId || undefined;
-      token.organizationName = dbUser.organization?.name;
 
       return token;
     },

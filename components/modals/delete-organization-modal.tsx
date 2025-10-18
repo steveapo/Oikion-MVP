@@ -5,12 +5,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useSession, signOut } from "next-auth/react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { deleteOrganization } from "@/actions/organizations";
 
 function DeleteOrganizationModal({
   showDeleteOrganizationModal,
@@ -19,28 +21,46 @@ function DeleteOrganizationModal({
   showDeleteOrganizationModal: boolean;
   setShowDeleteOrganizationModal: Dispatch<SetStateAction<boolean>>;
 }) {
-  const { data: session } = useSession();
+  const router = useRouter();
+  const { data: session, update: updateSession } = useSession();
   const [deleting, setDeleting] = useState(false);
 
-  async function deleteOrganization() {
+  async function handleDeleteOrganization() {
     setDeleting(true);
-    await fetch(`/api/organization`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }).then(async (res) => {
-      if (res.status === 200) {
-        // Brief delay to allow revalidation/navigation
-        await new Promise((resolve) => setTimeout(resolve, 400));
-        // Reload to reflect new org-less state
-        window.location.assign("/dashboard");
+    toast.loading("Deleting organization...", { id: "org-delete" });
+
+    try {
+      const result = await deleteOrganization();
+
+      if (result.success && result.personalWorkspaceId) {
+        console.log('[DELETE ORG] Successfully deleted, switched to Personal workspace:', result.personalWorkspaceId);
+        
+        toast.success("Organization deleted successfully", { id: "org-delete" });
+        
+        // Close the modal
+        setShowDeleteOrganizationModal(false);
+        
+        // Force session refresh to get updated organization
+        console.log('[DELETE ORG] Updating session...');
+        await updateSession();
+        
+        // Wait for session to fully update
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        console.log('[DELETE ORG] Reloading to dashboard...');
+        
+        // Force a hard reload to ensure all state is completely fresh
+        // This ensures the org switcher and all components see the new Personal workspace
+        window.location.href = "/dashboard";
       } else {
+        toast.error(result.error || "Failed to delete organization", { id: "org-delete" });
         setDeleting(false);
-        const error = await res.text();
-        throw error;
       }
-    });
+    } catch (error) {
+      console.error('[DELETE ORG] Error:', error);
+      toast.error("Failed to delete organization", { id: "org-delete" });
+      setDeleting(false);
+    }
   }
 
   return (
@@ -61,11 +81,7 @@ function DeleteOrganizationModal({
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          toast.promise(deleteOrganization(), {
-            loading: "Deleting organization...",
-            success: "Organization deleted successfully!",
-            error: (err) => err,
-          });
+          await handleDeleteOrganization();
         }}
         className="flex flex-col space-y-6 bg-accent px-4 py-8 text-left sm:px-16"
       >
