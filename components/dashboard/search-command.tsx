@@ -54,7 +54,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const fetchResults = async (searchQuery: string) => {
+  const fetchResults = React.useCallback(async (searchQuery: string) => {
     setLoading(true);
     setError(null);
 
@@ -77,7 +77,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);

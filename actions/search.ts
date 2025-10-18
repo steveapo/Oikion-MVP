@@ -63,20 +63,8 @@ export async function searchEntities(
         ? db.property.findMany({
             where: {
               organizationId: user.organizationId,
-              // Exclude archived properties
-              listing: {
-                marketingStatus: {
-                  not: MarketingStatus.ARCHIVED,
-                },
-              },
-              // Search in address fields
-              address: {
-                OR: [
-                  { city: { contains: validatedParams.q, mode: "insensitive" } },
-                  { region: { contains: validatedParams.q, mode: "insensitive" } },
-                  { locationText: { contains: validatedParams.q, mode: "insensitive" } },
-                ],
-              },
+              // Search by description (acts as property name/title)
+              description: { contains: validatedParams.q, mode: "insensitive" },
             },
             include: {
               address: true,
@@ -92,11 +80,8 @@ export async function searchEntities(
         ? db.client.findMany({
             where: {
               organizationId: user.organizationId,
-              OR: [
-                { name: { contains: validatedParams.q, mode: "insensitive" } },
-                { email: { contains: validatedParams.q, mode: "insensitive" } },
-                { phone: { contains: validatedParams.q, mode: "insensitive" } },
-              ],
+              // Search by name only as requested
+              name: { contains: validatedParams.q, mode: "insensitive" },
             },
             orderBy: { createdAt: "desc" },
             take: validatedParams.limit,
