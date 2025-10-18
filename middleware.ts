@@ -14,11 +14,13 @@ import { locales } from './i18n/config';
  */
 const { auth } = NextAuth(authConfig);
 
-// Create i18n middleware
+// Create i18n middleware with NO automatic locale detection
+// This prevents redirects based on browser Accept-Language header
 const intlMiddleware = createIntlMiddleware({
   locales: locales,
   defaultLocale: 'en',
-  localePrefix: 'as-needed' // Don't prefix default locale (en)
+  localePrefix: 'as-needed', // Don't prefix default locale (en)
+  localeDetection: false // CRITICAL: Disable automatic locale detection to prevent unwanted redirects
 });
 
 /**
