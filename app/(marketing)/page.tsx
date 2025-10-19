@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import { getTranslations, getLocale } from 'next-intl/server';
-import { infos } from "@/config/landing";
 import { constructMetadata } from "@/lib/utils";
 import BentoGrid from "@/components/sections/bentogrid";
 import Features from "@/components/sections/features";
@@ -13,17 +12,43 @@ import { SessionErrorAlert } from "@/components/shared/session-error-alert";
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  const t = await getTranslations('marketing.home');
+  const t = await getTranslations('home.metadata');
   
   return constructMetadata({
-    title: t('metadata.title'),
-    description: t('metadata.description'),
+    title: t('title'),
+    description: t('description'),
     locale,
     pathname: '/',
   });
 }
 
-export default function IndexPage() {
+export default async function IndexPage() {
+  const t = await getTranslations('home.info');
+  
+  // Construct info data from translations
+  const infoSection1 = {
+    title: t('section1.title'),
+    description: t('section1.description'),
+    image: "/_static/illustrations/work-from-home.jpg",
+    list: [
+      {
+        title: t('section1.items.collaborative.title'),
+        description: t('section1.items.collaborative.description'),
+        icon: "laptop" as const,
+      },
+      {
+        title: t('section1.items.efficient.title'),
+        description: t('section1.items.efficient.description'),
+        icon: "settings" as const,
+      },
+      {
+        title: t('section1.items.scalable.title'),
+        description: t('section1.items.scalable.description'),
+        icon: "search" as const,
+      },
+    ],
+  };
+
   return (
     <>
       <Suspense fallback={null}>
@@ -33,7 +58,7 @@ export default function IndexPage() {
       <PreviewLanding />
       <Powered />
       <BentoGrid />
-      <InfoLanding data={infos[0]} reverse={true} />
+      <InfoLanding data={infoSection1} reverse={true} />
       {/* <InfoLanding data={infos[1]} /> */}
       <Features />
       <Testimonials />

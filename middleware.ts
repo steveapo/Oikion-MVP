@@ -69,22 +69,10 @@ export default function middleware(req: NextRequest) {
   // ALWAYS apply i18n middleware for non-public, non-API routes
   // This is critical for getLocale() to work
   if (!isPublicFile && !isApiRoute) {
-    const url = req.nextUrl.clone();
-    const match = url.pathname.match(/^\/(en|el)(\/.*)?$/);
-
-    if (match) {
-      const locale = match[1];
-      const rest = match[2] || "/";
-      const redirectUrl = new URL(rest, req.url);
-      const res = NextResponse.redirect(redirectUrl);
-      res.cookies.set("NEXT_LOCALE", locale, { path: "/", sameSite: "lax" });
-      return res;
-    }
-
-    return NextResponse.next();
+    return intlMiddleware(req);
   }
   
-  // Continue with normal NextAuth middleware behavior
+  // Continue with normal middleware behavior for public files and API routes
   return NextResponse.next();
 }
 

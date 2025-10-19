@@ -1,8 +1,11 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
-export default function BentoGrid() {
+export default async function BentoGrid() {
+  const t = await getTranslations('home.bento');
+  
   return (
     <section className="py-32">
       <MaxWidthWrapper>
@@ -27,7 +30,7 @@ export default function BentoGrid() {
                 </span>
               </div>
               <h2 className="mt-6 text-center font-heading text-3xl md:text-4xl lg:text-[40px]">
-                Customizable
+                {t('title')}
               </h2>
             </div>
           </div>
@@ -90,11 +93,10 @@ export default function BentoGrid() {
               </div>
               <div className="relative z-10 mt-8 space-y-1.5 text-center">
                 <h2 className="text-lg font-medium text-foreground">
-                  Secure by default
+                  {t('features.security.title')}
                 </h2>
                 <p className="text-muted-foreground">
-                  Provident fugit and vero voluptate. magnam magni doloribus
-                  dolores voluptates a sapiente nisi.
+                  {t('features.security.description')}
                 </p>
               </div>
             </div>
@@ -187,11 +189,10 @@ export default function BentoGrid() {
               </div>
               <div className="relative z-10 mt-8 space-y-1.5 text-center">
                 <h2 className="text-lg font-medium text-foreground">
-                  Faster than light
+                  {t('features.activity.title')}
                 </h2>
                 <p className="text-muted-foreground">
-                  Provident fugit vero voluptate. magnam magni doloribus dolores
-                  voluptates inventore nisi.
+                  {t('features.activity.description')}
                 </p>
               </div>
             </div>
@@ -219,11 +220,10 @@ export default function BentoGrid() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-lg font-medium text-foreground">
-                    Faster than light
+                    {t('features.properties.title')}
                   </h2>
                   <p className="text-muted-foreground">
-                    Provident fugit vero voluptate. Voluptates a sapiente
-                    inventore nisi.
+                    {t('features.properties.description')}
                   </p>
                 </div>
               </div>
@@ -304,11 +304,10 @@ export default function BentoGrid() {
                 </div>
                 <div className="space-y-2">
                   <h2 className="text-lg font-medium text-foreground">
-                    Keep your loved ones safe
+                    {t('features.clients.title')}
                   </h2>
                   <p className="text-muted-foreground">
-                    Voluptate. magnam magni doloribus dolores voluptates a
-                    sapiente.
+                    {t('features.clients.description')}
                   </p>
                 </div>
               </div>

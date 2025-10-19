@@ -1,0 +1,25 @@
+{
+  "metadata": {
+    "title": "Blog - Oikion",
+    "description": "Latest news, updates, and insights about real estate technology and property management."
+  },
+  "hero": {
+    "title": "Latest from Oikion",
+    "description": "Stay updated with the latest news, product updates, and insights about real estate technology."
+  },
+  "categories": {
+    "all": "All Posts",
+    "updates": "Product Updates",
+    "guides": "Guides",
+    "news": "News"
+  },
+  "readMore": "Read more",
+  "minutesRead": "{minutes} min read",
+  "noPostsFound": "No posts found",
+  "subscribe": {
+    "title": "Subscribe to our newsletter",
+    "description": "Get the latest updates and insights delivered to your inbox.",
+    "placeholder": "Enter your email",
+    "cta": "Subscribe"
+  }
+}

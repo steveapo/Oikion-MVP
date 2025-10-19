@@ -1,17 +1,40 @@
 import Image from "next/image";
+import { getTranslations } from "next-intl/server";
 
-import { testimonials } from "@/config/landing";
 import { HeaderSection } from "@/components/shared/header-section";
 
-export default function Testimonials() {
+export default async function Testimonials() {
+  const t = await getTranslations('home.testimonials');
+  
+  // Construct testimonials from translations
+  const testimonials = [
+    {
+      name: t('items.user1.name'),
+      job: t('items.user1.job'),
+      review: t('items.user1.review'),
+      image: "https://randomuser.me/api/portraits/women/1.jpg",
+    },
+    {
+      name: t('items.user2.name'),
+      job: t('items.user2.job'),
+      review: t('items.user2.review'),
+      image: "https://randomuser.me/api/portraits/men/1.jpg",
+    },
+    {
+      name: t('items.user3.name'),
+      job: t('items.user3.job'),
+      review: t('items.user3.review'),
+      image: "https://randomuser.me/api/portraits/women/2.jpg",
+    },
+  ];
+  
   return (
     <section>
       <div className="container flex max-w-6xl flex-col gap-10 py-32 sm:gap-y-16">
         <HeaderSection
           label="Testimonials"
-          title="What our clients are sharing."
-          subtitle="Discover the glowing feedback from our delighted customers
-            worldwide."
+          title={t('title')}
+          subtitle={t('subtitle')}
         />
 
         <div className="column-1 gap-5 space-y-5 md:columns-2 lg:columns-3 ">

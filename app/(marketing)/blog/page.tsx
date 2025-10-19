@@ -6,11 +6,11 @@ import { BlogPosts } from "@/components/content/blog-posts";
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  const t = await getTranslations('marketing.blog');
+  const t = await getTranslations('blog.metadata');
   
   return constructMetadata({
-    title: t('metadata.title'),
-    description: t('metadata.description'),
+    title: t('title'),
+    description: t('description'),
     locale,
     pathname: '/blog',
   });

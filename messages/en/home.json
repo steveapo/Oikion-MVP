@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "title": "Oikion - Operating System for Greek Real Estate Agencies",
+    "description": "Complete MLS, CRM, and activity feed solution for real estate agencies in Greece. Manage properties, clients, and team collaboration in one platform."
+  },
+  "hero": {
+    "badge": "Built for Greek Real Estate",
+    "title": "Operating System for",
+    "titleHighlight": "Real Estate Agencies",
+    "description": "Complete MLS, CRM, and internal activity feed. Manage properties, clients, and team collaboration in one powerful platform designed for Greek real estate professionals.",
+    "ctaPrimary": "Get Started",
+    "ctaSecondary": "View Pricing"
+  },
+  "features": {
+    "label": "Features",
+    "title": "Everything you need to run your agency",
+    "subtitle": "Powerful tools designed specifically for Greek real estate professionals to manage properties, clients, and team collaboration.",
+    "items": {
+      "mls": {
+        "title": "Complete MLS System",
+        "description": "Manage your property listings with a comprehensive Multiple Listing System. Fast CRUD operations, advanced filters, and media management.",
+        "cta": "Learn more"
+      },
+      "crm": {
+        "title": "Built-in CRM",
+        "description": "Track clients, interactions, and tasks in one place. Manage your relationships and never miss a follow-up.",
+        "cta": "Learn more"
+      },
+      "activity": {
+        "title": "Activity Feed",
+        "description": "Stay informed with an internal activity feed showing all significant events across your organization.",
+        "cta": "Learn more"
+      },
+      "team": {
+        "title": "Team Collaboration",
+        "description": "Work together seamlessly with role-based access control and real-time updates for your entire team.",
+        "cta": "Learn more"
+      },
+      "billing": {
+        "title": "Subscription Billing",
+        "description": "Transparent pricing with Stripe-powered subscription management and customer portal.",
+        "cta": "Learn more"
+      },
+      "secure": {
+        "title": "Secure & Reliable",
+        "description": "Built with modern security practices, Auth.js v5 authentication, and hosted on reliable infrastructure.",
+        "cta": "Learn more"
+      }
+    },
+    "visitSite": "Learn more"
+  },
+  "info": {
+    "section1": {
+      "title": "Empower your agency",
+      "description": "Unlock the full potential of your real estate business with Oikion. Manage properties, collaborate seamlessly with your team, and scale your operations effortlessly.",
+      "items": {
+        "collaborative": {
+          "title": "Collaborative",
+          "description": "Work together with your team members in real-time with shared property listings and client data."
+        },
+        "efficient": {
+          "title": "Efficient",
+          "description": "Streamline your workflows with integrated MLS, CRM, and activity tracking in one platform."
+        },
+        "scalable": {
+          "title": "Scalable",
+          "description": "Our platform offers the scalability needed to grow from a small team to a large agency."
+        }
+      }
+    },
+    "section2": {
+      "title": "Seamless workflow integration",
+      "description": "Integrate Oikion seamlessly into your existing real estate workflows. Connect your property data, client information, and team activities in one unified system.",
+      "items": {
+        "flexible": {
+          "title": "Flexible",
+          "description": "Customize your property fields, client tags, and workflows to fit your unique agency requirements."
+        },
+        "efficient": {
+          "title": "Efficient",
+          "description": "Streamline your processes with automated activity tracking and reducing manual data entry."
+        },
+        "reliable": {
+          "title": "Reliable",
+          "description": "Rely on our robust infrastructure with PostgreSQL database and comprehensive documentation."
+        }
+      }
+    }
+  },
+  "testimonials": {
+    "title": "What our users say",
+    "subtitle": "See how real estate agencies are using Oikion to transform their business.",
+    "items": {
+      "user1": {
+        "name": "Maria Papadopoulos",
+        "job": "Agency Owner, Athens",
+        "review": "Oikion has revolutionized how we manage our property listings and client relationships. Everything we need is in one place, and our team collaboration has never been better."
+      },
+      "user2": {
+        "name": "Nikos Dimitriou",
+        "job": "Real Estate Agent, Thessaloniki",
+        "review": "The MLS system is incredibly intuitive and the activity feed keeps me updated on everything happening in our agency. It's a game changer for our business."
+      },
+      "user3": {
+        "name": "Elena Georgiadou",
+        "job": "Office Manager, Patras",
+        "review": "Managing our team and tracking client interactions has become so much easier with Oikion. The CRM features are exactly what we needed."
+      }
+    }
+  },
+  "preview": {
+    "badge": "Dashboard Preview",
+    "title": "See Oikion in action",
+    "description": "Experience the power of a complete real estate operating system. Manage properties, clients, and your team all from one beautiful dashboard.",
+    "cta": "Start your free trial"
+  },
+  "powered": {
+    "title": "Built with modern technology",
+    "description": "Powered by industry-leading tools and frameworks"
+  },
+  "bento": {
+    "title": "Everything you need",
+    "description": "A complete solution for modern real estate agencies",
+    "features": {
+      "properties": {
+        "title": "Property Management",
+        "description": "Complete MLS with advanced search and filtering"
+      },
+      "clients": {
+        "title": "Client Relationships",
+        "description": "CRM built for real estate professionals"
+      },
+      "activity": {
+        "title": "Team Activity",
+        "description": "Stay informed with real-time updates"
+      },
+      "security": {
+        "title": "Enterprise Security",
+        "description": "Bank-level security for your data"
+      }
+    }
+  }
+}

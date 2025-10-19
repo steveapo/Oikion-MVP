@@ -1,0 +1,81 @@
+{
+  "metadata": {
+    "title": "Pricing - Oikion",
+    "description": "Choose the perfect plan for your real estate agency. Transparent pricing with all features included."
+  },
+  "hero": {
+    "title": "Simple, Transparent Pricing",
+    "description": "Choose the plan that fits your agency's needs. All plans include core MLS and CRM features."
+  },
+  "plans": {
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "save": "Save {percent}%",
+    "starter": {
+      "name": "Starter",
+      "description": "Perfect for small agencies getting started",
+      "price": "€49",
+      "priceMonthly": "per month",
+      "features": [
+        "Up to 100 property listings",
+        "Up to 5 team members",
+        "Basic CRM features",
+        "Activity feed",
+        "Email support"
+      ],
+      "cta": "Start free trial"
+    },
+    "professional": {
+      "name": "Professional",
+      "description": "For growing agencies with advanced needs",
+      "price": "€99",
+      "priceMonthly": "per month",
+      "popular": "Most Popular",
+      "features": [
+        "Unlimited property listings",
+        "Up to 20 team members",
+        "Advanced CRM features",
+        "Priority support",
+        "Custom integrations",
+        "Advanced analytics"
+      ],
+      "cta": "Start free trial"
+    },
+    "enterprise": {
+      "name": "Enterprise",
+      "description": "For large agencies with custom requirements",
+      "price": "Custom",
+      "priceMonthly": "contact us",
+      "features": [
+        "Everything in Professional",
+        "Unlimited team members",
+        "Dedicated account manager",
+        "Custom development",
+        "SLA guarantee",
+        "24/7 phone support"
+      ],
+      "cta": "Contact sales"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "items": {
+      "trial": {
+        "question": "Do you offer a free trial?",
+        "answer": "Yes, we offer a 14-day free trial with full access to all features. No credit card required."
+      },
+      "cancel": {
+        "question": "Can I cancel anytime?",
+        "answer": "Absolutely. You can cancel your subscription at any time from your account settings. No questions asked."
+      },
+      "support": {
+        "question": "What kind of support do you offer?",
+        "answer": "All plans include email support. Professional and Enterprise plans include priority support with faster response times."
+      },
+      "data": {
+        "question": "Is my data secure?",
+        "answer": "Yes, we take security seriously. All data is encrypted in transit and at rest, and we follow industry best practices."
+      }
+    }
+  }
+}

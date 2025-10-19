@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import { features } from "@/config/landing";
 import { Button } from "@/components/ui/button";
@@ -6,16 +7,17 @@ import { HeaderSection } from "@/components/shared/header-section";
 import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
-export default function Features() {
+export default async function Features() {
+  const t = await getTranslations('home.features');
+  
   return (
     <section>
       <div className="pb-6 pt-28">
         <MaxWidthWrapper>
           <HeaderSection
-            label="Features"
-            title="Discover all features."
-            subtitle="Harum quae dolore inventore repudiandae? orrupti aut temporibus
-          ariatur."
+            label={t('label')}
+            title={t('title')}
+            subtitle={t('subtitle')}
           />
 
           <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -47,7 +49,7 @@ export default function Features() {
                         className="px-4"
                       >
                         <Link href="/" className="flex items-center gap-2">
-                          <span>Visit the site</span>
+                          <span>{t('visitSite')}</span>
                           <Icons.arrowUpRight className="size-4" />
                         </Link>
                       </Button>

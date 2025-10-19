@@ -30,6 +30,10 @@ export default getRequestConfig(async ({ requestLocale }) => {
     navigation: (await import(`@/messages/${locale}/navigation.json`)).default,
     validation: (await import(`@/messages/${locale}/validation.json`)).default,
     errors: (await import(`@/messages/${locale}/errors.json`)).default,
+    // Marketing pages
+    home: (await import(`@/messages/${locale}/home.json`)).default,
+    pricing: (await import(`@/messages/${locale}/pricing.json`)).default,
+    blog: (await import(`@/messages/${locale}/blog.json`)).default,
   };
 
   return {

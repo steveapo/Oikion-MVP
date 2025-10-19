@@ -11,11 +11,11 @@ import { PricingFaq } from "@/components/pricing/pricing-faq";
 
 export async function generateMetadata() {
   const locale = await getLocale();
-  const t = await getTranslations('marketing.pricing');
+  const t = await getTranslations('pricing.metadata');
   
   return constructMetadata({
-    title: t('metadata.title'),
-    description: t('metadata.description'),
+    title: t('title'),
+    description: t('description'),
     locale,
     pathname: '/pricing',
   });

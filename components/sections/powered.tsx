@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 
@@ -238,12 +239,14 @@ const logos = [
   },
 ];
 
-export default function Powered() {
+export default async function Powered() {
+  const t = await getTranslations('home.powered');
+  
   return (
     <section className="py-14 text-muted-foreground">
       <MaxWidthWrapper>
         <h2 className="text-center text-sm font-semibold uppercase">
-          Powered by
+          {t('title')}
         </h2>
 
         <div className="mt-10 grid grid-cols-2 place-items-center gap-8 md:grid-cols-4">
