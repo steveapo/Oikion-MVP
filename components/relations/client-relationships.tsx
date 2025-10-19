@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Plus, X, Building2, User as UserIcon, Briefcase, Trash2 } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,17 +52,6 @@ interface Relationship {
   createdAt: Date;
 }
 
-const RELATIONSHIP_TYPES = [
-  { value: "EMPLOYEE", label: "Employee", description: "Works for the company" },
-  { value: "PARTNER", label: "Partner", description: "Business partnership" },
-  { value: "VENDOR", label: "Vendor", description: "Vendor/Supplier" },
-  { value: "CLIENT", label: "Client", description: "Client relationship" },
-  { value: "REFERRAL", label: "Referral", description: "Referral source" },
-  { value: "FAMILY", label: "Family", description: "Family member" },
-  { value: "COLLEAGUE", label: "Colleague", description: "Professional colleague" },
-  { value: "OTHER", label: "Other", description: "Other relationship" },
-];
-
 interface ClientRelationshipsProps {
   clientId: string;
   clientType: "PERSON" | "COMPANY";
@@ -85,13 +75,28 @@ export function ClientRelationships({
   const [position, setPosition] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  const t = useTranslations("relations.relationships");
+  const tClientType = useTranslations("relations.clientType");
+  const tActions = useTranslations("relations.actions");
+
+  const RELATIONSHIP_TYPES = [
+    { value: "EMPLOYEE", label: t("types.EMPLOYEE"), description: t("typeDescriptions.EMPLOYEE") },
+    { value: "PARTNER", label: t("types.PARTNER"), description: t("typeDescriptions.PARTNER") },
+    { value: "VENDOR", label: t("types.VENDOR"), description: t("typeDescriptions.VENDOR") },
+    { value: "CLIENT", label: t("types.CLIENT"), description: t("typeDescriptions.CLIENT") },
+    { value: "REFERRAL", label: t("types.REFERRAL"), description: t("typeDescriptions.REFERRAL") },
+    { value: "FAMILY", label: t("types.FAMILY"), description: t("typeDescriptions.FAMILY") },
+    { value: "COLLEAGUE", label: t("types.COLLEAGUE"), description: t("typeDescriptions.COLLEAGUE") },
+    { value: "OTHER", label: t("types.OTHER"), description: t("typeDescriptions.OTHER") },
+  ];
+
   // Separate clients by type
   const persons = availableClients.filter(c => c.clientType === "PERSON");
   const companies = availableClients.filter(c => c.clientType === "COMPANY");
 
   const handleAddRelationship = () => {
     if (!selectedClientId) {
-      toast.error("Please select a relation");
+      toast.error(t("selectError"));
       return;
     }
 
@@ -105,23 +110,23 @@ export function ClientRelationships({
         });
 
         if (result.success) {
-          toast.success("Relationship created successfully!");
+          toast.success(t("createSuccess"));
           setIsDialogOpen(false);
           setSelectedClientId("");
           setRelationshipType("OTHER");
           setPosition("");
           window.location.reload(); // Refresh to show new relationship
         } else {
-          toast.error(result.error || "Failed to create relationship");
+          toast.error(result.error || t("createError"));
         }
       } catch (error) {
-        toast.error("Failed to create relationship");
+        toast.error(t("createError"));
       }
     });
   };
 
   const handleDeleteRelationship = (relationshipId: string) => {
-    if (!confirm("Are you sure you want to remove this relationship?")) {
+    if (!confirm(t("deleteConfirm"))) {
       return;
     }
 
@@ -129,13 +134,13 @@ export function ClientRelationships({
       try {
         const result = await deleteClientRelationship(relationshipId);
         if (result.success) {
-          toast.success("Relationship removed");
+          toast.success(t("deleteSuccess"));
           window.location.reload();
         } else {
-          toast.error(result.error || "Failed to remove relationship");
+          toast.error(result.error || t("deleteError"));
         }
       } catch (error) {
-        toast.error("Failed to remove relationship");
+        toast.error(t("deleteError"));
       }
     });
   };
@@ -150,9 +155,9 @@ export function ClientRelationships({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Relationships</CardTitle>
+            <CardTitle>{t("title")}</CardTitle>
             <CardDescription>
-              Connected {clientType === "PERSON" ? "companies and people" : "people and companies"}
+              {clientType === "PERSON" ? t("descriptionPerson") : t("descriptionCompany")}
             </CardDescription>
           </div>
           {canManage && (
@@ -160,31 +165,31 @@ export function ClientRelationships({
               <DialogTrigger asChild>
                 <Button size="sm" className="whitespace-nowrap shrink-0">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Link
+                  {t("addLink")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Create Relationship</DialogTitle>
+                  <DialogTitle>{t("createTitle")}</DialogTitle>
                   <DialogDescription>
-                    Connect this {clientType.toLowerCase()} to another person or company
+                    {clientType === "PERSON" ? t("createDescription") : t("createDescriptionCompany")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>Select Relationship</Label>
+                    <Label>{t("selectLabel")}</Label>
                     <Select
                       value={selectedClientId}
                       onValueChange={setSelectedClientId}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Choose a person or company" />
+                        <SelectValue placeholder={t("selectPlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {persons.length > 0 && (
                           <>
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              People
+                              {t("people")}
                             </div>
                             {persons.map((client) => (
                               <SelectItem key={client.id} value={client.id}>
@@ -202,7 +207,7 @@ export function ClientRelationships({
                               <div className="my-1 border-t" />
                             )}
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              Companies
+                              {t("companies")}
                             </div>
                             {companies.map((client) => (
                               <SelectItem key={client.id} value={client.id}>
@@ -216,7 +221,7 @@ export function ClientRelationships({
                         )}
                         {persons.length === 0 && companies.length === 0 && (
                           <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                            No available relations
+                            {t("noAvailable")}
                           </div>
                         )}
                       </SelectContent>
@@ -224,7 +229,7 @@ export function ClientRelationships({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>Relationship Type</Label>
+                    <Label>{t("typeLabel")}</Label>
                     <Select
                       value={relationshipType}
                       onValueChange={setRelationshipType}
@@ -249,15 +254,15 @@ export function ClientRelationships({
 
                   {showPositionField && (
                     <div className="space-y-2">
-                      <Label>Position / Role (Optional)</Label>
+                      <Label>{t("positionLabel")}</Label>
                       <Input
-                        placeholder="e.g., CEO, Manager, Employee"
+                        placeholder={t("positionPlaceholder")}
                         value={position}
                         onChange={(e) => setPosition(e.target.value)}
                         maxLength={200}
                       />
                       <p className="text-xs text-muted-foreground">
-                        The position of the person in the company
+                        {t("positionDescription")}
                       </p>
                     </div>
                   )}
@@ -268,14 +273,14 @@ export function ClientRelationships({
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isPending}
                     >
-                      Cancel
+                      {tActions("cancel")}
                     </Button>
                     <Button
                       onClick={handleAddRelationship}
                       disabled={isPending || !selectedClientId}
                     >
                       {isPending && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                      Create
+                      {tActions("create")}
                     </Button>
                   </div>
                 </div>
@@ -287,7 +292,7 @@ export function ClientRelationships({
       <CardContent>
         {relationshipsFrom.length === 0 && relationshipsTo.length === 0 ? (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            No relationships yet. Add connections to people and companies.
+            {t("noRelationships")}
           </div>
         ) : (
           <div className="space-y-6">
@@ -295,7 +300,7 @@ export function ClientRelationships({
             {relationshipsFrom.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  Linked To
+                  {t("linkedTo")}
                 </h4>
                 <div className="space-y-2">
                   {relationshipsFrom.map((rel) => (
@@ -320,7 +325,7 @@ export function ClientRelationships({
                               {rel.toClient?.name}
                             </Link>
                             <Badge variant="secondary" className="text-xs">
-                              {rel.toClient?.clientType}
+                              {tClientType(rel.toClient?.clientType || "PERSON")}
                             </Badge>
                           </div>
                           {rel.relationshipType && (
@@ -362,7 +367,7 @@ export function ClientRelationships({
             {relationshipsTo.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  Linked From
+                  {t("linkedFrom")}
                 </h4>
                 <div className="space-y-2">
                   {relationshipsTo.map((rel) => (
@@ -387,7 +392,7 @@ export function ClientRelationships({
                               {rel.fromClient?.name}
                             </Link>
                             <Badge variant="secondary" className="text-xs">
-                              {rel.fromClient?.clientType}
+                              {tClientType(rel.fromClient?.clientType || "PERSON")}
                             </Badge>
                           </div>
                           {rel.relationshipType && (

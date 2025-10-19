@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreHorizontal, Edit, Archive, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +36,7 @@ export function PropertyCardActions({
 }: PropertyCardActionsProps) {
   const router = useRouter();
   const [isArchiving, setIsArchiving] = useState(false);
+  const t = useTranslations('properties.actions');
 
   const handleArchive = async () => {
     if (isArchiving) return;
@@ -42,10 +44,10 @@ export function PropertyCardActions({
     setIsArchiving(true);
     try {
       await archiveProperty(propertyId);
-      toast.success("Property archived successfully");
+      toast.success(t('archiveSuccess'));
       router.refresh();
     } catch (error) {
-      toast.error("Failed to archive property");
+      toast.error(t('archiveError'));
     } finally {
       setIsArchiving(false);
     }
@@ -56,7 +58,7 @@ export function PropertyCardActions({
       <Link href={`/dashboard/properties/${propertyId}`}>
         <Button variant="outline" size="sm">
           <Eye className="mr-2 h-4 w-4" />
-          View
+          {t('view')}
         </Button>
       </Link>
       
@@ -73,7 +75,7 @@ export function PropertyCardActions({
                 <DropdownMenuItem asChild>
                   <Link href={`/dashboard/properties/${propertyId}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit
+                    {t('edit')}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -86,7 +88,7 @@ export function PropertyCardActions({
                 disabled={isArchiving}
               >
                 <Archive className="mr-2 h-4 w-4" />
-                {isArchiving ? "Archiving..." : "Archive"}
+                {isArchiving ? t('archiving') : t('archive')}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

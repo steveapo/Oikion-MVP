@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,18 +21,20 @@ import {
 } from "@/components/ui/table";
 
 export default function TransactionsList() {
+  const t = useTranslations("admin.transactions");
+  
   return (
     <Card className="xl:col-span-2">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>Transactions</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
           <CardDescription className="text-balance">
-            Recent transactions from your store.
+            {t('description')}
           </CardDescription>
         </div>
         <Button size="sm" className="ml-auto shrink-0 gap-1 px-4">
           <Link href="#" className="flex items-center gap-2">
-            <span>View All</span>
+            <span>{t('viewAll')}</span>
             <ArrowUpRight className="hidden size-4 sm:block" />
           </Link>
         </Button>
@@ -40,11 +43,11 @@ export default function TransactionsList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Customer</TableHead>
-              <TableHead className="hidden xl:table-column">Type</TableHead>
-              <TableHead className="hidden xl:table-column">Status</TableHead>
-              <TableHead className="hidden xl:table-column">Date</TableHead>
-              <TableHead className="text-right">Amount</TableHead>
+              <TableHead>{t('columns.customer')}</TableHead>
+              <TableHead className="hidden xl:table-column">{t('columns.type')}</TableHead>
+              <TableHead className="hidden xl:table-column">{t('columns.status')}</TableHead>
+              <TableHead className="hidden xl:table-column">{t('columns.date')}</TableHead>
+              <TableHead className="text-right">{t('columns.amount')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,10 +58,10 @@ export default function TransactionsList() {
                   liam@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">Sale</TableCell>
+              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
               <TableCell className="hidden xl:table-column">
                 <Badge className="text-xs" variant="outline">
-                  Approved
+                  {t('statuses.approved')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
@@ -73,10 +76,10 @@ export default function TransactionsList() {
                   olivia@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">Refund</TableCell>
+              <TableCell className="hidden xl:table-column">{t('types.refund')}</TableCell>
               <TableCell className="hidden xl:table-column">
                 <Badge className="text-xs" variant="outline">
-                  Declined
+                  {t('statuses.declined')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
@@ -92,11 +95,11 @@ export default function TransactionsList() {
                 </div>
               </TableCell>
               <TableCell className="hidden xl:table-column">
-                Subscription
+                {t('types.subscription')}
               </TableCell>
               <TableCell className="hidden xl:table-column">
                 <Badge className="text-xs" variant="outline">
-                  Approved
+                  {t('statuses.approved')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
@@ -111,10 +114,10 @@ export default function TransactionsList() {
                   emma@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">Sale</TableCell>
+              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
               <TableCell className="hidden xl:table-column">
                 <Badge className="text-xs" variant="outline">
-                  Approved
+                  {t('statuses.approved')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
@@ -129,10 +132,10 @@ export default function TransactionsList() {
                   liam@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">Sale</TableCell>
+              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
               <TableCell className="hidden xl:table-column">
                 <Badge className="text-xs" variant="outline">
-                  Approved
+                  {t('statuses.approved')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">

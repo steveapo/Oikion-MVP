@@ -1,5 +1,6 @@
 import { User, Building, Phone, Mail } from "lucide-react";
 import { ClientType, UserRole } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -52,7 +53,10 @@ interface ContactServerCardProps {
  * Renders static HTML on the server to reduce client-side JavaScript
  * Only interactive elements (dropdown) are client components
  */
-export function ContactServerCard({ client, userRole, userId }: ContactServerCardProps) {
+export async function ContactServerCard({ client, userRole, userId }: ContactServerCardProps) {
+  const t = await getTranslations("relations.card");
+  const tClientType = await getTranslations("relations.clientType");
+  
   const canEdit = canCreateContent(userRole);
   const canDelete = canDeleteContent(userRole, client.createdBy === userId);
   
@@ -72,7 +76,7 @@ export function ContactServerCard({ client, userRole, userId }: ContactServerCar
               <h3 className="font-semibold text-lg">{client.name}</h3>
               <div className="flex items-center space-x-2 mt-1">
                 <Badge variant="outline" className="text-xs capitalize">
-                  {client.clientType.toLowerCase()}
+                  {tClientType(client.clientType)}
                 </Badge>
                 {tags.slice(0, 2).map((tag: string) => (
                   <Badge key={tag} variant="secondary" className="text-xs">
@@ -81,7 +85,7 @@ export function ContactServerCard({ client, userRole, userId }: ContactServerCar
                 ))}
                 {tags.length > 2 && (
                   <Badge variant="secondary" className="text-xs">
-                    +{tags.length - 2} more
+                    {t("more", { count: tags.length - 2 })}
                   </Badge>
                 )}
               </div>
@@ -122,23 +126,23 @@ export function ContactServerCard({ client, userRole, userId }: ContactServerCar
         {/* Statistics */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex space-x-4">
-            <span>{client._count.interactions} interactions</span>
-            <span>{client._count.notes} notes</span>
-            <span>{client._count.tasks} tasks</span>
+            <span>{client._count.interactions} {t("interactions")}</span>
+            <span>{client._count.notes} {t("notes")}</span>
+            <span>{client._count.tasks} {t("tasks")}</span>
           </div>
         </div>
 
         {/* Last Interaction */}
         {lastInteraction && (
           <div className="text-xs text-muted-foreground">
-            Last contact: {formatRelativeDate(new Date(lastInteraction.timestamp))}
+            {t("lastContact")}: {formatRelativeDate(new Date(lastInteraction.timestamp))}
           </div>
         )}
       </CardContent>
 
       <CardFooter className="flex items-center justify-between pt-3">
         <div className="text-xs text-muted-foreground">
-          By {client.creator.name || client.creator.email || "Unknown"}
+          {t("by")} {client.creator.name || client.creator.email || t("../detail.unknown")}
         </div>
         
         <ContactCardActions

@@ -36,21 +36,32 @@ export function LanguageSwitcher() {
     }
 
     startTransition(async () => {
+      // Show loading toast immediately
+      const loadingToastId = toast.loading("Translating Language...", {
+        id: "locale-switch",
+      });
+
       try {
         // Update user preference in database
         const result = await updateUserLocale(newLocale, pathname);
 
         if (!result.success) {
-          toast.error("Failed to change language");
+          toast.error("Failed to change language", { id: "locale-switch" });
           return;
         }
 
         setIsOpen(false);
+        
+        // Show success toast after a brief delay for smooth transition
+        setTimeout(() => {
+          toast.success("Language updated!", { id: "locale-switch" });
+        }, 2000);
+
         // Refresh in place; URL stays unprefixed. Locale comes from cookie.
         router.refresh();
       } catch (error) {
         console.error("Failed to change language:", error);
-        toast.error("Failed to change language");
+        toast.error("Failed to change language", { id: "locale-switch" });
       }
     });
   };

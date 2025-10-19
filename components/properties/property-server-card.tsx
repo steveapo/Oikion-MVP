@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { PropertyStatus, PropertyType, TransactionType, UserRole } from "@prisma/client";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -58,6 +59,15 @@ interface PropertyServerCardProps {
   property: PropertyCardData;
   userRole: UserRole;
   userId: string;
+  translations: {
+    noImage: string;
+    archived: string;
+    status: string;
+    list: string;
+    by: string;
+    unknown: string;
+    view: string;
+  };
 }
 
 /**
@@ -65,7 +75,7 @@ interface PropertyServerCardProps {
  * Renders static HTML on the server to reduce client-side JavaScript
  * Only interactive elements (dropdown) are client components
  */
-export function PropertyServerCard({ property, userRole, userId }: PropertyServerCardProps) {
+export function PropertyServerCard({ property, userRole, userId, translations }: PropertyServerCardProps) {
   const canEdit = canCreateContent(userRole);
   const canArchive = canDeleteContent(userRole, property.createdBy === userId);
   
@@ -80,7 +90,7 @@ export function PropertyServerCard({ property, userRole, userId }: PropertyServe
         {isArchived && (
           <div className="absolute left-3 top-3 z-10">
             <Badge className="bg-gray-700 text-white hover:bg-gray-800 px-3 py-1 text-sm font-semibold">
-              Archived
+              {translations.archived}
             </Badge>
           </div>
         )}
@@ -103,7 +113,7 @@ export function PropertyServerCard({ property, userRole, userId }: PropertyServe
           <div className="flex aspect-[16/10] w-full items-center justify-center bg-muted">
             <div className="text-center">
               <div className="text-4xl text-muted-foreground">🏠</div>
-              <p className="text-sm text-muted-foreground">No Image</p>
+              <p className="text-sm text-muted-foreground">{translations.noImage}</p>
             </div>
             <div className="absolute right-2 top-2">
               <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${transactionBadge.className}`}>
@@ -133,7 +143,7 @@ export function PropertyServerCard({ property, userRole, userId }: PropertyServe
                 </Badge>
                 {isArchived && (
                   <Badge className="bg-gray-700 text-white hover:bg-gray-800 px-2.5 py-0.5 text-xs font-semibold">
-                    Archived
+                    {translations.archived}
                   </Badge>
                 )}
               </div>
@@ -157,11 +167,11 @@ export function PropertyServerCard({ property, userRole, userId }: PropertyServe
           {property.listing && (
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">
-                Status: <span className="capitalize">{property.listing.marketingStatus.toLowerCase()}</span>
+                {translations.status} <span className="capitalize">{property.listing.marketingStatus.toLowerCase()}</span>
               </span>
               {property.listing.listPrice !== property.price && (
                 <span className="text-muted-foreground">
-                  List: {formatCurrency(property.listing.listPrice)}
+                  {translations.list} {formatCurrency(property.listing.listPrice)}
                 </span>
               )}
             </div>
@@ -178,7 +188,7 @@ export function PropertyServerCard({ property, userRole, userId }: PropertyServe
 
       <CardFooter className="flex items-center justify-between p-4 pt-0">
         <div className="text-xs text-muted-foreground">
-          By {property.creator.name || property.creator.email || "Unknown"}
+          {translations.by} {property.creator.name || property.creator.email || translations.unknown}
         </div>
         
         <PropertyCardActions

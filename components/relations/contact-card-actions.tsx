@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -35,9 +36,11 @@ export function ContactCardActions({
 }: ContactCardActionsProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
+  const t = useTranslations("relations.actions");
+  const tMessages = useTranslations("relations.messages");
 
   const handleDelete = async () => {
-    if (!confirm(`Are you sure you want to delete ${clientName}? This action cannot be undone.`)) {
+    if (!confirm(tMessages("deleteConfirm", { name: clientName }))) {
       return;
     }
 
@@ -46,10 +49,10 @@ export function ContactCardActions({
     setIsDeleting(true);
     try {
       await deleteClient(clientId);
-      toast.success("Relation deleted successfully");
+      toast.success(tMessages("deleteSuccess"));
       router.refresh();
     } catch (error) {
-      toast.error("Failed to delete relation");
+      toast.error(tMessages("deleteError"));
       setIsDeleting(false);
     }
   };
@@ -58,7 +61,7 @@ export function ContactCardActions({
     <div className="flex items-center gap-2">
       <Link href={`/dashboard/relations/${clientId}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
         <Eye className="mr-2 h-4 w-4" />
-        View
+        {t("view")}
       </Link>
       
       {(canEdit || canDelete) && (
@@ -74,7 +77,7 @@ export function ContactCardActions({
                 <DropdownMenuItem asChild>
                   <Link href={`/dashboard/relations/${clientId}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    Edit
+                    {t("edit")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -87,7 +90,7 @@ export function ContactCardActions({
                 disabled={isDeleting}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {isDeleting ? "Deleting..." : "Delete"}
+                {isDeleting ? t("deleting") : t("delete")}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

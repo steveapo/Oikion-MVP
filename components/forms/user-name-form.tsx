@@ -5,6 +5,7 @@ import { updateUserName, type FormData } from "@/actions/update-user-name";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -16,7 +17,7 @@ import { SectionColumns } from "@/components/dashboard/section-columns";
 import { Icons } from "@/components/shared/icons";
 
 interface UserNameFormProps {
-  user: Pick<User, "id" | "name">;
+  user: { id: string; name: string | null | undefined };
 }
 
 export function UserNameForm({ user }: UserNameFormProps) {
@@ -24,6 +25,7 @@ export function UserNameForm({ user }: UserNameFormProps) {
   const [updated, setUpdated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const updateUserNameWithId = updateUserName.bind(null, user.id);
+  const t = useTranslations("settings");
 
   const checkUpdate = (value) => {
     setUpdated(user.name !== value);
@@ -45,13 +47,13 @@ export function UserNameForm({ user }: UserNameFormProps) {
       const { status } = await updateUserNameWithId(data);
 
       if (status !== "success") {
-        toast.error("Something went wrong.", {
-          description: "Your name was not updated. Please try again.",
+        toast.error(t("errors.updateFailed"), {
+          description: t("errors.nameNotUpdated"),
         });
       } else {
         await update();
         setUpdated(false);
-        toast.success("Your name has been updated.");
+        toast.success(t("success.nameUpdated"));
       }
     });
   });
@@ -59,12 +61,12 @@ export function UserNameForm({ user }: UserNameFormProps) {
   return (
     <form onSubmit={onSubmit}>
       <SectionColumns
-        title="Your Name"
-        description="Please enter a display name you are comfortable with."
+        title={t("userNameForm.title")}
+        description={t("userNameForm.description")}
       >
         <div className="flex w-full items-center gap-2">
           <Label className="sr-only" htmlFor="name">
-            Name
+            {t("userNameForm.label")}
           </Label>
           <Input
             id="name"
@@ -83,8 +85,8 @@ export function UserNameForm({ user }: UserNameFormProps) {
               <Icons.spinner className="size-4 animate-spin" />
             ) : (
               <p>
-                Save
-                <span className="hidden sm:inline-flex">&nbsp;Changes</span>
+                {t("userNameForm.save")}
+                <span className="hidden sm:inline-flex">&nbsp;{t("actions.saveChanges").replace(t("userNameForm.save") + " ", "")}</span>
               </p>
             )}
           </Button>
@@ -95,7 +97,7 @@ export function UserNameForm({ user }: UserNameFormProps) {
               {errors.name.message}
             </p>
           )}
-          <p className="text-[13px] text-muted-foreground">Max 32 characters</p>
+          <p className="text-[13px] text-muted-foreground">{t("userNameForm.maxCharacters")}</p>
         </div>
       </SectionColumns>
     </form>

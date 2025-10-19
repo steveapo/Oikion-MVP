@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,10 @@ export function PropertiesFilters() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const tFilters = useTranslations('properties.filters');
+  const tStatus = useTranslations('properties.status');
+  const tTransaction = useTranslations('properties.transactionType');
+  const tPropertyType = useTranslations('properties.propertyType');
 
   const updateFilters = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -55,7 +60,7 @@ export function PropertiesFilters() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search by location (city, region)..."
+            placeholder={tFilters('searchPlaceholder')}
             className="pl-10"
             defaultValue={searchParams.get("location") ?? ""}
             onChange={(e) => {
@@ -72,7 +77,7 @@ export function PropertiesFilters() {
           <CollapsibleTrigger asChild>
             <Button variant="outline" size="sm">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
+              {tFilters('filtersButton')}
               {hasActiveFilters && (
                 <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                   !
@@ -85,7 +90,7 @@ export function PropertiesFilters() {
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
             <X className="mr-2 h-4 w-4" />
-            Clear All
+            {tFilters('clearAll')}
           </Button>
         )}
       </div>
@@ -97,7 +102,7 @@ export function PropertiesFilters() {
             
             {/* Status Filter */}
             <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
+              <Label htmlFor="status">{tFilters('status')}</Label>
               <Select
                 defaultValue={searchParams.get("status") ?? "all"}
                 onValueChange={(value) => updateFilters("status", value)}
@@ -106,18 +111,18 @@ export function PropertiesFilters() {
                   <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value={PropertyStatus.AVAILABLE}>Available</SelectItem>
-                  <SelectItem value={PropertyStatus.UNDER_OFFER}>Under Offer</SelectItem>
-                  <SelectItem value={PropertyStatus.SOLD}>Sold</SelectItem>
-                  <SelectItem value={PropertyStatus.RENTED}>Rented</SelectItem>
+                  <SelectItem value="all">{tFilters('allStatuses')}</SelectItem>
+                  <SelectItem value={PropertyStatus.AVAILABLE}>{tStatus('AVAILABLE')}</SelectItem>
+                  <SelectItem value={PropertyStatus.UNDER_OFFER}>{tStatus('UNDER_OFFER')}</SelectItem>
+                  <SelectItem value={PropertyStatus.SOLD}>{tStatus('SOLD')}</SelectItem>
+                  <SelectItem value={PropertyStatus.RENTED}>{tStatus('RENTED')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Transaction Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="transactionType">Transaction Type</Label>
+              <Label htmlFor="transactionType">{tFilters('type')}</Label>
               <Select
                 defaultValue={searchParams.get("transactionType") ?? "all"}
                 onValueChange={(value) => updateFilters("transactionType", value)}
@@ -126,10 +131,10 @@ export function PropertiesFilters() {
                   <SelectValue placeholder="All Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value={TransactionType.SALE}>Sale</SelectItem>
-                  <SelectItem value={TransactionType.RENT}>Rent</SelectItem>
-                  <SelectItem value={TransactionType.LEASE}>Lease</SelectItem>
+                  <SelectItem value="all">{tFilters('allTypes')}</SelectItem>
+                  <SelectItem value={TransactionType.SALE}>{tTransaction('SALE')}</SelectItem>
+                  <SelectItem value={TransactionType.RENT}>{tTransaction('RENT')}</SelectItem>
+                  <SelectItem value={TransactionType.LEASE}>{tTransaction('LEASE')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -145,19 +150,19 @@ export function PropertiesFilters() {
                   <SelectValue placeholder="All Properties" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Properties</SelectItem>
-                  <SelectItem value={PropertyType.APARTMENT}>Apartment</SelectItem>
-                  <SelectItem value={PropertyType.HOUSE}>House</SelectItem>
-                  <SelectItem value={PropertyType.LAND}>Land</SelectItem>
-                  <SelectItem value={PropertyType.COMMERCIAL}>Commercial</SelectItem>
-                  <SelectItem value={PropertyType.OTHER}>Other</SelectItem>
+                  <SelectItem value="all">{tFilters('allProperties')}</SelectItem>
+                  <SelectItem value={PropertyType.APARTMENT}>{tPropertyType('APARTMENT')}</SelectItem>
+                  <SelectItem value={PropertyType.HOUSE}>{tPropertyType('HOUSE')}</SelectItem>
+                  <SelectItem value={PropertyType.LAND}>{tPropertyType('LAND')}</SelectItem>
+                  <SelectItem value={PropertyType.COMMERCIAL}>{tPropertyType('COMMERCIAL')}</SelectItem>
+                  <SelectItem value={PropertyType.OTHER}>{tPropertyType('OTHER')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Bedrooms Filter */}
             <div className="space-y-2">
-              <Label htmlFor="bedrooms">Bedrooms</Label>
+              <Label htmlFor="bedrooms">{tFilters('bedrooms')}</Label>
               <Select
                 defaultValue={searchParams.get("bedrooms") ?? "all"}
                 onValueChange={(value) => updateFilters("bedrooms", value)}
@@ -166,7 +171,7 @@ export function PropertiesFilters() {
                   <SelectValue placeholder="Any" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Any</SelectItem>
+                  <SelectItem value="all">{tFilters('any')}</SelectItem>
                   <SelectItem value="1">1</SelectItem>
                   <SelectItem value="2">2</SelectItem>
                   <SelectItem value="3">3</SelectItem>
@@ -178,11 +183,11 @@ export function PropertiesFilters() {
 
             {/* Price Range */}
             <div className="space-y-2 md:col-span-2">
-              <Label>Price Range (€)</Label>
+              <Label>{tFilters('priceRange')}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  placeholder="Min Price"
+                  placeholder={tFilters('minPrice')}
                   defaultValue={searchParams.get("minPrice") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -192,10 +197,10 @@ export function PropertiesFilters() {
                     return () => clearTimeout(timeoutId);
                   }}
                 />
-                <span className="text-muted-foreground">to</span>
+                <span className="text-muted-foreground">{tFilters('to')}</span>
                 <Input
                   type="number"
-                  placeholder="Max Price"
+                  placeholder={tFilters('maxPrice')}
                   defaultValue={searchParams.get("maxPrice") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;

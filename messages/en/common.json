@@ -17,6 +17,7 @@
   },
   "status": {
     "loading": "Loading...",
+    "uploading": "Uploading...",
     "saving": "Saving...",
     "success": "Success!",
     "error": "Error",
@@ -44,5 +45,9 @@
     "successfullySaved": "Successfully saved",
     "successfullyDeleted": "Successfully deleted",
     "errorOccurred": "An error occurred. Please try again."
+  },
+  "charts": {
+    "title": "Charts",
+    "description": "List of charts by shadcn-ui"
   }
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -70,6 +71,7 @@ export function OrganizationSettingsForm({
 }: OrganizationSettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const { triggerReload } = useOrganizationContext();
+  const t = useTranslations("settings");
 
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
@@ -85,11 +87,11 @@ export function OrganizationSettingsForm({
     const result = await updateOrganization(organization.id, data);
 
     if (result.success) {
-      toast.success("Organization settings updated");
+      toast.success(t("success.organizationUpdated"));
       // Trigger reload to update org name in switcher
       triggerReload("update");
     } else {
-      toast.error(result.error || "Failed to update organization");
+      toast.error(result.error || t("errors.organizationUpdateFailed"));
     }
 
     setIsSaving(false);
@@ -98,12 +100,12 @@ export function OrganizationSettingsForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Organization Settings</CardTitle>
+        <CardTitle>{t("organizationForm.title")}</CardTitle>
         <CardDescription>
-          Manage your organization name and plan settings.
+          {t("organizationForm.description")}
           {organization.isPersonal && (
             <span className="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-              Personal
+              {t("organizationForm.personal")}
             </span>
           )}
         </CardDescription>
@@ -116,16 +118,16 @@ export function OrganizationSettingsForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Organization Name</FormLabel>
+                  <FormLabel>{t("organizationForm.nameLabel")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="My Organization"
+                      placeholder={t("organizationForm.namePlaceholder")}
                       {...field}
                       disabled={isSaving}
                     />
                   </FormControl>
                   <FormDescription>
-                    This is the display name of your organization.
+                    {t("organizationForm.nameDescription")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -137,7 +139,7 @@ export function OrganizationSettingsForm({
               name="plan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Plan</FormLabel>
+                  <FormLabel>{t("organizationForm.planLabel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -145,16 +147,16 @@ export function OrganizationSettingsForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a plan" />
+                        <SelectValue placeholder={t("organizationForm.planPlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(planLabels).map(([value, label]) => (
+                      {Object.keys(planLabels).map((value) => (
                         <SelectItem key={value} value={value}>
                           <div className="flex flex-col">
-                            <span className="font-medium">{label}</span>
+                            <span className="font-medium">{t(`organizationForm.plans.${value}`)}</span>
                             <span className="text-xs text-muted-foreground">
-                              {planDescriptions[value as keyof typeof planDescriptions]}
+                              {t(`organizationForm.planDescriptions.${value}`)}
                             </span>
                           </div>
                         </SelectItem>
@@ -162,7 +164,7 @@ export function OrganizationSettingsForm({
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    Select the plan tier for this organization (frontend only).
+                    {t("organizationForm.planDescription")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -171,7 +173,7 @@ export function OrganizationSettingsForm({
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? t("organizationForm.saving") : t("actions.saveChanges")}
             </Button>
           </CardFooter>
         </form>

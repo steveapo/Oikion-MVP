@@ -23,6 +23,9 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
     redirect("/?error=session_invalid");
   }
 
+  // At this point, user is guaranteed to exist
+  const currentUser = user as NonNullable<typeof user>;
+
   const filteredLinks = sidebarLinks.map((section) => ({
     ...section,
     items: section.items.filter(({ authorizeOnly }) => {
@@ -30,7 +33,7 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
       if (!authorizeOnly) return true;
       
       // Check if user has sufficient role level (respects hierarchy)
-      return hasRole(user.role, authorizeOnly);
+      return hasRole(currentUser.role, authorizeOnly);
     }),
   }));
 

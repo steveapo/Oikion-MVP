@@ -1,4 +1,5 @@
 import { redirect } from "@/i18n/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { auth } from "@/auth";
 import { HeaderSection } from "@/components/shared/header-section";
@@ -8,11 +9,16 @@ import { PendingInvitations } from "@/components/members/pending-invitations";
 import { canManageMembers } from "@/lib/roles";
 import { getMembers } from "@/actions/members";
 import { getInvitations } from "@/actions/invitations";
+import { constructMetadata } from "@/lib/utils";
 
-export const metadata = {
-  title: "Members",
-  description: "Manage your organization members and invitations",
-};
+export async function generateMetadata() {
+  const t = await getTranslations('members');
+  
+  return constructMetadata({
+    title: `${t('header.title')} – Oikion`,
+    description: t('header.description'),
+  });
+}
 
 export default async function MembersPage() {
   const session = await auth();
@@ -21,7 +27,10 @@ export default async function MembersPage() {
     redirect("/login");
   }
 
-  const canManage = canManageMembers(session.user.role);
+  // TypeScript guard - session is guaranteed to be non-null after redirect
+  const user = session!.user;
+  const t = await getTranslations('members');
+  const canManage = canManageMembers(user.role);
 
   const [membersResult, invitationsResult] = await Promise.all([
     getMembers(),
@@ -43,22 +52,25 @@ export default async function MembersPage() {
   return (
     <div className="space-y-8">
       <HeaderSection
-        label="Organization"
-        title="Members"
-        subtitle={`Manage your team members and invitations • ${members.length} member${members.length !== 1 ? "s" : ""}`}
+        label={t('header.label')}
+        title={t('header.title')}
+        subtitle={members.length === 1 
+          ? t('header.subtitle', { count: members.length })
+          : t('header.subtitlePlural', { count: members.length })
+        }
       />
 
       {canManage && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">Invite New Member</h2>
+            <h2 className="text-xl font-semibold mb-4">{t('sections.inviteNew')}</h2>
             <InviteMemberForm />
           </div>
 
           {pendingInvitations.length > 0 && (
             <div>
               <h2 className="text-xl font-semibold mb-4">
-                Pending Invitations ({pendingInvitations.length})
+                {t('sections.pendingCount', { count: pendingInvitations.length })}
               </h2>
               <PendingInvitations invitations={pendingInvitations} />
             </div>
@@ -67,12 +79,12 @@ export default async function MembersPage() {
       )}
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">Team Members</h2>
+        <h2 className="text-xl font-semibold mb-4">{t('sections.teamMembers')}</h2>
         <MembersList 
           members={members} 
-          currentUserId={session.user.id!} 
+          currentUserId={user.id!} 
           canManage={canManage}
-          currentUserRole={session.user.role}
+          currentUserRole={user.role}
         />
       </div>
     </div>

@@ -111,7 +111,7 @@ export async function generateMetadata() {
 **Before**:
 ```typescript
 export const metadata = constructMetadata({
-  title: "Pricing – SaaS Starter",
+  title: "Pricing – Oikion",
   description: "Explore our subscription plans.",
 });
 ```
@@ -143,8 +143,8 @@ export async function generateMetadata() {
 **Before**:
 ```typescript
 export const metadata = constructMetadata({
-  title: "Blog – SaaS Starter",
-  description: "Latest news and updates from Next SaaS Starter.",
+  title: "Blog – Oikion",
+  description: "Latest news and updates from Oikion.",
 });
 ```
 

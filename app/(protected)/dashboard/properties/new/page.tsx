@@ -12,11 +12,11 @@ export const metadata = constructMetadata({
 export default async function NewPropertyPage() {
   const user = await getCurrentUser();
   
-  if (!user) {
+  if (!user || !user.id) {
     redirect("/login");
   }
 
-  if (!canCreateContent(user.role)) {
+  if (!canCreateContent(user!.role)) {
     redirect("/dashboard/properties");
   }
 

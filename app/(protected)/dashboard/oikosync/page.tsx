@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import { Activity, Rss } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -30,6 +32,7 @@ interface OikosyncPageProps {
 
 async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   const user = await getCurrentUser();
+  const t = await getTranslations("oikosync");
   
   if (!user) {
     return null;
@@ -50,28 +53,27 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading="Oikosync"
-          text="Stay updated with your organization&apos;s activity feed."
+          heading={t("header.title")}
+          text={t("header.description")}
         />
 
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="activity" />
-          <EmptyPlaceholder.Title>Subscribe to view activity feed</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t("subscription.title")}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            See your team&apos;s activity in real-time with a subscription.
-            Track property updates, client interactions, and more.
+            {t("subscription.description")}
           </EmptyPlaceholder.Description>
           <Link href="/dashboard/billing">
-            <Button>View Subscription Plans</Button>
+            <Button>{t("subscription.viewPlans")}</Button>
           </Link>
         </EmptyPlaceholder>
 
         {/* Demo activities for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
           <div className="mx-auto max-w-md text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">Demo Activity Feed</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">{t("subscription.demoTitle")}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Here&apos;s what your activity feed will look like:
+              {t("subscription.demoDescription")}
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded border bg-muted/50 p-3 text-left">
@@ -130,8 +132,8 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading="Oikosync"
-        text="Stay updated with your organization&apos;s activity feed."
+        heading={t("header.title")}
+        text={t("header.description")}
       />
 
       <ActivityFilters />
@@ -139,11 +141,11 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
       {activitiesData.activities.length === 0 ? (
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="activity" />
-          <EmptyPlaceholder.Title>No activities found</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t("empty.noResults")}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {Object.keys(filters).some(key => filters[key as keyof typeof filters])
-              ? "Try adjusting your filters to see more activities."
-              : "No activities in the selected time period. Activities will appear here as your team works with properties and clients."
+              ? t("empty.tryAdjustFilters")
+              : t("empty.noActivitiesInPeriod")
             }
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
@@ -158,9 +160,11 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   );
 }
 
-export default function OikosyncPage({ searchParams }: OikosyncPageProps) {
+import { ActivityFeedSkeleton } from "@/components/shared/activity-feed-skeleton";
+
+export default async function OikosyncPage({ searchParams }: OikosyncPageProps) {
   return (
-    <Suspense fallback={<div>Loading activities...</div>}>
+    <Suspense fallback={<ActivityFeedSkeleton count={8} />}>
       <OikosyncContent searchParams={searchParams} />
     </Suspense>
   );
