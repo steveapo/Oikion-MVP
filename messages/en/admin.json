@@ -1,0 +1,51 @@
+{
+  "header": {
+    "title": "Admin Panel",
+    "description": "Access only for users with ADMIN role."
+  },
+  "sections": {
+    "overview": "Overview",
+    "users": "Users",
+    "organizations": "Organizations",
+    "subscriptions": "Subscriptions"
+  },
+  "orders": {
+    "header": {
+      "title": "Orders",
+      "description": "Check and manage your latest orders."
+    },
+    "empty": {
+      "title": "No orders listed",
+      "description": "You don't have any orders yet. Start ordering a product.",
+      "button": "Buy Products"
+    }
+  },
+  "widgets": {
+    "subscriptions": {
+      "title": "Subscriptions",
+      "value": "+2350",
+      "change": "+180.1% from last month"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "description": "Recent transactions from your store.",
+    "viewAll": "View All",
+    "columns": {
+      "customer": "Customer",
+      "type": "Type",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount"
+    },
+    "types": {
+      "sale": "Sale",
+      "refund": "Refund",
+      "subscription": "Subscription"
+    },
+    "statuses": {
+      "approved": "Approved",
+      "declined": "Declined"
+    }
+  }
+}

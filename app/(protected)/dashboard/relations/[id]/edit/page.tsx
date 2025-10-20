@@ -26,7 +26,7 @@ export default async function EditContactPage({ params }: EditContactPageProps) 
     redirect("/login");
   }
 
-  if (!canCreateContent(user.role)) {
+  if (!canCreateContent(user!.role)) {
     redirect("/dashboard/relations");
   }
 

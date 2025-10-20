@@ -18,7 +18,7 @@ export default async function NewContactPage() {
     redirect("/login");
   }
 
-  if (!canCreateContent(user.role)) {
+  if (!canCreateContent(user!.role)) {
     redirect("/dashboard/relations");
   }
 

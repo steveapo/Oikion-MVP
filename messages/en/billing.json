@@ -18,5 +18,16 @@
     "testMode": "Test mode enabled - no real charges will be made",
     "active": "Your subscription is active",
     "expired": "Your subscription has expired"
+  },
+  "info": {
+    "title": "Subscription Plan",
+    "description": "You are currently on the <strong>{plan}</strong> plan.",
+    "renewsOn": "Your plan renews on {date}.",
+    "cancelsOn": "Your plan will be canceled on {date}.",
+    "choosePlan": "Choose a plan"
+  },
+  "demo": {
+    "title": "This is a demo app.",
+    "description": "Oikion app is a demo app using a Stripe test environment. You can find a list of test card numbers on the <a>Stripe docs</a>."
   }
 }

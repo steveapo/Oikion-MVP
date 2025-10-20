@@ -1,15 +1,29 @@
 {
-  "menu": {
-    "dashboard": "Πίνακας Ελέγχου",
-    "properties": "Ακίνητα",
-    "relations": "Σχέσεις",
-    "oikosync": "Oikosync",
-    "members": "Μέλη",
-    "billing": "Χρεώσεις",
-    "settings": "Ρυθμίσεις"
+  "sidebar": {
+    "sections": {
+      "menu": "ΜΕΝΟΥ",
+      "options": "ΕΠΙΛΟΓΕΣ"
+    },
+    "menu": {
+      "dashboard": "Πίνακας Ελέγχου",
+      "properties": "Ακίνητα",
+      "relations": "Σχέσεις",
+      "oikosync": "Oikosync",
+      "members": "Μέλη",
+      "billing": "Χρεώσεις"
+    },
+    "options": {
+      "settings": "Ρυθμίσεις",
+      "documentation": "Τεκμηρίωση",
+      "support": "Υποστήριξη"
+    }
   },
   "user": {
     "profile": "Προφίλ",
     "signOut": "Αποσύνδεση"
+  },
+  "testingVersion": {
+    "title": "Δοκιμαστική Έκδοση (0.1)",
+    "description": "Πρώιμη alpha έκδοση. Οι λειτουργίες μπορεί να είναι ημιτελείς και ενδέχεται σφάλματα. Τα σχόλιά σας μας βοηθούν!"
   }
 }

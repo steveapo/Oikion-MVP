@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { UserRole } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { SectionColumns } from "@/components/dashboard/section-columns";
 import { Icons } from "@/components/shared/icons";
@@ -27,6 +28,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
   const [showPersonalOrgDialog, setShowPersonalOrgDialog] = useState(false);
   const { setShowDeleteOrganizationModal, DeleteOrganizationModal } =
     useDeleteOrganizationModal();
+  const t = useTranslations("settings");
 
   const role = session?.user?.role;
   // Only ORG_OWNER can delete the organization
@@ -43,15 +45,14 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
       <Dialog open={showPersonalOrgDialog} onOpenChange={setShowPersonalOrgDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Personal Agency</DialogTitle>
+            <DialogTitle>{t("deleteOrganization.personalOrg.title")}</DialogTitle>
             <DialogDescription className="pt-2">
-              This is your personal agency, if you are a Solo Agent it's for you.
+              {t("deleteOrganization.personalOrg.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-4">
             <p className="text-sm text-muted-foreground">
-              Your personal agency is automatically created when you sign up and cannot be deleted.
-              It's your private workspace for managing your own properties and clients.
+              {t("deleteOrganization.personalOrg.explanation")}
             </p>
           </div>
           <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -60,7 +61,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
               variant="outline"
               onClick={() => setShowPersonalOrgDialog(false)}
             >
-              Okay, I understand
+              {t("deleteOrganization.personalOrg.understand")}
             </Button>
             <Button
               type="button"
@@ -70,15 +71,15 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 // TODO: Open create organization modal/flow
               }}
             >
-              Create a new Agency
+              {t("deleteOrganization.personalOrg.createNew")}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
       <SectionColumns
-        title="Delete Agency"
-        description="Only agency owners can delete the agency and all its data."
+        title={t("deleteOrganization.title")}
+        description={t("deleteOrganization.description")}
       >
         <div className="relative">
           {/* Blurred content for personal org */}
@@ -89,11 +90,10 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
           }`}>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-medium">Are you sure?</span>
+                <span className="text-[15px] font-medium">{t("deleteOrganization.confirm")}</span>
               </div>
               <div className="text-balance text-sm text-muted-foreground">
-                Permanently delete your agency and all associated data.
-                This action cannot be undone.
+                {t("deleteOrganization.warning")}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 disabled={isPersonalOrg}
               >
                 <Icons.trash className="mr-2 size-4" />
-                <span>Delete Agency</span>
+                <span>{t("deleteOrganization.button")}</span>
               </Button>
             </div>
           </div>
@@ -117,10 +117,10 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
               <div className="text-center space-y-2 px-4">
                 <Icons.help className="mx-auto size-8 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground">
-                  This is your personal agency
+                  {t("deleteOrganization.personalOrg.badge")}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Click to learn more
+                  {t("deleteOrganization.personalOrg.clickToLearn")}
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 className="relative z-10"
               >
                 <Icons.trash className="mr-2 size-4" />
-                <span>Delete Agency</span>
+                <span>{t("deleteOrganization.button")}</span>
               </Button>
             </div>
           )}

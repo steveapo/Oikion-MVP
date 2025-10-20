@@ -51,8 +51,8 @@ export default async function ContactPage({ params }: ContactPageProps) {
     notFound();
   }
 
-  const canEdit = canCreateContent(user.role);
-  const canDelete = canDeleteContent(user.role, client.createdBy === user.id);
+  const canEdit = canCreateContent(user!.role);
+  const canDelete = canDeleteContent(user!.role, client.createdBy === user!.id);
 
   try {
     // Get relationships

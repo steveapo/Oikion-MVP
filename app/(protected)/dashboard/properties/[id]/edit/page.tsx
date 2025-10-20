@@ -35,11 +35,11 @@ export async function generateMetadata({ params }: EditPropertyPageProps) {
 export default async function EditPropertyPage({ params }: EditPropertyPageProps) {
   const user = await getCurrentUser();
   
-  if (!user) {
+  if (!user || !user.id) {
     redirect("/login");
   }
 
-  if (!canCreateContent(user.role)) {
+  if (!canCreateContent(user!.role)) {
     redirect("/dashboard/properties");
   }
 
@@ -50,7 +50,7 @@ export default async function EditPropertyPage({ params }: EditPropertyPageProps
     notFound();
   }
 
-  const canArchive = canDeleteContent(user.role, property.createdBy === user.id);
+  const canArchive = canDeleteContent(user!.role, property.createdBy === user!.id);
 
   const displayLocation = property.address 
     ? [property.address.city, property.address.region].filter(Boolean).join(", ")

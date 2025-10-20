@@ -1,4 +1,5 @@
 import { redirect } from "@/i18n/navigation";
+import { getTranslations } from 'next-intl/server';
 
 import { getCurrentUser } from "@/lib/session";
 import { canAccessBilling } from "@/lib/roles";
@@ -9,40 +10,44 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { BillingInfo } from "@/components/pricing/billing-info";
 import { Icons } from "@/components/shared/icons";
 
-export const metadata = constructMetadata({
-  title: "Billing – SaaS Starter",
-  description: "Manage billing and your subscription plan.",
-});
+export async function generateMetadata() {
+  const t = await getTranslations('billing');
+  
+  return constructMetadata({
+    title: `${t('header.title')} – Oikion`,
+    description: t('header.description'),
+  });
+}
 
 export default async function BillingPage() {
   const user = await getCurrentUser();
+  const t = await getTranslations('billing');
 
-  if (!user) {
+  if (!user || !user.id) {
     redirect("/login");
   }
 
-  if (!canAccessBilling(user.role)) {
+  // TypeScript guard - user is guaranteed to be non-null after redirect
+  const currentUser = user!;
+
+  if (!canAccessBilling(currentUser.role)) {
     redirect("/dashboard");
   }
-
-  if (!user.id) {
-    redirect("/login");
-  }
-  const userSubscriptionPlan = await getUserSubscriptionPlan(user.id!);
+  
+  const userSubscriptionPlan = await getUserSubscriptionPlan(currentUser.id!);
 
   return (
     <>
       <DashboardHeader
-        heading="Billing"
-        text="Manage billing and your subscription plan."
+        heading={t('header.title')}
+        text={t('header.description')}
       />
       <div className="grid gap-8">
         <Alert className="!pl-14">
           <Icons.warning />
-          <AlertTitle>This is a demo app.</AlertTitle>
+          <AlertTitle>{t('demo.title')}</AlertTitle>
           <AlertDescription className="text-balance">
-            SaaS Starter app is a demo app using a Stripe test environment. You
-            can find a list of test card numbers on the{" "}
+            {t('demo.description')}{" "}
             <a
               href="https://stripe.com/docs/testing#cards"
               target="_blank"

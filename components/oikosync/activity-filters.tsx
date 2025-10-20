@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Filter, X, Calendar } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ export function ActivityFilters() {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [actors, setActors] = useState<Actor[]>([]);
+  const t = useTranslations("oikosync.filters");
 
   useEffect(() => {
     const loadActors = async () => {
@@ -76,7 +78,7 @@ export function ActivityFilters() {
           <CollapsibleTrigger asChild>
             <Button variant="outline" size="sm">
               <Filter className="mr-2 h-4 w-4" />
-              Filters
+              {t("title")}
               {hasActiveFilters && (
                 <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                   !
@@ -89,7 +91,7 @@ export function ActivityFilters() {
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
             <X className="mr-2 h-4 w-4" />
-            Clear All
+            {t("clearAll")}
           </Button>
         )}
       </div>
@@ -102,16 +104,16 @@ export function ActivityFilters() {
             {/* Actor Filter */}
             {actors.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="actorId">Team Member</Label>
+                <Label htmlFor="actorId">{t("teamMember")}</Label>
                 <Select
                   defaultValue={searchParams.get("actorId") ?? "all"}
                   onValueChange={(value) => updateFilters("actorId", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="All Members" />
+                    <SelectValue placeholder={t("allMembers")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Members</SelectItem>
+                    <SelectItem value="all">{t("allMembers")}</SelectItem>
                     {actors.map((actor) => (
                       <SelectItem key={actor.id} value={actor.id}>
                         {actor.name || actor.email}
@@ -124,20 +126,20 @@ export function ActivityFilters() {
 
             {/* Entity Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="entityType">Entity Type</Label>
+              <Label htmlFor="entityType">{t("entityType")}</Label>
               <Select
                 defaultValue={searchParams.get("entityType") ?? "all"}
                 onValueChange={(value) => updateFilters("entityType", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Types" />
+                  <SelectValue placeholder={t("allTypes")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value={EntityType.PROPERTY}>Property</SelectItem>
-                  <SelectItem value={EntityType.CLIENT}>Client</SelectItem>
-                  <SelectItem value={EntityType.TASK}>Task</SelectItem>
-                  <SelectItem value={EntityType.USER}>User</SelectItem>
+                  <SelectItem value="all">{t("allTypes")}</SelectItem>
+                  <SelectItem value={EntityType.PROPERTY}>{t("properties")}</SelectItem>
+                  <SelectItem value={EntityType.CLIENT}>{t("clients")}</SelectItem>
+                  <SelectItem value={EntityType.TASK}>{t("tasks")}</SelectItem>
+                  <SelectItem value={EntityType.USER}>{t("members")}</SelectItem>
                   <SelectItem value={EntityType.SUBSCRIPTION}>Subscription</SelectItem>
                 </SelectContent>
               </Select>
@@ -145,63 +147,63 @@ export function ActivityFilters() {
 
             {/* Action Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="actionType">Action Type</Label>
+              <Label htmlFor="actionType">{t("actionType")}</Label>
               <Select
                 defaultValue={searchParams.get("actionType") ?? "all"}
                 onValueChange={(value) => updateFilters("actionType", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="All Actions" />
+                  <SelectValue placeholder={t("allActions")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Actions</SelectItem>
+                  <SelectItem value="all">{t("allActions")}</SelectItem>
                   
                   {/* Property Actions */}
-                  <SelectItem value={ActionType.PROPERTY_CREATED}>Property Created</SelectItem>
-                  <SelectItem value={ActionType.PROPERTY_UPDATED}>Property Updated</SelectItem>
-                  <SelectItem value={ActionType.PROPERTY_ARCHIVED}>Property Archived</SelectItem>
-                  <SelectItem value={ActionType.MEDIA_ADDED}>Media Added</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_CREATED}>{t("../actionTypes.propertyCreated")}</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_UPDATED}>{t("../actionTypes.propertyUpdated")}</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_ARCHIVED}>{t("../actionTypes.propertyArchived")}</SelectItem>
+                  <SelectItem value={ActionType.MEDIA_ADDED}>{t("../actionTypes.mediaAdded")}</SelectItem>
                   
                   {/* Client Actions */}
-                  <SelectItem value={ActionType.CLIENT_CREATED}>Client Created</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_UPDATED}>Client Updated</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_CREATED}>Relationship Added</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_DELETED}>Relationship Broke</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_CREATED}>{t("../actionTypes.clientCreated")}</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_UPDATED}>{t("../actionTypes.clientUpdated")}</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_CREATED}>{t("../actionTypes.clientRelationshipCreated")}</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_DELETED}>{t("../actionTypes.clientRelationshipDeleted")}</SelectItem>
                   
                   {/* Interaction Actions */}
-                  <SelectItem value={ActionType.INTERACTION_LOGGED}>Interaction Logged</SelectItem>
-                  <SelectItem value={ActionType.NOTE_ADDED}>Note Added</SelectItem>
+                  <SelectItem value={ActionType.INTERACTION_LOGGED}>{t("../actionTypes.interactionLogged")}</SelectItem>
+                  <SelectItem value={ActionType.NOTE_ADDED}>{t("../actionTypes.noteAdded")}</SelectItem>
                   
                   {/* Task Actions */}
-                  <SelectItem value={ActionType.TASK_CREATED}>Task Created</SelectItem>
-                  <SelectItem value={ActionType.TASK_COMPLETED}>Task Completed</SelectItem>
+                  <SelectItem value={ActionType.TASK_CREATED}>{t("../actionTypes.taskCreated")}</SelectItem>
+                  <SelectItem value={ActionType.TASK_COMPLETED}>{t("../actionTypes.taskCompleted")}</SelectItem>
                   
                   {/* Organization Actions */}
-                  <SelectItem value={ActionType.MEMBER_INVITED}>Member Invited</SelectItem>
-                  <SelectItem value={ActionType.MEMBER_ROLE_CHANGED}>Role Changed</SelectItem>
+                  <SelectItem value={ActionType.MEMBER_INVITED}>{t("../actionTypes.memberInvited")}</SelectItem>
+                  <SelectItem value={ActionType.MEMBER_ROLE_CHANGED}>{t("../actionTypes.memberRoleChanged")}</SelectItem>
                   
                   {/* Subscription Actions */}
-                  <SelectItem value={ActionType.SUBSCRIPTION_STARTED}>Subscription Started</SelectItem>
-                  <SelectItem value={ActionType.SUBSCRIPTION_UPDATED}>Subscription Updated</SelectItem>
-                  <SelectItem value={ActionType.SUBSCRIPTION_CANCELLED}>Subscription Cancelled</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_STARTED}>{t("../actionTypes.subscriptionStarted")}</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_UPDATED}>{t("../actionTypes.subscriptionUpdated")}</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_CANCELLED}>{t("../actionTypes.subscriptionCancelled")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Date Range */}
             <div className="space-y-2">
-              <Label>Date Range</Label>
+              <Label>{t("dateRange")}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="date"
-                  placeholder="From"
+                  placeholder={t("from")}
                   defaultValue={searchParams.get("dateFrom") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     updateFilters("dateFrom", value || null);
                   }}
                 />
-                <span className="text-muted-foreground">to</span>
+                <span className="text-muted-foreground">{t("to")}</span>
                 <Input
                   type="date"
                   placeholder="To"

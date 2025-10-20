@@ -19,6 +19,7 @@
     "validate:i18n": "node scripts/validate-translations.mjs"
   },
   "dependencies": {
+    "-": "^0.0.1",
     "@auth/prisma-adapter": "^2.4.1",
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "^5.17.0",

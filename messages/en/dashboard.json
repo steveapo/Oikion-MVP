@@ -7,5 +7,25 @@
     "title": "No content created",
     "description": "You don't have any content yet. Start creating content.",
     "button": "Add Content"
+  },
+  "recentProperties": {
+    "title": "Recent Properties",
+    "description": "Your latest property listings",
+    "empty": "No properties yet. Start adding your first property!",
+    "addFirst": "Add Property",
+    "viewAll": "View All",
+    "bed": "bed",
+    "bath": "bath",
+    "in": "in"
+  },
+  "recentClients": {
+    "title": "Recent Clients",
+    "description": "Your latest client contacts",
+    "empty": "No clients yet. Start adding your first client!",
+    "addFirst": "Add Client",
+    "viewAll": "View All",
+    "interactions": "interactions",
+    "notes": "notes",
+    "tasks": "tasks"
   }
 }

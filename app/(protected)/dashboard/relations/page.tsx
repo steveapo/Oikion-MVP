@@ -181,11 +181,11 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
   );
 }
 
+import { ContactListSkeleton } from "@/components/shared/contact-card-skeleton";
+
 export default async function ContactsPage({ searchParams }: ContactsPageProps) {
-  const t = await getTranslations('relations');
-  
   return (
-    <Suspense fallback={<div>{t('loading')}</div>}>
+    <Suspense fallback={<ContactListSkeleton count={6} />}>
       <ContactsContent searchParams={searchParams} />
     </Suspense>
   );

@@ -1,4 +1,5 @@
 import { UserRole } from "@prisma/client";
+import { getTranslations } from "next-intl/server";
 import {
   Pagination,
   PaginationContent,
@@ -22,13 +23,25 @@ interface PropertiesListServerProps {
  * Server-rendered properties list wrapper
  * Uses PropertyServerCard for each property to minimize client-side JavaScript
  */
-export function PropertiesListServer({ 
+export async function PropertiesListServer({ 
   properties, 
   totalPages, 
   currentPage, 
   userRole, 
   userId 
 }: PropertiesListServerProps) {
+  const t = await getTranslations('properties.card');
+  
+  const translations = {
+    noImage: t('noImage'),
+    archived: t('archived'),
+    status: t('status'),
+    list: t('list'),
+    by: t('by'),
+    unknown: t('unknown'),
+    view: t('view'),
+  };
+  
   return (
     <div className="space-y-6">
       {/* Properties Grid */}
@@ -38,7 +51,8 @@ export function PropertiesListServer({
             key={property.id} 
             property={property} 
             userRole={userRole} 
-            userId={userId} 
+            userId={userId}
+            translations={translations}
           />
         ))}
       </div>

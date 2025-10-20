@@ -17,6 +17,7 @@
   },
   "status": {
     "loading": "Φόρτωση...",
+    "uploading": "Μεταφόρτωση...",
     "saving": "Αποθήκευση...",
     "success": "Επιτυχία!",
     "error": "Σφάλμα",
@@ -44,5 +45,9 @@
     "successfullySaved": "Αποθηκεύτηκε με επιτυχία",
     "successfullyDeleted": "Διαγράφηκε με επιτυχία",
     "errorOccurred": "Παρουσιάστηκε σφάλμα. Παρακαλώ δοκιμάστε ξανά."
+  },
+  "charts": {
+    "title": "Γραφήματα",
+    "description": "Λίστα γραφημάτων από το shadcn-ui"
   }
 }

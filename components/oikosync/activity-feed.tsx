@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import { useTranslations } from "next-intl";
 import { 
   Activity, 
   Home, 
@@ -105,8 +106,22 @@ export function ActivityFeed({ activities, totalPages, currentPage }: ActivityFe
 
 function ActivityCard({ activity }: { activity: ActivityItem }) {
   const actorName = activity.actor.name || activity.actor.email || "Unknown User";
-  const { icon, color, message, linkHref } = getActivityDisplay(activity);
+  const t = useTranslations("oikosync.activity");
+  const tEntityTypes = useTranslations("oikosync.entityTypes");
+  const { icon, color, message, linkHref } = getActivityDisplay(activity, t);
   const Icon = icon;
+
+  // Map entity type to translation key
+  const getEntityTypeKey = (entityType: string): string => {
+    const typeMap: Record<string, string> = {
+      "PROPERTY": "property",
+      "CLIENT": "client",
+      "TASK": "task",
+      "USER": "user",
+      "SUBSCRIPTION": "subscription"
+    };
+    return typeMap[entityType] || entityType.toLowerCase();
+  };
 
   return (
     <Card>
@@ -131,7 +146,7 @@ function ActivityCard({ activity }: { activity: ActivityItem }) {
                   )}
                 </p>
                 <div className="mt-1 flex items-center space-x-2 text-xs text-muted-foreground">
-                  <span>by {actorName}</span>
+                  <span>{t("by")} {actorName}</span>
                   <span>•</span>
                   <span>{formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}</span>
                 </div>
@@ -139,14 +154,14 @@ function ActivityCard({ activity }: { activity: ActivityItem }) {
               
               {/* Entity Badge */}
               <Badge variant="outline" className="ml-2">
-                {activity.entityType.toLowerCase()}
+                {tEntityTypes(getEntityTypeKey(activity.entityType))}
               </Badge>
             </div>
 
             {/* Additional payload info */}
             {activity.payload && Object.keys(activity.payload).length > 0 && (
               <div className="mt-2 text-xs text-muted-foreground">
-                {renderPayloadInfo(activity)}
+                {renderPayloadInfo(activity, t)}
               </div>
             )}
           </div>
@@ -156,7 +171,7 @@ function ActivityCard({ activity }: { activity: ActivityItem }) {
   );
 }
 
-function getActivityDisplay(activity: ActivityItem) {
+function getActivityDisplay(activity: ActivityItem, t: any) {
   const { actionType, entityType, entityDetails, payload } = activity;
 
   switch (actionType) {
@@ -164,7 +179,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Home,
         color: "bg-blue-100 text-blue-600",
-        message: `created property ${entityDetails?.propertyType?.toLowerCase() || "property"} ${getEntityLocation(entityDetails)}`,
+        message: `${t("created")} ${t("property")} ${entityDetails?.propertyType?.toLowerCase() || t("property")} ${getEntityLocation(entityDetails, t)}`,
         linkHref: `/dashboard/properties/${activity.entityId}`,
       };
 
@@ -172,7 +187,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Home,
         color: "bg-blue-100 text-blue-600",
-        message: `updated property ${entityDetails?.propertyType?.toLowerCase() || "property"} ${getEntityLocation(entityDetails)}`,
+        message: `${t("updated")} ${t("property")} ${entityDetails?.propertyType?.toLowerCase() || t("property")} ${getEntityLocation(entityDetails, t)}`,
         linkHref: `/dashboard/properties/${activity.entityId}`,
       };
 
@@ -180,7 +195,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Archive,
         color: "bg-gray-100 text-gray-600",
-        message: `archived property ${entityDetails?.propertyType?.toLowerCase() || "property"} ${getEntityLocation(entityDetails)}`,
+        message: `${t("archived")} ${t("property")} ${entityDetails?.propertyType?.toLowerCase() || t("property")} ${getEntityLocation(entityDetails, t)}`,
         linkHref: `/dashboard/properties/${activity.entityId}`,
       };
 
@@ -188,7 +203,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Eye,
         color: "bg-purple-100 text-purple-600",
-        message: `added ${payload?.count || "images"} to property ${getEntityLocation(entityDetails)}`,
+        message: `${t("added")} ${payload?.count || t("images")} ${t("to")} ${t("property")} ${getEntityLocation(entityDetails, t)}`,
         linkHref: `/dashboard/properties/${activity.entityId}`,
       };
 
@@ -196,7 +211,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Users,
         color: "bg-green-100 text-green-600",
-        message: `created ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || "Unknown"}"`,
+        message: `${t("created")} ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || t("unknown")}"`,
         linkHref: `/dashboard/relations/${activity.entityId}`,
       };
 
@@ -204,7 +219,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Users,
         color: "bg-green-100 text-green-600",
-        message: `updated ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || "Unknown"}"`,
+        message: `${t("updated")} ${entityDetails?.clientType?.toLowerCase() || "client"} "${entityDetails?.name || t("unknown")}"`,
         linkHref: `/dashboard/relations/${activity.entityId}`,
       };
 
@@ -212,7 +227,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Link2,
         color: "bg-teal-100 text-teal-600",
-        message: `linked "${payload?.fromClientName || "Unknown"}" with "${payload?.toClientName || "Unknown"}" as ${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || "related"}${payload?.position ? ` (${payload.position})` : ""}`,
+        message: `${t("linked")} "${payload?.fromClientName || t("unknown")}" ${t("with")} "${payload?.toClientName || t("unknown")}" ${t("as")} ${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || "related"}${payload?.position ? ` (${payload.position})` : ""}`,
         linkHref: `/dashboard/relations/${payload?.fromClientId}`,
       };
 
@@ -220,7 +235,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Unlink,
         color: "bg-red-100 text-red-600",
-        message: `broke link between "${payload?.fromClientName || "Unknown"}" and "${payload?.toClientName || "Unknown"}" (${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || "relationship"})`,
+        message: `${t("broke")} ${t("linkBetween")} "${payload?.fromClientName || t("unknown")}" ${t("and")} "${payload?.toClientName || t("unknown")}" (${payload?.relationshipType?.toLowerCase()?.replace("_", " ") || t("relationship")})`,
         linkHref: `/dashboard/relations/${payload?.fromClientId}`,
       };
 
@@ -228,7 +243,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: FileText,
         color: "bg-yellow-100 text-yellow-600",
-        message: `added a note${entityType === "CLIENT" && entityDetails ? ` to ${entityDetails.name}` : ""}`,
+        message: `${t("added")} ${t("note")}${entityType === "CLIENT" && entityDetails ? ` ${t("to")} ${entityDetails.name}` : ""}`,
         linkHref: entityType === "CLIENT" ? `/dashboard/relations/${activity.entityId}` : `/dashboard/properties/${activity.entityId}`,
       };
 
@@ -237,7 +252,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: interactionIcon,
         color: "bg-indigo-100 text-indigo-600",
-        message: `logged a ${payload?.interactionType?.toLowerCase()?.replace("_", " ") || "interaction"}${payload?.clientName ? ` with ${payload.clientName}` : ""}`,
+        message: `${t("logged")} ${payload?.interactionType?.toLowerCase()?.replace("_", " ") || "interaction"}${payload?.clientName ? ` ${t("with")} ${payload.clientName}` : ""}`,
         linkHref: `/dashboard/relations/${activity.entityId}`,
       };
 
@@ -245,7 +260,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Calendar,
         color: "bg-orange-100 text-orange-600",
-        message: `created task "${entityDetails?.title || payload?.taskTitle || "Unknown task"}"`,
+        message: `${t("created")} ${t("task")} "${entityDetails?.title || payload?.taskTitle || t("unknown")}"`,
         linkHref: null,
       };
 
@@ -253,7 +268,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: CheckCircle,
         color: "bg-green-100 text-green-600",
-        message: `completed task "${entityDetails?.title || payload?.taskTitle || "Unknown task"}"`,
+        message: `${t("completed")} ${t("task")} "${entityDetails?.title || payload?.taskTitle || t("unknown")}"`,
         linkHref: null,
       };
 
@@ -261,7 +276,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: UserPlus,
         color: "bg-blue-100 text-blue-600",
-        message: `invited ${payload?.email || "someone"} to the organization`,
+        message: `${t("invited")} ${payload?.email || t("someone")} ${t("to")} organization`,
         linkHref: null,
       };
 
@@ -269,7 +284,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Settings,
         color: "bg-purple-100 text-purple-600",
-        message: `changed ${entityDetails?.name || "user"}'s role to ${payload?.role || "unknown"}`,
+        message: `${t("changed")} ${entityDetails?.name || t("user")}'s ${t("role")} ${t("to")} ${payload?.role || t("unknown")}`,
         linkHref: null,
       };
 
@@ -277,7 +292,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: CreditCard,
         color: "bg-green-100 text-green-600",
-        message: `started subscription (${payload?.plan || "Plan"})`,
+        message: `${t("started")} ${t("subscription")} (${payload?.plan || "Plan"})`,
         linkHref: "/dashboard/billing",
       };
 
@@ -285,7 +300,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: CreditCard,
         color: "bg-blue-100 text-blue-600",
-        message: `updated subscription to ${payload?.plan || "new plan"}`,
+        message: `${t("updated")} ${t("subscription")} ${t("to")} ${payload?.plan || "new plan"}`,
         linkHref: "/dashboard/billing",
       };
 
@@ -293,7 +308,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: CreditCard,
         color: "bg-red-100 text-red-600",
-        message: "cancelled subscription",
+        message: `${t("cancelled")} ${t("subscription")}`,
         linkHref: "/dashboard/billing",
       };
 
@@ -301,7 +316,7 @@ function getActivityDisplay(activity: ActivityItem) {
       return {
         icon: Activity,
         color: "bg-gray-100 text-gray-600",
-        message: `performed ${actionType.toLowerCase().replace("_", " ")}`,
+        message: `${t("performed")} ${actionType.toLowerCase().replace("_", " ")}`,
         linkHref: null,
       };
   }
@@ -322,18 +337,18 @@ function getInteractionIcon(type?: string) {
   }
 }
 
-function getEntityLocation(entityDetails: any) {
+function getEntityLocation(entityDetails: any, t: any) {
   if (!entityDetails) return "";
   
   if (entityDetails.address) {
     const parts = [entityDetails.address.city, entityDetails.address.region].filter(Boolean);
-    return parts.length > 0 ? `in ${parts.join(", ")}` : "";
+    return parts.length > 0 ? `${t("in")} ${parts.join(", ")}` : "";
   }
   
   return "";
 }
 
-function renderPayloadInfo(activity: ActivityItem) {
+function renderPayloadInfo(activity: ActivityItem, t: any) {
   const { actionType, payload } = activity;
   
   if (!payload || Object.keys(payload).length === 0) return null;
@@ -347,19 +362,19 @@ function renderPayloadInfo(activity: ActivityItem) {
           currency: "EUR",
           maximumFractionDigits: 0,
         }).format(payload.price);
-        return `Price: ${formattedPrice}`;
+        return `${t("price")} ${formattedPrice}`;
       }
       break;
       
     case "TASK_CREATED":
       if (payload.assignedTo) {
-        return `Assigned to: ${payload.assignedTo}`;
+        return `${t("assignedTo")} ${payload.assignedTo}`;
       }
       break;
       
     case "PROPERTY_UPDATED":
       if (payload.updatedFields && Array.isArray(payload.updatedFields)) {
-        return `Updated: ${payload.updatedFields.join(", ")}`;
+        return `${t("updatedFields")} ${payload.updatedFields.join(", ")}`;
       }
       break;
   }

@@ -28,7 +28,7 @@ export default async function PropertyImagesPage({ params }: PropertyImagesPageP
     redirect("/login");
   }
 
-  if (!canCreateContent(user.role)) {
+  if (!canCreateContent(user!.role)) {
     redirect("/dashboard/properties");
   }
 

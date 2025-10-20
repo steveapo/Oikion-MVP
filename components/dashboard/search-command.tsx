@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { SidebarNavItem } from "@/types";
 
 import { cn } from "@/lib/utils";
@@ -19,6 +20,7 @@ import { Icons } from "@/components/shared/icons";
 export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
+  const t = useTranslations();
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -59,7 +61,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           {links.map((section) => (
-            <CommandGroup key={section.title} heading={section.title}>
+            <CommandGroup key={section.title} heading={t(section.title)}>
               {section.items.map((item) => {
                 const Icon = Icons[item.icon || "arrowRight"];
                 return (
@@ -70,7 +72,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
                     }}
                   >
                     <Icon className="mr-2 size-5" />
-                    {item.title}
+                    {t(item.title)}
                   </CommandItem>
                 );
               })}

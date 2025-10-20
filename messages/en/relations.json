@@ -5,12 +5,50 @@
   },
   "actions": {
     "add": "Add Relation",
-    "addFirst": "Add Your First Relation"
+    "addFirst": "Add Your First Relation",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "more": "More actions"
   },
   "tabs": {
     "clients": "Clients",
     "interactions": "Interactions",
     "tasks": "Tasks"
+  },
+  "filters": {
+    "clientType": "Client Type",
+    "search": "Search",
+    "searchPlaceholder": "Search by name, email, or phone...",
+    "tags": "Tags",
+    "all": "All",
+    "allTypes": "All Types",
+    "filters": "Filters",
+    "clearAll": "Clear All",
+    "clear": "Clear Filters"
+  },
+  "card": {
+    "by": "By",
+    "interactions": "interactions",
+    "notes": "notes",
+    "tasks": "tasks",
+    "lastContact": "Last contact",
+    "more": "+{count} more"
+  },
+  "clientType": {
+    "PERSON": "Person",
+    "COMPANY": "Company",
+    "person": "person",
+    "company": "company"
+  },
+  "messages": {
+    "deleteSuccess": "Relation deleted successfully",
+    "deleteError": "Failed to delete relation",
+    "deleteConfirm": "Are you sure you want to delete {name}? This action cannot be undone."
   },
   "empty": {
     "title": "No relations found",
@@ -26,5 +64,70 @@
     "lastContact": "Last contact: {time}",
     "interactions": "{count} interactions"
   },
-  "loading": "Loading relations..."
+  "loading": "Loading relations...",
+  "new": {
+    "title": "Add Relation",
+    "description": "Create a new relation record in your CRM."
+  },
+  "detail": {
+    "individual": "Individual",
+    "company": "Company",
+    "relationRecord": "relation record",
+    "contactInformation": "Contact Information",
+    "contactDescription": "Primary and secondary contact details",
+    "primaryContact": "Primary Contact",
+    "secondaryContact": "Secondary Contact",
+    "tags": "Tags",
+    "createdBy": "Created by",
+    "createdOn": "Created on",
+    "unknown": "Unknown"
+  },
+  "relationships": {
+    "title": "Relationships",
+    "description": "Connected companies and people",
+    "descriptionPerson": "Connected companies and people",
+    "descriptionCompany": "Connected people and companies",
+    "addLink": "Add Link",
+    "createTitle": "Create Relationship",
+    "createDescription": "Connect this person to another person or company",
+    "createDescriptionCompany": "Connect this company to another person or company",
+    "selectLabel": "Select Relationship",
+    "selectPlaceholder": "Choose a person or company",
+    "typeLabel": "Relationship Type",
+    "positionLabel": "Position / Role (Optional)",
+    "positionPlaceholder": "e.g., CEO, Manager, Employee",
+    "positionDescription": "The position of the person in the company",
+    "linkedTo": "Linked To",
+    "linkedFrom": "Linked From",
+    "noRelationships": "No relationships yet. Add connections to people and companies.",
+    "noAvailable": "No available relations",
+    "people": "People",
+    "companies": "Companies",
+    "selectError": "Please select a relation",
+    "createSuccess": "Relationship created successfully!",
+    "createError": "Failed to create relationship",
+    "deleteConfirm": "Are you sure you want to remove this relationship?",
+    "deleteSuccess": "Relationship removed",
+    "deleteError": "Failed to remove relationship",
+    "types": {
+      "EMPLOYEE": "Employee",
+      "PARTNER": "Partner",
+      "VENDOR": "Vendor",
+      "CLIENT": "Client",
+      "REFERRAL": "Referral",
+      "FAMILY": "Family",
+      "COLLEAGUE": "Colleague",
+      "OTHER": "Other"
+    },
+    "typeDescriptions": {
+      "EMPLOYEE": "Works for the company",
+      "PARTNER": "Business partnership",
+      "VENDOR": "Vendor/Supplier",
+      "CLIENT": "Client relationship",
+      "REFERRAL": "Referral source",
+      "FAMILY": "Family member",
+      "COLLEAGUE": "Professional colleague",
+      "OTHER": "Other relationship"
+    }
+  }
 }

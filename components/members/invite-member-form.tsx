@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { UserRole } from "@prisma/client";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,27 +43,10 @@ const inviteFormSchema = z.object({
 
 type InviteFormValues = z.infer<typeof inviteFormSchema>;
 
-const roleLabels: Record<UserRole, { label: string; description: string }> = {
-  ORG_OWNER: {
-    label: "Owner",
-    description: "Full access to everything, including billing",
-  },
-  ADMIN: {
-    label: "Admin",
-    description: "Manage members and all organization content",
-  },
-  AGENT: {
-    label: "Agent",
-    description: "Create and edit properties and clients",
-  },
-  VIEWER: {
-    label: "Viewer",
-    description: "Read-only access to organization data",
-  },
-};
-
 export function InviteMemberForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("members.inviteForm");
+  const tRoles = useTranslations("members.roleDescriptions");
 
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
@@ -80,19 +64,19 @@ export function InviteMemberForm() {
     setIsLoading(false);
 
     if (result.success) {
-      toast.success("Invitation sent successfully");
+      toast.success(t("successMessage"));
       form.reset();
     } else {
-      toast.error(result.error || "Failed to send invitation");
+      toast.error(result.error || t("errorMessage"));
     }
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Invite New Member</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Send an invitation to join your organization
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -103,17 +87,17 @@ export function InviteMemberForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                  <FormLabel>{t("emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="colleague@example.com"
+                      placeholder={t("emailPlaceholder")}
                       type="email"
                       {...field}
                       disabled={isLoading}
                     />
                   </FormControl>
                   <FormDescription>
-                    They will receive an email invitation to join
+                    {t("emailDescription")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -125,7 +109,7 @@ export function InviteMemberForm() {
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
+                  <FormLabel>{t("roleLabel")}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -133,16 +117,16 @@ export function InviteMemberForm() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder={t("rolePlaceholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.entries(roleLabels).map(([value, roleInfo]) => (
-                        <SelectItem key={value} value={value}>
+                      {Object.values(UserRole).map((role) => (
+                        <SelectItem key={role} value={role}>
                           <div className="flex flex-col items-start">
-                            <span className="font-medium">{roleInfo.label}</span>
+                            <span className="font-medium">{tRoles(`${role}.label`)}</span>
                             <span className="text-xs text-muted-foreground">
-                              {roleInfo.description}
+                              {tRoles(`${role}.description`)}
                             </span>
                           </div>
                         </SelectItem>
@@ -150,7 +134,7 @@ export function InviteMemberForm() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    {roleLabels[field.value]?.description}
+                    {tRoles(`${field.value}.description`)}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +143,7 @@ export function InviteMemberForm() {
 
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-              Send Invitation
+              {t("submitButton")}
             </Button>
           </form>
         </Form>

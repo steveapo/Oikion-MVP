@@ -1,0 +1,10 @@
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - '@swc/core'
+  - '@vercel/speed-insights'
+  - contentlayer2
+  - esbuild
+  - prisma
+  - protobufjs
+  - sharp

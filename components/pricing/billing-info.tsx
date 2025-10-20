@@ -1,5 +1,6 @@
 import Link from "next/link";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import { CustomerPortalButton } from "@/components/forms/customer-portal-button";
 import { buttonVariants } from "@/components/ui/button";
@@ -19,6 +20,7 @@ interface BillingInfoProps extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
+  const t = useTranslations('billing.info');
   const {
     title,
     description,
@@ -31,9 +33,12 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Subscription Plan</CardTitle>
+        <CardTitle>{t('title')}</CardTitle>
         <CardDescription>
-          You are currently on the <strong>{title}</strong> plan.
+          {t.rich('description', {
+            plan: title,
+            strong: (chunks) => <strong>{chunks}</strong>
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent>{description}</CardContent>
@@ -41,9 +46,8 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
         {isPaid ? (
           <p className="text-sm font-medium text-muted-foreground">
             {isCanceled
-              ? "Your plan will be canceled on "
-              : "Your plan renews on "}
-            {formatDate(stripeCurrentPeriodEnd)}.
+              ? t('cancelsOn', { date: formatDate(stripeCurrentPeriodEnd) })
+              : t('renewsOn', { date: formatDate(stripeCurrentPeriodEnd) })}
           </p>
         ) : null}
 
@@ -51,7 +55,7 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
           <CustomerPortalButton userStripeId={stripeCustomerId} />
         ) : (
           <Link href="/pricing" className={cn(buttonVariants())}>
-            Choose a plan
+            {t('choosePlan')}
           </Link>
         )}
       </CardFooter>

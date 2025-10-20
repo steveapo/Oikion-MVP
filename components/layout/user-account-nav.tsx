@@ -46,20 +46,28 @@ export function UserAccountNav() {
 
     startTransition(async () => {
       try {
+        // Show loading toast
+        toast.loading("Translating Language...", { id: "locale-switch" });
+
         // Update user preference in database
         const result = await updateUserLocale(newLocale, pathname);
 
         if (!result.success) {
-          toast.error("Failed to change language");
+          toast.error("Failed to change language", { id: "locale-switch" });
           return;
         }
 
         setOpen(false);
         // Use router.replace with locale parameter for proper locale routing
-        router.replace(pathname, { locale: newLocale });
+        router.replace(pathname, { locale: newLocale as "en" | "el" });
+
+        // Show success toast after 2 seconds
+        setTimeout(() => {
+          toast.success("Language updated!", { id: "locale-switch" });
+        }, 2000);
       } catch (error) {
         console.error("Failed to change language:", error);
-        toast.error("Failed to change language");
+        toast.error("Failed to change language", { id: "locale-switch" });
       }
     });
   };
