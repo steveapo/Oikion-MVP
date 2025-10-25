@@ -1,4 +1,4 @@
-import Image from "next/image";
+:import Image from "next/image";
 import { placeholderBlurhash } from "@/lib/utils";
 import { PropertyStatus, PropertyType, TransactionType, UserRole } from "@prisma/client";
 import { useTranslations } from "next-intl";
