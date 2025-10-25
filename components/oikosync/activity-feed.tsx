@@ -44,7 +44,7 @@ interface ActivityItem {
     id: string;
     name: string | null;
     email: string | null;
-  } | null;
+  };
   entityDetails: any;
 }
 
@@ -105,7 +105,7 @@ export function ActivityFeed({ activities, totalPages, currentPage }: ActivityFe
 }
 
 function ActivityCard({ activity }: { activity: ActivityItem }) {
-  const actorName = activity.actor?.name || activity.actor?.email || "Unknown User";
+  const actorName = activity.actor.name || activity.actor.email || "Unknown User";
   const t = useTranslations("oikosync.activity");
   const tEntityTypes = useTranslations("oikosync.entityTypes");
   const { icon, color, message, linkHref } = getActivityDisplay(activity, t);

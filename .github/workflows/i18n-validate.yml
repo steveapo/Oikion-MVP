@@ -1,0 +1,43 @@
+name: i18n-validate
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Tolgee pull (if secrets present)
+        if: ${{ vars.TOLGEE_API_URL != '' && secrets.TOLGEE_API_KEY_READ != '' && secrets.TOLGEE_PROJECT_ID != '' }}
+        env:
+          TOLGEE_API_URL: ${{ vars.TOLGEE_API_URL }}
+          TOLGEE_API_KEY_READ: ${{ secrets.TOLGEE_API_KEY_READ }}
+          TOLGEE_PROJECT_ID: ${{ secrets.TOLGEE_PROJECT_ID }}
+        run: pnpm tolgee:pull
+
+      - name: Validate translations
+        run: pnpm validate:i18n
+
+

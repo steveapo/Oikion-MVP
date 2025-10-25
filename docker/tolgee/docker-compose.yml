@@ -1,0 +1,101 @@
+version: "3.9"
+
+services:
+  tolgee:
+    image: tolgee/tolgee:latest
+    container_name: tolgee
+    restart: unless-stopped
+    ports:
+      - "8085:8080"
+    environment:
+      # Database
+      - SPRING_DATASOURCE_URL=${TOLGEE_DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${TOLGEE_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${TOLGEE_DB_PASSWORD}
+
+      # Admin bootstrap (optional — alternatively configure via UI)
+      - TOLGEE_AUTHENTICATION_INITIAL_USERNAME=${TOLGEE_ADMIN_EMAIL}
+      - TOLGEE_AUTHENTICATION_INITIAL_PASSWORD=${TOLGEE_ADMIN_PASSWORD}
+
+      # File storage (optional: keep defaults to local filesystem)
+      # - TOLGEE_FILE_STORAGE_S3_ENABLED=true
+      # - TOLGEE_FILE_STORAGE_S3_BUCKET=${TOLGEE_S3_BUCKET}
+      # - TOLGEE_FILE_STORAGE_S3_REGION=${TOLGEE_S3_REGION}
+      # - TOLGEE_FILE_STORAGE_S3_ACCESS_KEY=${TOLGEE_S3_ACCESS_KEY}
+      # - TOLGEE_FILE_STORAGE_S3_SECRET_KEY=${TOLGEE_S3_SECRET_KEY}
+
+      # Misc
+      - TOLGEE_FORCE_SSH=${TOLGEE_FORCE_SSL:-true}
+
+    depends_on:
+      - postgres
+    networks:
+      - tolgee
+
+  postgres:
+    image: postgres:15
+    container_name: tolgee-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=tolgee
+      - POSTGRES_USER=${TOLGEE_DB_USERNAME}
+      - POSTGRES_PASSWORD=${TOLGEE_DB_PASSWORD}
+    volumes:
+      - tolgee_pg_data:/var/lib/postgresql/data
+    networks:
+      - tolgee
+
+volumes:
+  tolgee_pg_data:
+
+networks:
+  tolgee:
+    driver: bridge
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tolgee
+      POSTGRES_PASSWORD: tolgee
+      POSTGRES_DB: tolgee
+    ports:
+      - "5433:5432"
+    volumes:
+      - tolgee_pg_data:/var/lib/postgresql/data
+
+  tolgee:
+    image: tolgee/tolgee:latest
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      TOLGEE_APP_NAME: Tolgee
+      TOLGEE_AUTH_ENABLED: 'true'
+      TOLGEE_AUTH_LOGIN_METHODS: 'PASSWORD'
+      TOLGEE_AUTH_CREATE_INITIAL_USER: 'true'
+      TOLGEE_AUTH_INITIAL_USERNAME: admin@your-domain.test
+      TOLGEE_AUTH_INITIAL_PASSWORD: change-me
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tolgee
+      SPRING_DATASOURCE_USERNAME: tolgee
+      SPRING_DATASOURCE_PASSWORD: tolgee
+      # SMTP (optional)
+      # SPRING_MAIL_HOST: smtp
+      # SPRING_MAIL_PORT: 1025
+      # SPRING_MAIL_USERNAME: ''
+      # SPRING_MAIL_PASSWORD: ''
+      # SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: 'false'
+      # SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: 'false'
+    ports:
+      - "8085:8080" # access Tolgee at http://localhost:8085
+    volumes:
+      - tolgee_data:/data
+
+volumes:
+  tolgee_pg_data:
+  tolgee_data:
+
+

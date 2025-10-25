@@ -1,0 +1,34 @@
+---
+title: Language Switcher
+description: Component to change the active locale and persist user preference.
+published: true
+---
+
+## Overview
+
+Renders a dropdown allowing users to switch locales. Selection is saved to the user profile and `NEXT_LOCALE` cookie.
+
+## Import
+
+```tsx
+import { LanguageSwitcher } from "@/components/shared/language-switcher";
+```
+
+## Usage
+
+```tsx
+<LanguageSwitcher />
+```
+
+## Behavior
+
+- Calls `updateUserLocale(locale)` server action
+- Sets `NEXT_LOCALE` cookie and saves `preferredLocale` in DB
+- Triggers `router.refresh()` to re-render with the new locale
+
+## Notes
+
+- Ensure locales (`i18n/config.ts`) exist in Tolgee project
+- Middleware has `localeDetection: false` to avoid unwanted redirects
+
+
