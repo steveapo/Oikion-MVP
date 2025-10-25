@@ -1,7 +1,5 @@
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { getTranslations, getLocale } from 'next-intl/server';
-
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { constructMetadata } from "@/lib/utils";
@@ -10,9 +8,6 @@ import { PricingCards } from "@/components/pricing/pricing-cards";
 import { PricingFaq } from "@/components/pricing/pricing-faq";
 
 export async function generateMetadata() {
-  const locale = await getLocale();
-  const t = await getTranslations('marketing.pricing');
-  
   return constructMetadata({
     title: t('metadata.title'),
     description: t('metadata.description'),

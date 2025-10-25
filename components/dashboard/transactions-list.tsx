@@ -1,7 +1,5 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,20 +19,18 @@ import {
 } from "@/components/ui/table";
 
 export default function TransactionsList() {
-  const t = useTranslations("admin.transactions");
-  
   return (
     <Card className="xl:col-span-2">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle>{""}</CardTitle>
           <CardDescription className="text-balance">
-            {t('description')}
+            {""}
           </CardDescription>
         </div>
         <Button size="sm" className="ml-auto shrink-0 gap-1 px-4">
           <Link href="#" className="flex items-center gap-2">
-            <span>{t('viewAll')}</span>
+            <span>{""}</span>
             <ArrowUpRight className="hidden size-4 sm:block" />
           </Link>
         </Button>

@@ -1,7 +1,5 @@
 import Link from "next/link";
 import * as React from "react";
-import { useTranslations } from "next-intl";
-
 import { CustomerPortalButton } from "@/components/forms/customer-portal-button";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -20,7 +18,6 @@ interface BillingInfoProps extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
-  const t = useTranslations('billing.info');
   const {
     title,
     description,
@@ -33,7 +30,7 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
+        <CardTitle>{""}</CardTitle>
         <CardDescription>
           {t.rich('description', {
             plan: title,
@@ -46,8 +43,8 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
         {isPaid ? (
           <p className="text-sm font-medium text-muted-foreground">
             {isCanceled
-              ? t('cancelsOn', { date: formatDate(stripeCurrentPeriodEnd) })
-              : t('renewsOn', { date: formatDate(stripeCurrentPeriodEnd) })}
+              ? ""
+              : ""}
           </p>
         ) : null}
 
@@ -55,7 +52,7 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
           <CustomerPortalButton userStripeId={stripeCustomerId} />
         ) : (
           <Link href="/pricing" className={cn(buttonVariants())}>
-            {t('choosePlan')}
+            {""}
           </Link>
         )}
       </CardFooter>

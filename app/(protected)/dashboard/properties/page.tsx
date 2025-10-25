@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
-import { getTranslations } from 'next-intl/server';
-
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { canCreateContent } from "@/lib/roles";
@@ -17,8 +15,6 @@ import { PropertyListSkeleton } from "@/components/properties/property-card-skel
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
-  const t = await getTranslations('properties');
-  
   return constructMetadata({
     title: `${t('header.title')} - Oikion`,
     description: t('header.description'),
@@ -40,8 +36,6 @@ interface PropertiesPageProps {
 
 async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   const user = await getCurrentUser();
-  const t = await getTranslations('properties');
-  
   if (!user) {
     return null;
   }

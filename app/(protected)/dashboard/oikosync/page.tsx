@@ -1,8 +1,5 @@
 import { Suspense } from "react";
 import { Activity, Rss } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
-
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { getActivities } from "@/actions/activities";
@@ -32,8 +29,6 @@ interface OikosyncPageProps {
 
 async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   const user = await getCurrentUser();
-  const t = await getTranslations("oikosync");
-  
   if (!user) {
     return null;
   }

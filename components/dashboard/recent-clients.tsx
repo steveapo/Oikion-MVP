@@ -1,6 +1,5 @@
 import { Link } from "@/i18n/navigation";
 import { Users, Mail, Phone, Building2, User } from "lucide-react";
-import { useTranslations } from "next-intl";
 import type { ClientType } from "@prisma/client";
 
 import {
@@ -33,24 +32,22 @@ interface RecentClientsProps {
 }
 
 export function RecentClients({ clients }: RecentClientsProps) {
-  const t = useTranslations("dashboard.recentClients");
-
   if (clients.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
-            {t("title")}
+            {""}
           </CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardDescription>{""}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">{t("empty")}</p>
+            <p className="text-sm text-muted-foreground">{""}</p>
             <Link href="/dashboard/relations/new">
               <Button className="mt-4" size="sm">
-                {t("addFirst")}
+                {""}
               </Button>
             </Link>
           </div>
@@ -66,13 +63,13 @@ export function RecentClients({ clients }: RecentClientsProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
-              {t("title")}
+              {""}
             </CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
+            <CardDescription>{""}</CardDescription>
           </div>
           <Link href="/dashboard/relations">
             <Button variant="ghost" size="sm">
-              {t("viewAll")}
+              {""}
             </Button>
           </Link>
         </div>
@@ -120,13 +117,13 @@ export function RecentClients({ clients }: RecentClientsProps) {
                     </div>
                     {client._count && (
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span>{client._count.interactions} {t('interactions')}</span>
+                        <span>{client._count.interactions} {""}</span>
                         <span>•</span>
-                        <span>{client._count.notes} {t('notes')}</span>
+                        <span>{client._count.notes} {""}</span>
                         {client._count.tasks > 0 && (
                           <>
                             <span>•</span>
-                            <span>{client._count.tasks} {t('tasks')}</span>
+                            <span>{client._count.tasks} {""}</span>
                           </>
                         )}
                       </div>

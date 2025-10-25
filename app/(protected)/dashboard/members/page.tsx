@@ -1,6 +1,4 @@
 import { redirect } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
-
 import { auth } from "@/auth";
 import { HeaderSection } from "@/components/shared/header-section";
 import { InviteMemberForm } from "@/components/members/invite-member-form";
@@ -14,8 +12,6 @@ import { PersonalOrgNotice } from "@/components/members/personal-org-notice";
 import { constructMetadata } from "@/lib/utils";
 
 export async function generateMetadata() {
-  const t = await getTranslations('members');
-  
   const title = `${await t('header.title')} – Oikion`;
   const description = await t('header.description');
   return constructMetadata({ title, description });
@@ -30,7 +26,6 @@ export default async function MembersPage() {
 
   // TypeScript guard - session is guaranteed to be non-null after redirect
   const user = session!.user;
-  const t = await getTranslations('members');
   const canManage = canManageMembers(user.role);
 
   const [membersResult, invitationsResult, currentOrg] = await Promise.all([
@@ -56,10 +51,10 @@ export default async function MembersPage() {
   const headerTitle = await t('header.title');
   const teamMembersTitle = await t('sections.teamMembers');
   const inviteNewTitle = await t('sections.inviteNew');
-  const pendingTitle = await t('sections.pendingCount', { count: pendingInvitations.length });
+  const pendingTitle = await "";
   const subtitleText = members.length === 1 
-    ? await t('header.subtitle', { count: members.length })
-    : await t('header.subtitlePlural', { count: members.length });
+    ? await ""
+    : await "";
 
   // Personal org: show notice and prevent inviting
   if (currentOrg?.isPersonal) {

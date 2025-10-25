@@ -2,7 +2,6 @@
 
 import { Fragment, useEffect, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
 import { NavItem, SidebarNavItem } from "@/types";
 import { Menu, PanelLeftClose, PanelRightClose } from "lucide-react";
 
@@ -31,8 +30,6 @@ interface DashboardSidebarProps {
 
 export function DashboardSidebar({ links, initialCurrentOrg, initialAllOrgs }: DashboardSidebarProps) {
   const path = usePathname();
-  const t = useTranslations();
-
   // NOTE: Use this if you want save in local storage -- Credits: Hosna Qasmei
   //
   // const [isSidebarExpanded, setIsSidebarExpanded] = useState(() => {
@@ -185,8 +182,6 @@ export function MobileSheetSidebar({ links, initialCurrentOrg, initialAllOrgs }:
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const { isSm, isMobile } = useMediaQuery();
-  const t = useTranslations();
-
   if (isSm || isMobile) {
     return (
       <Sheet open={open} onOpenChange={setOpen}>

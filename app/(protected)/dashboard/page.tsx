@@ -1,4 +1,3 @@
-import { getTranslations } from 'next-intl/server';
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
@@ -9,23 +8,19 @@ import { RecentPropertiesSkeleton } from "@/components/dashboard/recent-properti
 import { RecentClientsSkeleton } from "@/components/dashboard/recent-clients-skeleton";
 
 export async function generateMetadata() {
-  const t = await getTranslations('dashboard');
   return constructMetadata({
-    title: t('header.title') as unknown as string,
-    // Avoid extra session fetch during metadata generation
-    description: t('header.description', { role: 'User' }) as unknown as string,
+    title: "Dashboard",
+    description: "Manage your properties, clients, and real estate operations",
   });
 }
 
 export default async function DashboardPage() {
   const user = await getCurrentUser();
-  const t = await getTranslations('dashboard');
-
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading={t('header.title') as unknown as string}
-        text={t('header.description', { role: user?.role || 'User' }) as unknown as string}
+        heading="Dashboard"
+        text={`Manage your properties, clients, and real estate operations${user?.role ? ` as ${user.role}` : ''}`}
       />
 
       {/* Two column layout for recent properties and clients - streamed independently */}

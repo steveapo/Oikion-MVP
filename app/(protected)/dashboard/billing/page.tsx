@@ -1,6 +1,4 @@
 import { redirect } from "@/i18n/navigation";
-import { getTranslations } from 'next-intl/server';
-
 import { getCurrentUser } from "@/lib/session";
 import { canAccessBilling } from "@/lib/roles";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -11,8 +9,6 @@ import { BillingInfo } from "@/components/pricing/billing-info";
 import { Icons } from "@/components/shared/icons";
 
 export async function generateMetadata() {
-  const t = await getTranslations('billing');
-  
   return constructMetadata({
     title: `${t('header.title')} – Oikion`,
     description: t('header.description'),
@@ -21,8 +17,6 @@ export async function generateMetadata() {
 
 export default async function BillingPage() {
   const user = await getCurrentUser();
-  const t = await getTranslations('billing');
-
   if (!user || !user.id) {
     redirect("/login");
   }

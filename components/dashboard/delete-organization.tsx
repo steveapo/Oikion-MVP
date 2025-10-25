@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { UserRole } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { SectionColumns } from "@/components/dashboard/section-columns";
 import { Icons } from "@/components/shared/icons";
@@ -28,8 +27,6 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
   const [showPersonalOrgDialog, setShowPersonalOrgDialog] = useState(false);
   const { setShowDeleteOrganizationModal, DeleteOrganizationModal } =
     useDeleteOrganizationModal();
-  const t = useTranslations("settings");
-
   const role = session?.user?.role;
   // Only ORG_OWNER can delete the organization
   const allowed = role === UserRole.ORG_OWNER;

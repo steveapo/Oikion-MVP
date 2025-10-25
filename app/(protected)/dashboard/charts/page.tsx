@@ -1,4 +1,3 @@
-import { getTranslations } from 'next-intl/server';
 import { constructMetadata } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AreaChartStacked } from "@/components/charts/area-chart-stacked";
@@ -13,20 +12,16 @@ import { RadialTextChart } from "@/components/charts/radial-text-chart";
 import { DashboardHeader } from "@/components/dashboard/header";
 
 export async function generateMetadata() {
-  const t = await getTranslations('common.charts');
-  
   return constructMetadata({
-    title: `${t('title')} – Oikion`,
-    description: t('description'),
+    title: `${""} – Oikion`,
+    description: "",
   });
 }
 
 export default async function ChartsPage() {
-  const t = await getTranslations('common.charts');
-  
   return (
     <>
-      <DashboardHeader heading={t('title')} text={t('description')} />
+      <DashboardHeader heading={""} text={""} />
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
           <RadialTextChart />
