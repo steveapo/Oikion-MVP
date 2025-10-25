@@ -1,5 +1,5 @@
-import { redirect } from "@/i18n/navigation";
-import { Link } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";

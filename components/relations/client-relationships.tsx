@@ -74,14 +74,14 @@ export function ClientRelationships({
   const [isPending, startTransition] = useTransition();
 
   const RELATIONSHIP_TYPES = [
-    { value: "EMPLOYEE", label: t("types.EMPLOYEE"), description: t("typeDescriptions.EMPLOYEE") },
-    { value: "PARTNER", label: t("types.PARTNER"), description: t("typeDescriptions.PARTNER") },
-    { value: "VENDOR", label: t("types.VENDOR"), description: t("typeDescriptions.VENDOR") },
-    { value: "CLIENT", label: t("types.CLIENT"), description: t("typeDescriptions.CLIENT") },
-    { value: "REFERRAL", label: t("types.REFERRAL"), description: t("typeDescriptions.REFERRAL") },
-    { value: "FAMILY", label: t("types.FAMILY"), description: t("typeDescriptions.FAMILY") },
-    { value: "COLLEAGUE", label: t("types.COLLEAGUE"), description: t("typeDescriptions.COLLEAGUE") },
-    { value: "OTHER", label: t("types.OTHER"), description: t("typeDescriptions.OTHER") },
+    { value: "EMPLOYEE", label: "Employee", description: "Works for the company" },
+    { value: "PARTNER", label: "Partner", description: "Business partner relationship" },
+    { value: "VENDOR", label: "Vendor", description: "Supplies goods or services" },
+    { value: "CLIENT", label: "Client", description: "Receives services or purchases" },
+    { value: "REFERRAL", label: "Referral", description: "Referred by or to" },
+    { value: "FAMILY", label: "Family", description: "Family relationship" },
+    { value: "COLLEAGUE", label: "Colleague", description: "Works with" },
+    { value: "OTHER", label: "Other", description: "Other relationship" },
   ];
 
   // Separate clients by type
@@ -267,14 +267,14 @@ export function ClientRelationships({
                       onClick={() => setIsDialogOpen(false)}
                       disabled={isPending}
                     >
-                      {tActions("cancel")}
+                      Cancel
                     </Button>
                     <Button
                       onClick={handleAddRelationship}
                       disabled={isPending || !selectedClientId}
                     >
                       {isPending && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-                      {tActions("create")}
+                      Create
                     </Button>
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export function ClientRelationships({
                               {rel.toClient?.name}
                             </Link>
                             <Badge variant="secondary" className="text-xs">
-                              {tClientType(rel.toClient?.clientType || "PERSON")}
+                              {(rel.toClient?.clientType || "PERSON") === "PERSON" ? "Person" : "Company"}
                             </Badge>
                           </div>
                           {rel.relationshipType && (
@@ -386,7 +386,7 @@ export function ClientRelationships({
                               {rel.fromClient?.name}
                             </Link>
                             <Badge variant="secondary" className="text-xs">
-                              {tClientType(rel.fromClient?.clientType || "PERSON")}
+                              {(rel.fromClient?.clientType || "PERSON") === "PERSON" ? "Person" : "Company"}
                             </Badge>
                           </div>
                           {rel.relationshipType && (

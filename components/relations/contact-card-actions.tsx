@@ -35,7 +35,7 @@ export function ContactCardActions({
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const handleDelete = async () => {
-    if (!confirm(tMessages("deleteConfirm", { name: clientName }))) {
+    if (!confirm(`Delete ${clientName}? This cannot be undone.`)) {
       return;
     }
 
@@ -44,10 +44,10 @@ export function ContactCardActions({
     setIsDeleting(true);
     try {
       await deleteClient(clientId);
-      toast.success(tMessages("deleteSuccess"));
+      toast.success("Contact deleted");
       router.refresh();
     } catch (error) {
-      toast.error(tMessages("deleteError"));
+      toast.error("Failed to delete contact");
       setIsDeleting(false);
     }
   };
@@ -72,7 +72,7 @@ export function ContactCardActions({
                 <DropdownMenuItem asChild>
                   <Link href={`/dashboard/relations/${clientId}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    {""}
+                    Edit
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -85,7 +85,7 @@ export function ContactCardActions({
                 disabled={isDeleting}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {isDeleting ? "" : ""}
+                {isDeleting ? "Deleting..." : "Delete"}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

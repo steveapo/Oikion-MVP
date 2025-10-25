@@ -46,7 +46,7 @@ export function ActivityFilters() {
   }, []);
 
   const updateFilters = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams((searchParams?.toString()) || "");
     
     if (value && value !== "all") {
       params.set(key, value);
@@ -61,10 +61,10 @@ export function ActivityFilters() {
   };
 
   const clearAllFilters = () => {
-    router.push(pathname);
+    router.push(pathname || "/");
   };
 
-  const hasActiveFilters = searchParams.toString() !== "";
+  const hasActiveFilters = (searchParams?.toString() || "") !== "";
 
   return (
     <div className="space-y-4">
@@ -102,7 +102,7 @@ export function ActivityFilters() {
               <div className="space-y-2">
                 <Label htmlFor="actorId">{""}</Label>
                 <Select
-                  defaultValue={searchParams.get("actorId") ?? "all"}
+                  defaultValue={searchParams?.get("actorId") ?? "all"}
                   onValueChange={(value) => updateFilters("actorId", value)}
                 >
                   <SelectTrigger>
@@ -124,7 +124,7 @@ export function ActivityFilters() {
             <div className="space-y-2">
               <Label htmlFor="entityType">{""}</Label>
               <Select
-                defaultValue={searchParams.get("entityType") ?? "all"}
+                defaultValue={searchParams?.get("entityType") ?? "all"}
                 onValueChange={(value) => updateFilters("entityType", value)}
               >
                 <SelectTrigger>
@@ -145,7 +145,7 @@ export function ActivityFilters() {
             <div className="space-y-2">
               <Label htmlFor="actionType">{""}</Label>
               <Select
-                defaultValue={searchParams.get("actionType") ?? "all"}
+                defaultValue={searchParams?.get("actionType") ?? "all"}
                 onValueChange={(value) => updateFilters("actionType", value)}
               >
                 <SelectTrigger>
@@ -155,33 +155,33 @@ export function ActivityFilters() {
                   <SelectItem value="all">{""}</SelectItem>
                   
                   {/* Property Actions */}
-                  <SelectItem value={ActionType.PROPERTY_CREATED}>{t("../actionTypes.propertyCreated")}</SelectItem>
-                  <SelectItem value={ActionType.PROPERTY_UPDATED}>{t("../actionTypes.propertyUpdated")}</SelectItem>
-                  <SelectItem value={ActionType.PROPERTY_ARCHIVED}>{t("../actionTypes.propertyArchived")}</SelectItem>
-                  <SelectItem value={ActionType.MEDIA_ADDED}>{t("../actionTypes.mediaAdded")}</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_CREATED}>Property created</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_UPDATED}>Property updated</SelectItem>
+                  <SelectItem value={ActionType.PROPERTY_ARCHIVED}>Property archived</SelectItem>
+                  <SelectItem value={ActionType.MEDIA_ADDED}>Media added</SelectItem>
                   
                   {/* Client Actions */}
-                  <SelectItem value={ActionType.CLIENT_CREATED}>{t("../actionTypes.clientCreated")}</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_UPDATED}>{t("../actionTypes.clientUpdated")}</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_CREATED}>{t("../actionTypes.clientRelationshipCreated")}</SelectItem>
-                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_DELETED}>{t("../actionTypes.clientRelationshipDeleted")}</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_CREATED}>Client created</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_UPDATED}>Client updated</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_CREATED}>Client relationship created</SelectItem>
+                  <SelectItem value={ActionType.CLIENT_RELATIONSHIP_DELETED}>Client relationship deleted</SelectItem>
                   
                   {/* Interaction Actions */}
-                  <SelectItem value={ActionType.INTERACTION_LOGGED}>{t("../actionTypes.interactionLogged")}</SelectItem>
-                  <SelectItem value={ActionType.NOTE_ADDED}>{t("../actionTypes.noteAdded")}</SelectItem>
+                  <SelectItem value={ActionType.INTERACTION_LOGGED}>Interaction logged</SelectItem>
+                  <SelectItem value={ActionType.NOTE_ADDED}>Note added</SelectItem>
                   
                   {/* Task Actions */}
-                  <SelectItem value={ActionType.TASK_CREATED}>{t("../actionTypes.taskCreated")}</SelectItem>
-                  <SelectItem value={ActionType.TASK_COMPLETED}>{t("../actionTypes.taskCompleted")}</SelectItem>
+                  <SelectItem value={ActionType.TASK_CREATED}>Task created</SelectItem>
+                  <SelectItem value={ActionType.TASK_COMPLETED}>Task completed</SelectItem>
                   
                   {/* Organization Actions */}
-                  <SelectItem value={ActionType.MEMBER_INVITED}>{t("../actionTypes.memberInvited")}</SelectItem>
-                  <SelectItem value={ActionType.MEMBER_ROLE_CHANGED}>{t("../actionTypes.memberRoleChanged")}</SelectItem>
+                  <SelectItem value={ActionType.MEMBER_INVITED}>Member invited</SelectItem>
+                  <SelectItem value={ActionType.MEMBER_ROLE_CHANGED}>Member role changed</SelectItem>
                   
                   {/* Subscription Actions */}
-                  <SelectItem value={ActionType.SUBSCRIPTION_STARTED}>{t("../actionTypes.subscriptionStarted")}</SelectItem>
-                  <SelectItem value={ActionType.SUBSCRIPTION_UPDATED}>{t("../actionTypes.subscriptionUpdated")}</SelectItem>
-                  <SelectItem value={ActionType.SUBSCRIPTION_CANCELLED}>{t("../actionTypes.subscriptionCancelled")}</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_STARTED}>Subscription started</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_UPDATED}>Subscription updated</SelectItem>
+                  <SelectItem value={ActionType.SUBSCRIPTION_CANCELLED}>Subscription cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -193,7 +193,7 @@ export function ActivityFilters() {
                 <Input
                   type="date"
                   placeholder={""}
-                  defaultValue={searchParams.get("dateFrom") ?? ""}
+                  defaultValue={searchParams?.get("dateFrom") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     updateFilters("dateFrom", value || null);
@@ -203,7 +203,7 @@ export function ActivityFilters() {
                 <Input
                   type="date"
                   placeholder="To"
-                  defaultValue={searchParams.get("dateTo") ?? ""}
+                  defaultValue={searchParams?.get("dateTo") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     updateFilters("dateTo", value || null);

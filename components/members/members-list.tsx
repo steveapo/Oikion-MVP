@@ -108,9 +108,9 @@ export function MembersList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("tableHeaders.member")}</TableHead>
-                <TableHead>{t("tableHeaders.role")}</TableHead>
-                <TableHead>{t("tableHeaders.joined")}</TableHead>
+                <TableHead>Member</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Joined</TableHead>
                 {canManage && <TableHead className="w-[70px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -141,7 +141,7 @@ export function MembersList({
                   </TableCell>
                   <TableCell>
                     <Badge variant={getRoleBadgeVariant(member.role)}>
-                      {tRoles(member.role)}
+                      {member.role}
                     </Badge>
                   </TableCell>
                   <TableCell>

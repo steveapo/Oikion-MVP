@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
@@ -7,8 +7,8 @@ import TransactionsList from "@/components/dashboard/transactions-list";
 
 export async function generateMetadata() {
   return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
+    title: "Admin - Oikion",
+    description: "Administrative dashboard and settings",
   });
 }
 
@@ -19,8 +19,8 @@ export default async function AdminPage() {
   return (
     <>
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading="Admin Dashboard"
+        text="Manage your application settings and data"
       />
       <div className="flex flex-col gap-5">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">

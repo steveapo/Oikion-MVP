@@ -42,14 +42,14 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
       <Dialog open={showPersonalOrgDialog} onOpenChange={setShowPersonalOrgDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t("deleteOrganization.personalOrg.title")}</DialogTitle>
+            <DialogTitle>Personal workspace</DialogTitle>
             <DialogDescription className="pt-2">
-              {t("deleteOrganization.personalOrg.description")}
+              You cannot delete the personal workspace. Create a new organization first.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 py-4">
             <p className="text-sm text-muted-foreground">
-              {t("deleteOrganization.personalOrg.explanation")}
+              Your personal workspace is used as a fallback and cannot be removed.
             </p>
           </div>
           <DialogFooter className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -58,7 +58,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
               variant="outline"
               onClick={() => setShowPersonalOrgDialog(false)}
             >
-              {t("deleteOrganization.personalOrg.understand")}
+              I understand
             </Button>
             <Button
               type="button"
@@ -68,15 +68,15 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 // TODO: Open create organization modal/flow
               }}
             >
-              {t("deleteOrganization.personalOrg.createNew")}
+              Create new organization
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
       <SectionColumns
-        title={t("deleteOrganization.title")}
-        description={t("deleteOrganization.description")}
+        title="Delete organization"
+        description="Permanently delete your organization and all associated data"
       >
         <div className="relative">
           {/* Blurred content for personal org */}
@@ -87,10 +87,10 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
           }`}>
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-[15px] font-medium">{t("deleteOrganization.confirm")}</span>
+                <span className="text-[15px] font-medium">Confirm organization deletion</span>
               </div>
               <div className="text-balance text-sm text-muted-foreground">
-                {t("deleteOrganization.warning")}
+                  This action is permanent and cannot be undone.
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -100,7 +100,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 disabled={isPersonalOrg}
               >
                 <Icons.trash className="mr-2 size-4" />
-                <span>{t("deleteOrganization.button")}</span>
+                <span>Delete Organization</span>
               </Button>
             </div>
           </div>
@@ -114,10 +114,10 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
               <div className="text-center space-y-2 px-4">
                 <Icons.help className="mx-auto size-8 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground">
-                  {t("deleteOrganization.personalOrg.badge")}
+                  Personal workspace
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {t("deleteOrganization.personalOrg.clickToLearn")}
+                  Click to learn more
                 </p>
               </div>
             </div>
@@ -133,7 +133,7 @@ export function DeleteOrganizationSection({ isPersonalOrg = false }: DeleteOrgan
                 className="relative z-10"
               >
                 <Icons.trash className="mr-2 size-4" />
-                <span>{t("deleteOrganization.button")}</span>
+                <span>Delete Organization</span>
               </Button>
             </div>
           )}

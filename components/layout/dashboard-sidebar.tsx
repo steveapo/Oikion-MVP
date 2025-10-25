@@ -103,7 +103,7 @@ export function DashboardSidebar({ links, initialCurrentOrg, initialAllOrgs }: D
                   >
                     {isSidebarExpanded ? (
                       <p className="text-xs text-muted-foreground">
-                        {t(section.title)}
+                        {section.title}
                       </p>
                     ) : (
                       <div className="h-4" />
@@ -127,7 +127,7 @@ export function DashboardSidebar({ links, initialCurrentOrg, initialAllOrgs }: D
                                 )}
                               >
                                 <Icon className="size-5" />
-                                {t(item.title)}
+                                {item.title}
                                 {item.badge && (
                                   <Badge className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full">
                                     {item.badge}
@@ -155,7 +155,7 @@ export function DashboardSidebar({ links, initialCurrentOrg, initialAllOrgs }: D
                                   </Link>
                                 </TooltipTrigger>
                                 <TooltipContent side="right">
-                                  {t(item.title)}
+                                  {item.title}
                                 </TooltipContent>
                               </Tooltip>
                             )}
@@ -217,7 +217,7 @@ export function MobileSheetSidebar({ links, initialCurrentOrg, initialAllOrgs }:
                     className="flex flex-col gap-0.5"
                   >
                     <p className="text-xs text-muted-foreground">
-                      {t(section.title)}
+                      {section.title}
                     </p>
 
                     {section.items.map((item) => {
@@ -241,7 +241,7 @@ export function MobileSheetSidebar({ links, initialCurrentOrg, initialAllOrgs }:
                               )}
                             >
                               <Icon className="size-5" />
-                              {t(item.title)}
+                              {item.title}
                               {item.badge && (
                                 <Badge className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full">
                                   {item.badge}

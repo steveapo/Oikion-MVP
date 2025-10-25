@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/session";
 import { getUserById } from "@/lib/user";

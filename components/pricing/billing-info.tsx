@@ -30,12 +30,9 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{""}</CardTitle>
+        <CardTitle>Current plan: {title}</CardTitle>
         <CardDescription>
-          {t.rich('description', {
-            plan: title,
-            strong: (chunks) => <strong>{chunks}</strong>
-          })}
+          You're on the {title} plan. Upgrade or manage your subscription below.
         </CardDescription>
       </CardHeader>
       <CardContent>{description}</CardContent>
@@ -43,8 +40,8 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
         {isPaid ? (
           <p className="text-sm font-medium text-muted-foreground">
             {isCanceled
-              ? ""
-              : ""}
+              ? `Your subscription will end on ${formatDate(stripeCurrentPeriodEnd)}`
+              : `Your subscription renews on ${formatDate(stripeCurrentPeriodEnd)}`}
           </p>
         ) : null}
 
@@ -52,7 +49,7 @@ export function BillingInfo({ userSubscriptionPlan }: BillingInfoProps) {
           <CustomerPortalButton userStripeId={stripeCustomerId} />
         ) : (
           <Link href="/pricing" className={cn(buttonVariants())}>
-            {""}
+            View Plans
           </Link>
         )}
       </CardFooter>

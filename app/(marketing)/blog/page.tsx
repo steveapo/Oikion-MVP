@@ -4,10 +4,8 @@ import { BlogPosts } from "@/components/content/blog-posts";
 
 export async function generateMetadata() {
   return constructMetadata({
-    title: t('metadata.title'),
-    description: t('metadata.description'),
-    locale,
-    pathname: '/blog',
+    title: "Blog - Oikion",
+    description: "Latest insights and updates from the Oikion team",
   });
 }
 

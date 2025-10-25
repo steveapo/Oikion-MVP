@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,9 @@ export default function TransactionsList() {
     <Card className="xl:col-span-2">
       <CardHeader className="flex flex-row items-center">
         <div className="grid gap-2">
-          <CardTitle>{""}</CardTitle>
+          <CardTitle>Recent transactions</CardTitle>
           <CardDescription className="text-balance">
-            {""}
+            Latest billing events and payments
           </CardDescription>
         </div>
         <Button size="sm" className="ml-auto shrink-0 gap-1 px-4">
@@ -39,11 +39,11 @@ export default function TransactionsList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>{t('columns.customer')}</TableHead>
-              <TableHead className="hidden xl:table-column">{t('columns.type')}</TableHead>
-              <TableHead className="hidden xl:table-column">{t('columns.status')}</TableHead>
-              <TableHead className="hidden xl:table-column">{t('columns.date')}</TableHead>
-              <TableHead className="text-right">{t('columns.amount')}</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead className="hidden xl:table-column">Type</TableHead>
+              <TableHead className="hidden xl:table-column">Status</TableHead>
+              <TableHead className="hidden xl:table-column">Date</TableHead>
+              <TableHead className="text-right">Amount</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -54,11 +54,9 @@ export default function TransactionsList() {
                   liam@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
+              <TableCell className="hidden xl:table-column">Sale</TableCell>
               <TableCell className="hidden xl:table-column">
-                <Badge className="text-xs" variant="outline">
-                  {t('statuses.approved')}
-                </Badge>
+                <Badge className="text-xs" variant="outline">Approved</Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
                 2023-06-23
@@ -72,11 +70,9 @@ export default function TransactionsList() {
                   olivia@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">{t('types.refund')}</TableCell>
+              <TableCell className="hidden xl:table-column">Refund</TableCell>
               <TableCell className="hidden xl:table-column">
-                <Badge className="text-xs" variant="outline">
-                  {t('statuses.declined')}
-                </Badge>
+                <Badge className="text-xs" variant="outline">Declined</Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
                 2023-06-24
@@ -91,12 +87,10 @@ export default function TransactionsList() {
                 </div>
               </TableCell>
               <TableCell className="hidden xl:table-column">
-                {t('types.subscription')}
+                Subscription
               </TableCell>
               <TableCell className="hidden xl:table-column">
-                <Badge className="text-xs" variant="outline">
-                  {t('statuses.approved')}
-                </Badge>
+                <Badge className="text-xs" variant="outline">Approved</Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
                 2023-06-25
@@ -110,11 +104,9 @@ export default function TransactionsList() {
                   emma@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
+              <TableCell className="hidden xl:table-column">Sale</TableCell>
               <TableCell className="hidden xl:table-column">
-                <Badge className="text-xs" variant="outline">
-                  {t('statuses.approved')}
-                </Badge>
+                <Badge className="text-xs" variant="outline">Approved</Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
                 2023-06-26
@@ -128,11 +120,9 @@ export default function TransactionsList() {
                   liam@example.com
                 </div>
               </TableCell>
-              <TableCell className="hidden xl:table-column">{t('types.sale')}</TableCell>
+              <TableCell className="hidden xl:table-column">Sale</TableCell>
               <TableCell className="hidden xl:table-column">
-                <Badge className="text-xs" variant="outline">
-                  {t('statuses.approved')}
-                </Badge>
+                <Badge className="text-xs" variant="outline">Approved</Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell lg:hidden xl:table-column">
                 2023-06-27

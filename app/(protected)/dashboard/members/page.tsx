@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { HeaderSection } from "@/components/shared/header-section";
 import { InviteMemberForm } from "@/components/members/invite-member-form";
@@ -12,8 +12,8 @@ import { PersonalOrgNotice } from "@/components/members/personal-org-notice";
 import { constructMetadata } from "@/lib/utils";
 
 export async function generateMetadata() {
-  const title = `${await t('header.title')} – Oikion`;
-  const description = await t('header.description');
+  const title = `Members – Oikion`;
+  const description = "Manage your organization members and invitations";
   return constructMetadata({ title, description });
 }
 
@@ -46,15 +46,15 @@ export default async function MembersPage() {
   const invitations = invitationsResult.invitations || [];
   const pendingInvitations = invitations.filter((inv) => inv.status === "PENDING");
 
-  // Precompute translated strings
-  const headerLabel = await t('header.label');
-  const headerTitle = await t('header.title');
-  const teamMembersTitle = await t('sections.teamMembers');
-  const inviteNewTitle = await t('sections.inviteNew');
-  const pendingTitle = await "";
+  // Static strings (i18n removed)
+  const headerLabel = "Team";
+  const headerTitle = "Members";
+  const teamMembersTitle = "Team members";
+  const inviteNewTitle = "Invite new members";
+  const pendingTitle = "Pending invitations";
   const subtitleText = members.length === 1 
-    ? await ""
-    : await "";
+    ? "Manage 1 team member"
+    : `Manage ${members.length} team members`;
 
   // Personal org: show notice and prevent inviting
   if (currentOrg?.isPersonal) {

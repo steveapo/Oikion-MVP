@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { canAccessBilling } from "@/lib/roles";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
@@ -10,8 +10,8 @@ import { Icons } from "@/components/shared/icons";
 
 export async function generateMetadata() {
   return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
+    title: "Billing - Oikion",
+    description: "Manage your subscription and billing",
   });
 }
 
@@ -33,15 +33,15 @@ export default async function BillingPage() {
   return (
     <>
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading="Billing"
+        text="Manage your subscription and billing"
       />
       <div className="grid gap-8">
         <Alert className="!pl-14">
           <Icons.warning />
-          <AlertTitle>{t('demo.title')}</AlertTitle>
+          <AlertTitle>Demo Mode</AlertTitle>
           <AlertDescription className="text-balance">
-            {t('demo.description')}{" "}
+            This is a demo environment. Use test card numbers for payments.{" "}
             <a
               href="https://stripe.com/docs/testing#cards"
               target="_blank"

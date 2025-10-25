@@ -84,11 +84,11 @@ export function OrganizationSettingsForm({
     const result = await updateOrganization(organization.id, data);
 
     if (result.success) {
-      toast.success(t("success.organizationUpdated"));
+      toast.success("Organization updated");
       // Trigger reload to update org name in switcher
       triggerReload("update");
     } else {
-      toast.error(result.error || t("errors.organizationUpdateFailed"));
+      toast.error(result.error || "Failed to update organization");
     }
 
     setIsSaving(false);
@@ -97,12 +97,12 @@ export function OrganizationSettingsForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("organizationForm.title")}</CardTitle>
+        <CardTitle>Organization</CardTitle>
         <CardDescription>
-          {t("organizationForm.description")}
+          Update your organization settings
           {organization.isPersonal && (
             <span className="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-              {t("organizationForm.personal")}
+              Personal workspace
             </span>
           )}
         </CardDescription>
@@ -115,16 +115,16 @@ export function OrganizationSettingsForm({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("organizationForm.nameLabel")}</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder={t("organizationForm.namePlaceholder")}
+                      placeholder={"Organization name"}
                       {...field}
                       disabled={isSaving}
                     />
                   </FormControl>
                   <FormDescription>
-                    {t("organizationForm.nameDescription")}
+                    This name is visible to members
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -136,7 +136,7 @@ export function OrganizationSettingsForm({
               name="plan"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t("organizationForm.planLabel")}</FormLabel>
+                  <FormLabel>Plan</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -144,24 +144,24 @@ export function OrganizationSettingsForm({
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={t("organizationForm.planPlaceholder")} />
+                        <SelectValue placeholder={"Select a plan"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {Object.keys(planLabels).map((value) => (
                         <SelectItem key={value} value={value}>
                           <div className="flex flex-col">
-                            <span className="font-medium">{t(`organizationForm.plans.${value}`)}</span>
+                            <span className="font-medium">{(planLabels as any)[value]}</span>
                             <span className="text-xs text-muted-foreground">
-                              {t(`organizationForm.planDescriptions.${value}`)}
-                            </span>
+                              {(planDescriptions as any)[value]
+                            }</span>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    {t("organizationForm.planDescription")}
+                    Choose a plan that fits your needs
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +170,7 @@ export function OrganizationSettingsForm({
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? t("organizationForm.saving") : t("actions.saveChanges")}
+              {isSaving ? "Saving..." : "Save changes"}
             </Button>
           </CardFooter>
         </form>

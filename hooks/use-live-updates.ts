@@ -7,13 +7,9 @@
 
 import { useEffect } from 'react';
 
-export function useLiveUpdates(
-  entityType: string,
-  entityId: string,
-  callback: (data: any) => void
-): void {
+export function useLiveUpdates(..._args: any[]): void {
   // Stub implementation - no-op
   useEffect(() => {
     // No live updates for now
-  }, [entityType, entityId, callback]);
+  }, []);
 }

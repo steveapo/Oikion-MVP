@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
 
 import { docsConfig } from "@/config/docs";

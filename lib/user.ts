@@ -31,7 +31,6 @@ export const getUserById = async (id: string) => {
         },
         _count: true,
       },
-      select: undefined,
     });
 
     return user;

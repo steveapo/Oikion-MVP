@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { ArrowLeft, Edit, Archive, Camera, MapPin, Calendar, User } from "lucide-react";
 
 import { getCurrentUser } from "@/lib/session";

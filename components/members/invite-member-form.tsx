@@ -43,6 +43,12 @@ type InviteFormValues = z.infer<typeof inviteFormSchema>;
 
 export function InviteMemberForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const roleLabels: Record<UserRole, { label: string; description: string }> = {
+    ORG_OWNER: { label: "Owner", description: "Full access to organization" },
+    ADMIN: { label: "Admin", description: "Manage settings and members" },
+    AGENT: { label: "Agent", description: "Create and manage content" },
+    VIEWER: { label: "Viewer", description: "Read-only access" },
+  };
   const form = useForm<InviteFormValues>({
     resolver: zodResolver(inviteFormSchema),
     defaultValues: {
@@ -119,9 +125,9 @@ export function InviteMemberForm() {
                       {Object.values(UserRole).map((role) => (
                         <SelectItem key={role} value={role}>
                           <div className="flex flex-col items-start">
-                            <span className="font-medium">{tRoles(`${role}.label`)}</span>
+                            <span className="font-medium">{roleLabels[role].label}</span>
                             <span className="text-xs text-muted-foreground">
-                              {tRoles(`${role}.description`)}
+                              {roleLabels[role].description}
                             </span>
                           </div>
                         </SelectItem>
@@ -129,7 +135,7 @@ export function InviteMemberForm() {
                     </SelectContent>
                   </Select>
                   <FormDescription>
-                    {tRoles(`${field.value}.description`)}
+                    {roleLabels[field.value as UserRole].description}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -138,7 +144,7 @@ export function InviteMemberForm() {
 
             <Button type="submit" disabled={isLoading}>
               {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-              {""}
+              Send Invitation
             </Button>
           </form>
         </Form>

@@ -58,7 +58,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           {links.map((section) => (
-            <CommandGroup key={section.title} heading={t(section.title)}>
+            <CommandGroup key={section.title} heading={section.title}>
               {section.items.map((item) => {
                 const Icon = Icons[item.icon || "arrowRight"];
                 return (
@@ -69,7 +69,7 @@ export function SearchCommand({ links }: { links: SidebarNavItem[] }) {
                     }}
                   >
                     <Icon className="mr-2 size-5" />
-                    {t(item.title)}
+                    {item.title}
                   </CommandItem>
                 );
               })}

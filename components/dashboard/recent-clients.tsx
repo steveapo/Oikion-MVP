@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { Users, Mail, Phone, Building2, User } from "lucide-react";
 import type { ClientType } from "@prisma/client";
 

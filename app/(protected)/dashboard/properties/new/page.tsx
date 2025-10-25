@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/session";
 import { canCreateContent } from "@/lib/roles";
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { constructMetadata } from "@/lib/utils";
 import dynamic from "next/dynamic";
 const PropertyForm = dynamic(() => import("@/components/properties/property-form").then(m => m.PropertyForm), {

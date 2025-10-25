@@ -19,10 +19,10 @@ export function UpgradeCard() {
           </div>
           <div className="flex-1 space-y-1">
             <CardTitle className="text-sm font-semibold leading-tight text-amber-900 dark:text-amber-50">
-              {t("testingVersion.title")}
+              Testing version
             </CardTitle>
             <CardDescription className="text-xs leading-relaxed text-amber-700/90 dark:text-amber-300/80">
-              {t("testingVersion.description")}
+              You are currently using a testing version. Some features may be limited.
             </CardDescription>
           </div>
         </div>

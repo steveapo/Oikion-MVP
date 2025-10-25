@@ -1,4 +1,4 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,8 @@ import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
   return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
+    title: "Orders - Oikion",
+    description: "Manage subscription orders and billing",
   });
 }
 
@@ -19,16 +19,16 @@ export default async function OrdersPage() {
   return (
     <>
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading="Orders"
+        text="Manage subscription orders and billing"
       />
       <EmptyPlaceholder>
         <EmptyPlaceholder.Icon name="package" />
-        <EmptyPlaceholder.Title>{t('empty.title')}</EmptyPlaceholder.Title>
+        <EmptyPlaceholder.Title>No orders yet</EmptyPlaceholder.Title>
         <EmptyPlaceholder.Description>
-          {t('empty.description')}
+          Orders will appear here when customers make purchases
         </EmptyPlaceholder.Description>
-        <Button>{t('empty.button')}</Button>
+        <Button>View Documentation</Button>
       </EmptyPlaceholder>
     </>
   );

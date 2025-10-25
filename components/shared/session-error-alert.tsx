@@ -13,7 +13,7 @@ export function SessionErrorAlert() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const error = searchParams.get("error");
+    const error = searchParams?.get("error");
     if (error === "session_invalid") {
       setShow(true);
       // Clear the session cookies
