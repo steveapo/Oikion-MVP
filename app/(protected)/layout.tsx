@@ -53,8 +53,8 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
     }),
   }));
 
-  // Check if profile is incomplete
-  const isProfileIncomplete = !currentUser.onboardingCompletedAt;
+  // Check if profile is incomplete (always false for now)
+  const isProfileIncomplete = false;
 
   return (
     <div className="relative flex min-h-screen w-full">

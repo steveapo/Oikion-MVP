@@ -46,10 +46,8 @@ async function broadcastClientUpdate(
   organizationId: string
 ) {
   try {
-    await broadcastLiveUpdate({
-      entityType: "client",
+    await broadcastLiveUpdate("client", clientId, {
       action,
-      entityId: clientId,
       organizationId,
     });
   } catch (error) {

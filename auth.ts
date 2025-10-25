@@ -1,6 +1,6 @@
 import authConfig from "@/auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { UserRole, EmailAuthInterval } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import NextAuth, { type DefaultSession } from "next-auth";
 import Resend from "next-auth/providers/resend";
 import Credentials from "next-auth/providers/credentials";
@@ -19,10 +19,6 @@ declare module "next-auth" {
       role: UserRole;
       organizationId?: string;
       organizationName?: string;
-      onboardingCompletedAt?: Date | null;
-      emailAuthVerifiedAt?: Date | null;
-      emailAuthNextDueAt?: Date | null;
-      emailAuthInterval?: EmailAuthInterval | null;
     } & DefaultSession["user"];
   }
 }
@@ -151,7 +147,7 @@ export const {
             try {
               await prisma.user.update({
                 where: { id: user.id },
-                data: { emailVerified: new Date(), emailAuthVerifiedAt: new Date() },
+                data: { emailVerified: new Date() },
               });
             } catch (e) {
               console.warn("[AUTH] Failed to auto-verify invited user email", e);
@@ -231,21 +227,7 @@ export const {
           (session.user as any).organizationName = token.organizationName;
         }
 
-        if (token.onboardingCompletedAt !== undefined) {
-          (session.user as any).onboardingCompletedAt = token.onboardingCompletedAt;
-        }
 
-        if (token.emailAuthVerifiedAt !== undefined) {
-          (session.user as any).emailAuthVerifiedAt = token.emailAuthVerifiedAt as any;
-        }
-
-        if (token.emailAuthNextDueAt !== undefined) {
-          (session.user as any).emailAuthNextDueAt = token.emailAuthNextDueAt as any;
-        }
-
-        if (token.emailAuthInterval !== undefined) {
-          (session.user as any).emailAuthInterval = token.emailAuthInterval as any;
-        }
 
         session.user.name = token.name;
         session.user.image = token.picture;
@@ -274,13 +256,7 @@ export const {
         return null;
       }
 
-      // Log onboarding status changes for debugging
-      const hasCompletedOnboarding = !!dbUser.onboardingCompletedAt;
-      const wasCompletedBefore = !!token.onboardingCompletedAt;
-
-      if (hasCompletedOnboarding !== wasCompletedBefore) {
-        console.log(`[AUTH] Onboarding status changed for user ${dbUser.email}: ${wasCompletedBefore} -> ${hasCompletedOnboarding}`);
-      }
+      // Onboarding status removed - field doesn't exist in schema
 
       // SAFETY CHECK: Verify user's current organization exists
       // If it doesn't exist (deleted), auto-switch to Personal workspace
@@ -440,10 +416,6 @@ export const {
       token.name = dbUser.name;
       token.email = dbUser.email;
       token.picture = dbUser.image;
-      token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
-      token.emailAuthVerifiedAt = dbUser.emailAuthVerifiedAt as any;
-      token.emailAuthNextDueAt = dbUser.emailAuthNextDueAt as any;
-      token.emailAuthInterval = dbUser.emailAuthInterval as any;
 
       // Record refresh timestamp to avoid frequent DB hits
       (token as any).dbRefreshedAt = now;
