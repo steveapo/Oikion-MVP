@@ -1,8 +1,6 @@
 import { Suspense } from "react";
 import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
-import { getTranslations } from 'next-intl/server';
-
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { canCreateContent } from "@/lib/roles";
@@ -11,17 +9,15 @@ import { Button } from "@/components/ui/button";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { PropertiesFilters } from "@/components/properties/properties-filters";
+import { PropertiesList } from "@/components/properties/properties-list";
 import { PropertiesListServer } from "@/components/properties/properties-list-server";
 import { PropertyListSkeleton } from "@/components/properties/property-card-skeleton";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
-import { PropertiesPageClient } from "@/components/properties/properties-page-client";
 
 export async function generateMetadata() {
-  const t = await getTranslations('properties');
-  
   return constructMetadata({
-    title: `${t('header.title') as unknown as string} - Oikion`,
-    description: t('header.description') as unknown as string,
+    title: `${t('header.title')} - Oikion`,
+    description: t('header.description'),
   });
 }
 
@@ -40,8 +36,6 @@ interface PropertiesPageProps {
 
 async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   const user = await getCurrentUser();
-  const t = await getTranslations('properties');
-  
   if (!user) {
     return null;
   }
@@ -62,8 +56,8 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-        heading={t('header.title') as unknown as string}
-        text={t('header.description') as unknown as string}
+          heading={t('header.title')}
+          text={t('header.description')}
         >
           {canCreateContent(user.role) && (
             <Button disabled>
@@ -144,8 +138,8 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading={t('header.title') as unknown as string}
-        text={t('header.description') as unknown as string}
+        heading={t('header.title')}
+        text={t('header.description')}
       >
         {canCreateContent(user.role) && (
           <Link href="/dashboard/properties/new">
@@ -179,8 +173,8 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
           )}
         </EmptyPlaceholder>
       ) : (
-        <PropertiesListServer
-          properties={propertiesData.properties as any}
+        <PropertiesListServer 
+          properties={propertiesData.properties}
           totalPages={propertiesData.totalPages}
           currentPage={propertiesData.page}
           userRole={user.role}
@@ -191,14 +185,10 @@ async function PropertiesContent({ searchParams }: PropertiesPageProps) {
   );
 }
 
-export default async function PropertiesPage({ searchParams }: PropertiesPageProps) {
-  const user = await getCurrentUser();
+export default function PropertiesPage({ searchParams }: PropertiesPageProps) {
   return (
-    <>
-      <PropertiesPageClient organizationId={(user as any)?.organizationId} />
-      <Suspense fallback={<PropertyListSkeleton count={6} />}>
-        <PropertiesContent searchParams={searchParams} />
-      </Suspense>
-    </>
+    <Suspense fallback={<PropertyListSkeleton count={6} />}>
+      <PropertiesContent searchParams={searchParams} />
+    </Suspense>
   );
 }

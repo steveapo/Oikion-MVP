@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { getTranslations, getLocale } from 'next-intl/server';
 import { infos } from "@/config/landing";
 import { constructMetadata } from "@/lib/utils";
 import BentoGrid from "@/components/sections/bentogrid";
@@ -12,14 +11,9 @@ import Testimonials from "@/components/sections/testimonials";
 import { SessionErrorAlert } from "@/components/shared/session-error-alert";
 
 export async function generateMetadata() {
-  const locale = await getLocale();
-  const t = await getTranslations('marketing.home');
-  
   return constructMetadata({
-    title: t('metadata.title'),
-    description: t('metadata.description'),
-    locale,
-    pathname: '/',
+    title: "Oikion - Real Estate CRM",
+    description: "Modern real estate management platform for agents and agencies",
   });
 }
 

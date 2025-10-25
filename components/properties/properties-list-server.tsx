@@ -1,5 +1,4 @@
 import { UserRole } from "@prisma/client";
-import { getTranslations } from "next-intl/server";
 import {
   Pagination,
   PaginationContent,
@@ -30,16 +29,14 @@ export async function PropertiesListServer({
   userRole, 
   userId 
 }: PropertiesListServerProps) {
-  const t = await getTranslations('properties.card');
-  
   const translations = {
-    noImage: t('noImage'),
-    archived: t('archived'),
-    status: t('status'),
-    list: t('list'),
-    by: t('by'),
-    unknown: t('unknown'),
-    view: t('view'),
+    noImage: "",
+    archived: "",
+    status: "",
+    list: "",
+    by: "",
+    unknown: "",
+    view: "",
   };
   
   return (

@@ -1,6 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { AlertCircle } from "lucide-react";
 import {
   Card,
@@ -11,8 +10,6 @@ import {
 } from "@/components/ui/card";
 
 export function UpgradeCard() {
-  const t = useTranslations("navigation");
-
   return (
     <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm dark:border-amber-800/50 dark:from-amber-950/20 dark:to-orange-950/20 md:max-xl:rounded-none md:max-xl:border-none md:max-xl:shadow-none">
       <CardHeader className="space-y-3 md:max-xl:px-4">

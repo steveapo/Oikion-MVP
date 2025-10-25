@@ -4,8 +4,6 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Plus, X, Building2, User as UserIcon, Briefcase, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -75,10 +73,6 @@ export function ClientRelationships({
   const [position, setPosition] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  const t = useTranslations("relations.relationships");
-  const tClientType = useTranslations("relations.clientType");
-  const tActions = useTranslations("relations.actions");
-
   const RELATIONSHIP_TYPES = [
     { value: "EMPLOYEE", label: t("types.EMPLOYEE"), description: t("typeDescriptions.EMPLOYEE") },
     { value: "PARTNER", label: t("types.PARTNER"), description: t("typeDescriptions.PARTNER") },
@@ -96,7 +90,7 @@ export function ClientRelationships({
 
   const handleAddRelationship = () => {
     if (!selectedClientId) {
-      toast.error(t("selectError"));
+      toast.error("");
       return;
     }
 
@@ -110,23 +104,23 @@ export function ClientRelationships({
         });
 
         if (result.success) {
-          toast.success(t("createSuccess"));
+          toast.success("");
           setIsDialogOpen(false);
           setSelectedClientId("");
           setRelationshipType("OTHER");
           setPosition("");
           window.location.reload(); // Refresh to show new relationship
         } else {
-          toast.error(result.error || t("createError"));
+          toast.error(result.error || "");
         }
       } catch (error) {
-        toast.error(t("createError"));
+        toast.error("");
       }
     });
   };
 
   const handleDeleteRelationship = (relationshipId: string) => {
-    if (!confirm(t("deleteConfirm"))) {
+    if (!confirm("")) {
       return;
     }
 
@@ -134,13 +128,13 @@ export function ClientRelationships({
       try {
         const result = await deleteClientRelationship(relationshipId);
         if (result.success) {
-          toast.success(t("deleteSuccess"));
+          toast.success("");
           window.location.reload();
         } else {
-          toast.error(result.error || t("deleteError"));
+          toast.error(result.error || "");
         }
       } catch (error) {
-        toast.error(t("deleteError"));
+        toast.error("");
       }
     });
   };
@@ -155,9 +149,9 @@ export function ClientRelationships({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>{t("title")}</CardTitle>
+            <CardTitle>{""}</CardTitle>
             <CardDescription>
-              {clientType === "PERSON" ? t("descriptionPerson") : t("descriptionCompany")}
+              {clientType === "PERSON" ? "" : ""}
             </CardDescription>
           </div>
           {canManage && (
@@ -165,31 +159,31 @@ export function ClientRelationships({
               <DialogTrigger asChild>
                 <Button size="sm" className="whitespace-nowrap shrink-0">
                   <Plus className="mr-2 h-4 w-4" />
-                  {t("addLink")}
+                  {""}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md">
                 <DialogHeader>
-                  <DialogTitle>{t("createTitle")}</DialogTitle>
+                  <DialogTitle>{""}</DialogTitle>
                   <DialogDescription>
-                    {clientType === "PERSON" ? t("createDescription") : t("createDescriptionCompany")}
+                    {clientType === "PERSON" ? "" : ""}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>{t("selectLabel")}</Label>
+                    <Label>{""}</Label>
                     <Select
                       value={selectedClientId}
                       onValueChange={setSelectedClientId}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("selectPlaceholder")} />
+                        <SelectValue placeholder={""} />
                       </SelectTrigger>
                       <SelectContent>
                         {persons.length > 0 && (
                           <>
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              {t("people")}
+                              {""}
                             </div>
                             {persons.map((client) => (
                               <SelectItem key={client.id} value={client.id}>
@@ -207,7 +201,7 @@ export function ClientRelationships({
                               <div className="my-1 border-t" />
                             )}
                             <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                              {t("companies")}
+                              {""}
                             </div>
                             {companies.map((client) => (
                               <SelectItem key={client.id} value={client.id}>
@@ -221,7 +215,7 @@ export function ClientRelationships({
                         )}
                         {persons.length === 0 && companies.length === 0 && (
                           <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                            {t("noAvailable")}
+                            {""}
                           </div>
                         )}
                       </SelectContent>
@@ -229,7 +223,7 @@ export function ClientRelationships({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t("typeLabel")}</Label>
+                    <Label>{""}</Label>
                     <Select
                       value={relationshipType}
                       onValueChange={setRelationshipType}
@@ -254,15 +248,15 @@ export function ClientRelationships({
 
                   {showPositionField && (
                     <div className="space-y-2">
-                      <Label>{t("positionLabel")}</Label>
+                      <Label>{""}</Label>
                       <Input
-                        placeholder={t("positionPlaceholder")}
+                        placeholder={""}
                         value={position}
                         onChange={(e) => setPosition(e.target.value)}
                         maxLength={200}
                       />
                       <p className="text-xs text-muted-foreground">
-                        {t("positionDescription")}
+                        {""}
                       </p>
                     </div>
                   )}
@@ -292,7 +286,7 @@ export function ClientRelationships({
       <CardContent>
         {relationshipsFrom.length === 0 && relationshipsTo.length === 0 ? (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            {t("noRelationships")}
+            {""}
           </div>
         ) : (
           <div className="space-y-6">
@@ -300,7 +294,7 @@ export function ClientRelationships({
             {relationshipsFrom.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  {t("linkedTo")}
+                  {""}
                 </h4>
                 <div className="space-y-2">
                   {relationshipsFrom.map((rel) => (
@@ -367,7 +361,7 @@ export function ClientRelationships({
             {relationshipsTo.length > 0 && (
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">
-                  {t("linkedFrom")}
+                  {""}
                 </h4>
                 <div className="space-y-2">
                   {relationshipsTo.map((rel) => (

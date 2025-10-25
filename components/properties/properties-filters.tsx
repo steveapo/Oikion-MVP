@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState } from "react";
 import { Search, Filter, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,11 +25,6 @@ export function PropertiesFilters() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
-  const tFilters = useTranslations('properties.filters');
-  const tStatus = useTranslations('properties.status');
-  const tTransaction = useTranslations('properties.transactionType');
-  const tPropertyType = useTranslations('properties.propertyType');
-
   const updateFilters = (key: string, value: string | null) => {
     const params = new URLSearchParams(searchParams.toString());
     

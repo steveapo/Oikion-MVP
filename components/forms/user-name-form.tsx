@@ -5,7 +5,6 @@ import { updateUserName, type FormData } from "@/actions/update-user-name";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -25,7 +24,6 @@ export function UserNameForm({ user }: UserNameFormProps) {
   const [updated, setUpdated] = useState(false);
   const [isPending, startTransition] = useTransition();
   const updateUserNameWithId = updateUserName.bind(null, user.id);
-  const t = useTranslations("settings");
 
   const checkUpdate = (value) => {
     setUpdated(user.name !== value);
@@ -47,13 +45,13 @@ export function UserNameForm({ user }: UserNameFormProps) {
       const { status } = await updateUserNameWithId(data);
 
       if (status !== "success") {
-        toast.error(t("errors.updateFailed"), {
-          description: t("errors.nameNotUpdated"),
+        toast.error("Update failed", {
+          description: "Your name could not be updated",
         });
       } else {
         await update();
         setUpdated(false);
-        toast.success(t("success.nameUpdated"));
+        toast.success("Name updated successfully");
       }
     });
   });
@@ -61,12 +59,12 @@ export function UserNameForm({ user }: UserNameFormProps) {
   return (
     <form onSubmit={onSubmit}>
       <SectionColumns
-        title={t("userNameForm.title")}
-        description={t("userNameForm.description")}
+        title="Display Name"
+        description="Update your display name"
       >
         <div className="flex w-full items-center gap-2">
           <Label className="sr-only" htmlFor="name">
-            {t("userNameForm.label")}
+            Name
           </Label>
           <Input
             id="name"
@@ -85,8 +83,8 @@ export function UserNameForm({ user }: UserNameFormProps) {
               <Icons.spinner className="size-4 animate-spin" />
             ) : (
               <p>
-                {t("userNameForm.save")}
-                <span className="hidden sm:inline-flex">&nbsp;{t("actions.saveChanges").replace(t("userNameForm.save") + " ", "")}</span>
+                Save
+                <span className="hidden sm:inline-flex">&nbsp;Changes</span>
               </p>
             )}
           </Button>
@@ -97,7 +95,7 @@ export function UserNameForm({ user }: UserNameFormProps) {
               {errors.name.message}
             </p>
           )}
-          <p className="text-[13px] text-muted-foreground">{t("userNameForm.maxCharacters")}</p>
+          <p className="text-[13px] text-muted-foreground">Maximum 32 characters</p>
         </div>
       </SectionColumns>
     </form>

@@ -7,6 +7,11 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { SectionColumns } from "@/components/dashboard/section-columns";
 import dynamic from "next/dynamic";
 import { DeleteAccountSection } from "@/components/dashboard/delete-account";
+const UserProfileForm = dynamic(() => import("@/components/forms/user-profile-form").then(m => m.UserProfileForm), {
+  loading: () => <div className="h-40 rounded-lg border p-4"><div className="h-4 w-40 bg-muted animate-pulse rounded mb-3" /><div className="h-24 bg-muted animate-pulse rounded" /></div>,
+  ssr: false,
+});
+
 const UserNameForm = dynamic(() => import("@/components/forms/user-name-form").then(m => m.UserNameForm), {
   loading: () => <div className="h-20 rounded-lg border p-4"><div className="h-4 w-32 bg-muted animate-pulse rounded" /></div>,
   ssr: false,
@@ -42,6 +47,28 @@ export default async function AccountSettingsPage() {
       />
       <div className="grid gap-6 pb-10">
         <div className="divide-y divide-muted">
+          <SectionColumns
+            title="Profile Information"
+            description="Update your personal details and profile information"
+          >
+            <UserProfileForm
+              user={{
+                id: currentUser.id!,
+                email: (dbUser as any)?.email || (currentUser as any).email,
+                image: (dbUser as any)?.image || (currentUser as any).image,
+                username: (dbUser as any)?.username,
+                usernameLastChangedAt: (dbUser as any)?.usernameLastChangedAt,
+                usernameChangeCount: (dbUser as any)?.usernameChangeCount,
+                onboardingCompletedAt: (dbUser as any)?.onboardingCompletedAt,
+                firstName: (dbUser as any)?.firstName,
+                lastName: (dbUser as any)?.lastName,
+                phone: (dbUser as any)?.phone,
+                company: (dbUser as any)?.company,
+                description: (dbUser as any)?.description,
+              }}
+            />
+          </SectionColumns>
+
           <UserNameForm user={{ id: currentUser.id!, name: currentUser.name }} />
 
           <SectionColumns

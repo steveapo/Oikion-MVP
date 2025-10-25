@@ -1,7 +1,5 @@
 import { Link } from "@/i18n/navigation";
 import { Home, Euro } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import {
   Card,
   CardContent,
@@ -37,24 +35,22 @@ interface RecentPropertiesProps {
 }
 
 export function RecentProperties({ properties }: RecentPropertiesProps) {
-  const t = useTranslations("dashboard.recentProperties");
-
   if (properties.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Home className="h-5 w-5" />
-            {t("title")}
+            {""}
           </CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardDescription>{""}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground">{t("empty")}</p>
+            <p className="text-sm text-muted-foreground">{""}</p>
             <Link href="/dashboard/properties/new">
               <Button className="mt-4" size="sm">
-                {t("addFirst")}
+                {""}
               </Button>
             </Link>
           </div>
@@ -70,13 +66,13 @@ export function RecentProperties({ properties }: RecentPropertiesProps) {
           <div>
             <CardTitle className="flex items-center gap-2">
               <Home className="h-5 w-5" />
-              {t("title")}
+              {""}
             </CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
+            <CardDescription>{""}</CardDescription>
           </div>
           <Link href="/dashboard/properties">
             <Button variant="ghost" size="sm">
-              {t("viewAll")}
+              {""}
             </Button>
           </Link>
         </div>
@@ -103,7 +99,7 @@ export function RecentProperties({ properties }: RecentPropertiesProps) {
                   <div className="flex-1 space-y-1.5 overflow-hidden">
                     {/* Property Name (Type + Location) */}
                     <p className="font-medium text-sm truncate">
-                      {property.propertyType} {t('in')} {location}
+                      {property.propertyType} {""} {location}
                     </p>
                     
                     {/* Type | Status row */}
@@ -132,12 +128,12 @@ export function RecentProperties({ properties }: RecentPropertiesProps) {
                       </span>
                       {property.bedrooms && (
                         <span className="text-muted-foreground">
-                          {property.bedrooms} {t('bed')}
+                          {property.bedrooms} {""}
                         </span>
                       )}
                       {property.bathrooms && (
                         <span className="text-muted-foreground">
-                          {property.bathrooms} {t('bath')}
+                          {property.bathrooms} {""}
                         </span>
                       )}
                     </div>

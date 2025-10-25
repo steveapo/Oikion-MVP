@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
@@ -71,8 +70,6 @@ export function OrganizationSettingsForm({
 }: OrganizationSettingsFormProps) {
   const [isSaving, setIsSaving] = useState(false);
   const { triggerReload } = useOrganizationContext();
-  const t = useTranslations("settings");
-
   const form = useForm<OrganizationFormData>({
     resolver: zodResolver(organizationSchema),
     defaultValues: {

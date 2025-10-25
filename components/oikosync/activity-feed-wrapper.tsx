@@ -1,4 +1,6 @@
 "use client";
+
+import { useSession } from "next-auth/react";
 import { useLiveUpdates } from "@/hooks/use-live-updates";
 import { ActivityFeed } from "./activity-feed";
 
@@ -13,7 +15,7 @@ interface ActivityItem {
     id: string;
     name: string | null;
     email: string | null;
-  } | null;
+  };
   entityDetails: any;
 }
 
@@ -31,14 +33,14 @@ export function ActivityFeedWrapper({
   activities,
   totalPages,
   currentPage,
-  organizationId,
-}: ActivityFeedWrapperProps & { organizationId: string | null | undefined }) {
+}: ActivityFeedWrapperProps) {
+  const { data: session } = useSession();
   
   // Subscribe to ALL entity types to catch all activities
   // Activity feed should show all organization events
   useLiveUpdates(
     ["property", "client", "member", "task", "interaction", "note", "activity"],
-    organizationId
+    session?.user?.organizationId
   );
 
   return (

@@ -1,6 +1,4 @@
 import { redirect } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
-
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -8,8 +6,6 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.orders');
-  
   return constructMetadata({
     title: `${t('header.title')} – Oikion`,
     description: t('header.description'),
@@ -20,8 +16,6 @@ export default async function OrdersPage() {
   // const user = await getCurrentUser();
   // if (!user || user.role !== "ADMIN") redirect("/login");
   
-  const t = await getTranslations('admin.orders');
-
   return (
     <>
       <DashboardHeader

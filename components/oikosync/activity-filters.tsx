@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Filter, X, Calendar } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,8 +33,6 @@ export function ActivityFilters() {
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [actors, setActors] = useState<Actor[]>([]);
-  const t = useTranslations("oikosync.filters");
-
   useEffect(() => {
     const loadActors = async () => {
       try {
@@ -78,7 +74,7 @@ export function ActivityFilters() {
           <CollapsibleTrigger asChild>
             <Button variant="outline" size="sm">
               <Filter className="mr-2 h-4 w-4" />
-              {t("title")}
+              {""}
               {hasActiveFilters && (
                 <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                   !
@@ -91,7 +87,7 @@ export function ActivityFilters() {
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
             <X className="mr-2 h-4 w-4" />
-            {t("clearAll")}
+            {""}
           </Button>
         )}
       </div>
@@ -104,16 +100,16 @@ export function ActivityFilters() {
             {/* Actor Filter */}
             {actors.length > 0 && (
               <div className="space-y-2">
-                <Label htmlFor="actorId">{t("teamMember")}</Label>
+                <Label htmlFor="actorId">{""}</Label>
                 <Select
                   defaultValue={searchParams.get("actorId") ?? "all"}
                   onValueChange={(value) => updateFilters("actorId", value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={t("allMembers")} />
+                    <SelectValue placeholder={""} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t("allMembers")}</SelectItem>
+                    <SelectItem value="all">{""}</SelectItem>
                     {actors.map((actor) => (
                       <SelectItem key={actor.id} value={actor.id}>
                         {actor.name || actor.email}
@@ -126,20 +122,20 @@ export function ActivityFilters() {
 
             {/* Entity Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="entityType">{t("entityType")}</Label>
+              <Label htmlFor="entityType">{""}</Label>
               <Select
                 defaultValue={searchParams.get("entityType") ?? "all"}
                 onValueChange={(value) => updateFilters("entityType", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("allTypes")} />
+                  <SelectValue placeholder={""} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("allTypes")}</SelectItem>
-                  <SelectItem value={EntityType.PROPERTY}>{t("properties")}</SelectItem>
-                  <SelectItem value={EntityType.CLIENT}>{t("clients")}</SelectItem>
-                  <SelectItem value={EntityType.TASK}>{t("tasks")}</SelectItem>
-                  <SelectItem value={EntityType.USER}>{t("members")}</SelectItem>
+                  <SelectItem value="all">{""}</SelectItem>
+                  <SelectItem value={EntityType.PROPERTY}>{""}</SelectItem>
+                  <SelectItem value={EntityType.CLIENT}>{""}</SelectItem>
+                  <SelectItem value={EntityType.TASK}>{""}</SelectItem>
+                  <SelectItem value={EntityType.USER}>{""}</SelectItem>
                   <SelectItem value={EntityType.SUBSCRIPTION}>Subscription</SelectItem>
                 </SelectContent>
               </Select>
@@ -147,16 +143,16 @@ export function ActivityFilters() {
 
             {/* Action Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="actionType">{t("actionType")}</Label>
+              <Label htmlFor="actionType">{""}</Label>
               <Select
                 defaultValue={searchParams.get("actionType") ?? "all"}
                 onValueChange={(value) => updateFilters("actionType", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("allActions")} />
+                  <SelectValue placeholder={""} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("allActions")}</SelectItem>
+                  <SelectItem value="all">{""}</SelectItem>
                   
                   {/* Property Actions */}
                   <SelectItem value={ActionType.PROPERTY_CREATED}>{t("../actionTypes.propertyCreated")}</SelectItem>
@@ -192,18 +188,18 @@ export function ActivityFilters() {
 
             {/* Date Range */}
             <div className="space-y-2">
-              <Label>{t("dateRange")}</Label>
+              <Label>{""}</Label>
               <div className="flex items-center gap-2">
                 <Input
                   type="date"
-                  placeholder={t("from")}
+                  placeholder={""}
                   defaultValue={searchParams.get("dateFrom") ?? ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     updateFilters("dateFrom", value || null);
                   }}
                 />
-                <span className="text-muted-foreground">{t("to")}</span>
+                <span className="text-muted-foreground">{""}</span>
                 <Input
                   type="date"
                   placeholder="To"

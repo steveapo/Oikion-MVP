@@ -102,7 +102,7 @@ export default function ProjectSwitcher({
     console.log('[ProjectSwitcher] Subscribing to member events');
 
     const unsubscribe = subscribeToLiveUpdates(
-      ["member"],
+      "member",
       session.user.organizationId,
       (event) => {
         console.log('[ProjectSwitcher] Received member event:', event);
