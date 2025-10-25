@@ -1,0 +1,93 @@
+Action,Source Path,Destination Path,Category,Reason
+DELETE,I18N_404_FIX.md,,i18n,i18n documentation cleanup
+DELETE,I18N_ARCHITECTURE.md,,i18n,i18n documentation cleanup
+DELETE,I18N_CRITICAL_FIX.md,,i18n,i18n documentation cleanup
+DELETE,I18N_DEPRECATION_FIX.md,,i18n,i18n documentation cleanup
+DELETE,I18N_DEPLOYMENT_CHECKLIST.md,,i18n,i18n documentation cleanup
+DELETE,I18N_DOCUMENTATION_INDEX.md,,i18n,i18n documentation cleanup
+DELETE,I18N_FILES_MANIFEST.md,,i18n,i18n documentation cleanup
+DELETE,I18N_FINAL_REPORT.md,,i18n,i18n documentation cleanup
+DELETE,I18N_FIX_SUMMARY.md,,i18n,i18n documentation cleanup
+DELETE,I18N_HANDOFF.md,,i18n,i18n documentation cleanup
+DELETE,I18N_IMPLEMENTATION_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,I18N_INSTALLATION.md,,i18n,i18n documentation cleanup
+DELETE,I18N_MIGRATION_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,I18N_QUICK_REFERENCE.md,,i18n,i18n documentation cleanup
+DELETE,I18N_QUICKSTART.md,,i18n,i18n documentation cleanup
+DELETE,I18N_README.md,,i18n,i18n documentation cleanup
+DELETE,I18N_ROUTING_EXPLAINED.md,,i18n,i18n documentation cleanup
+DELETE,I18N_SETUP_SUMMARY.md,,i18n,i18n documentation cleanup
+DELETE,I18N_START_HERE.md,,i18n,i18n documentation cleanup
+DELETE,I18N_TASK_COMPLETION.md,,i18n,i18n documentation cleanup
+DELETE,docs/I18N_IMPLEMENTATION.md,,i18n,i18n documentation cleanup
+DELETE,BLAZING_FAST_LOCALE_SWITCH.md,,i18n,i18n documentation cleanup
+DELETE,LOCALE_INSTANT_SWITCH_FIX.md,,i18n,i18n documentation cleanup
+DELETE,LOCALE_OPTIMIZATION_CHECKLIST.md,,i18n,i18n documentation cleanup
+DELETE,LOCALE_OPTIMIZATION_DIAGRAM.md,,i18n,i18n documentation cleanup
+DELETE,LOCALE_PERFORMANCE_SUMMARY.md,,i18n,i18n documentation cleanup
+DELETE,LOCALE_TOAST_NOTIFICATION.md,,i18n,i18n documentation cleanup
+DELETE,COMPREHENSIVE_TRANSLATIONS_SUMMARY.md,,i18n,i18n documentation cleanup
+DELETE,OIKOSYNC_MEMBERS_TRANSLATIONS_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,OIKOSYNC_TRANSLATIONS_IMPLEMENTATION.md,,i18n,i18n documentation cleanup
+DELETE,PROPERTIES_PAGE_GREEK_TRANSLATIONS.md,,i18n,i18n documentation cleanup
+DELETE,PROTECTED_PAGES_I18N_IMPLEMENTATION.md,,i18n,i18n documentation cleanup
+DELETE,PROTECTED_PAGES_TRANSLATION_GUIDE.md,,i18n,i18n documentation cleanup
+DELETE,PROTECTED_PAGES_TRANSLATIONS_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,RELATIONS_CARDS_TRANSLATIONS_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,RELATIONS_HOME_PAGE_TRANSLATIONS_COMPLETE.md,,i18n,i18n documentation cleanup
+DELETE,RELATIONS_PAGE_TRANSLATION_VERIFICATION.md,,i18n,i18n documentation cleanup
+DELETE,SIDEBAR_TRANSLATION_IMPLEMENTATION.md,,i18n,i18n documentation cleanup
+DELETE,SEO_IMPLEMENTATION_SUMMARY.md,,i18n,i18n documentation cleanup
+DELETE,SEO_LOCALIZATION_IMPLEMENTATION.md,,i18n,i18n documentation cleanup
+DELETE,SEO_TESTING_GUIDE.md,,i18n,i18n documentation cleanup
+DELETE,CLEANUP_AND_SESSION_FIX.md,,task-completion,Task completion file
+DELETE,CLEANUP_SUMMARY.md,,task-completion,Task completion file
+DELETE,CSRF_SIGNOUT_RESOLUTION.md,,task-completion,Task completion file
+DELETE,DASHBOARD_PROPERTIES_DISPLAY_UPDATE.md,,task-completion,Task completion file
+DELETE,DASHBOARD_RECENT_ITEMS_IMPLEMENTATION.md,,task-completion,Task completion file
+DELETE,DECIMAL_SERIALIZATION_FIX.md,,task-completion,Task completion file
+DELETE,DUPLICATE-WORKSPACE-FIX.md,,task-completion,Task completion file
+DELETE,IMPLEMENTATION_SUMMARY.md,,task-completion,Task completion file
+DELETE,INVITATION-LINK-FIX.md,,task-completion,Task completion file
+DELETE,LOADING_STATES_IMPLEMENTATION.md,,task-completion,Task completion file
+DELETE,LOADING_STATES_INDEX.md,,task-completion,Task completion file
+DELETE,OIKOSYNC_ACTIVITY_LAYOUT_UPDATE.md,,task-completion,Task completion file
+DELETE,ORG_RELOAD_OPTIMIZATION.md,,task-completion,Task completion file
+DELETE,PERSONAL_ORG_SUMMARY.md,,task-completion,Task completion file
+DELETE,QUICK_TEST_LOCALE_SWITCH.md,,task-completion,Task completion file
+DELETE,QUICK_TEST_PERFORMANCE.md,,task-completion,Task completion file
+DELETE,TESTING_ORG_RELOAD_FIX.md,,task-completion,Task completion file
+DELETE,VERCEL_DEPLOYMENT_FIX.md,,task-completion,Task completion file
+DELETE,docs/AUTH_SIGNOUT_CSRF_FIX.md,,task-completion,Task completion file
+MOVE,docs/backend/index.md,docs/architecture/backend/index.md,reorganize,Backend docs restructure
+MOVE,docs/backend/database.md,docs/architecture/backend/database.md,reorganize,Backend docs restructure
+MOVE,docs/backend/api-routes.md,docs/architecture/backend/api-routes.md,reorganize,Backend docs restructure
+MOVE,docs/backend/server-actions.md,docs/architecture/backend/server-actions.md,reorganize,Backend docs restructure
+MOVE,docs/backend/auth-and-integrations.md,docs/architecture/backend/auth-and-integrations.md,reorganize,Backend docs restructure
+MOVE,content/docs/index.mdx,docs/content-library/index.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/installation.mdx,docs/content-library/installation.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/in-progress.mdx,docs/content-library/in-progress.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/authentification.mdx,docs/content-library/configuration/authentification.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/blog.mdx,docs/content-library/configuration/blog.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/components.mdx,docs/content-library/configuration/components.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/config-files.mdx,docs/content-library/configuration/config-files.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/database.mdx,docs/content-library/configuration/database.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/email.mdx,docs/content-library/configuration/email.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/layouts.mdx,docs/content-library/configuration/layouts.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/markdown-files.mdx,docs/content-library/configuration/markdown-files.mdx,reorganize,Content docs consolidation
+MOVE,content/docs/configuration/subscriptions.mdx,docs/content-library/configuration/subscriptions.mdx,reorganize,Content docs consolidation
+MOVE,AGENCY_RENAME_GUIDE.md,docs/guides/agency-rename-guide.md,reorganize,Root docs consolidation
+MOVE,SKELETON_COMPONENTS_GUIDE.md,docs/guides/skeleton-components.md,reorganize,Root docs consolidation
+MOVE,test-invitation-flow.md,docs/features/invitations/invitation-flow.md,reorganize,Root docs consolidation
+MOVE,docs/PERSONAL_ORG_QUICK_REF.md,docs/features/personal-workspace.md,reorganize,Features consolidation
+MOVE,docs/setup/QUICKSTART_MEMBERS.md,docs/features/members/quickstart-members.md,reorganize,Features consolidation
+MOVE,docs/setup/DEV_EMAIL_TESTING.md,docs/guides/dev-email-testing.md,reorganize,Setup to guides
+MOVE,docs/setup/ENVIRONMENT_SETUP_GUIDE.md,docs/getting-started/environment-setup.md,reorganize,Setup to getting-started
+MOVE,docs/troubleshooting/WEBPACK_FIX.md,docs/operations/troubleshooting/webpack-fix.md,reorganize,Operations consolidation
+MOVE,docs/troubleshooting/ROLE_FILTERING_FIX.md,docs/operations/troubleshooting/role-filtering-fix.md,reorganize,Operations consolidation
+MOVE,docs/QODER_AGENT_RULES.md,docs/development/cursor-agent-rules.md,reorganize,Development docs
+KEEP,README.md,,root,Standard root file
+KEEP,LICENSE.md,,root,Standard root file
+KEEP,content/blog/,,root,Contentlayer source
+KEEP,content/guides/,,root,Contentlayer source
+KEEP,content/pages/,,root,Contentlayer source
