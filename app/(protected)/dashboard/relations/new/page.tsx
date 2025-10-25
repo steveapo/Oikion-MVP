@@ -4,7 +4,11 @@ import { getCurrentUser } from "@/lib/session";
 import { canCreateContent } from "@/lib/roles";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
-import { ClientForm } from "@/components/relations/client-form";
+import dynamic from "next/dynamic";
+const ClientForm = dynamic(() => import("@/components/relations/client-form").then(m => m.ClientForm), {
+  loading: () => <div className="h-60 rounded-lg border p-4"><div className="h-6 w-44 bg-muted animate-pulse rounded mb-4" /><div className="h-40 bg-muted animate-pulse rounded" /></div>,
+  ssr: false,
+});
 
 export const metadata = constructMetadata({
   title: "Add Relation - Oikion",

@@ -16,6 +16,13 @@ Complete documentation for the Oikion real estate agency operating system, built
 - **[Dev Email Testing](setup/DEV_EMAIL_TESTING.md)** - Testing email flows in development
 - **[Resend Dev Mode](setup/RESEND_DEV_MODE.md)** - Email service configuration
 
+### Backend
+- **[Backend Overview](backend/index.md)**
+  - [Database](backend/database.md)
+  - [API Routes](backend/api-routes.md)
+  - [Server Actions](backend/server-actions.md)
+  - [Auth and Integrations](backend/auth-and-integrations.md)
+
 ### Implementation Details
 - **[Implementation Complete](implementation/IMPLEMENTATION_COMPLETE.md)** - Full system implementation overview
 - **[Organization Invitations](implementation/ORG_INVITATIONS_IMPLEMENTATION.md)** - Invitation system details
@@ -96,4 +103,4 @@ When adding new features or making changes:
 
 ---
 
-**Last Updated**: October 16, 2025
+**Last Updated**: October 25, 2025

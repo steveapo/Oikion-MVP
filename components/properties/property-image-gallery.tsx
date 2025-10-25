@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { placeholderBlurhash } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,9 @@ export function PropertyImageGallery({ images }: PropertyImageGalleryProps) {
             alt={`Property image ${selectedImageIndex + 1}`}
             fill
             className="object-cover transition-transform hover:scale-105"
+            placeholder="blur"
+            blurDataURL={placeholderBlurhash}
+            priority={selectedImageIndex === 0}
           />
           
           {/* Image Counter */}

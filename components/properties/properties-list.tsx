@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { placeholderBlurhash } from "@/lib/utils";
 import { MoreHorizontal, Edit, Archive, Eye } from "lucide-react";
 import { UserRole, PropertyStatus, TransactionType, PropertyType } from "@prisma/client";
 
@@ -145,6 +146,8 @@ function PropertyCard({ property, userRole, userId }: { property: Property; user
               alt={`Property in ${displayLocation}`}
               fill
               className="object-cover"
+              placeholder="blur"
+              blurDataURL={placeholderBlurhash}
             />
             <div className="absolute right-2 top-2">
               {getTransactionTypeBadge(property.transactionType)}

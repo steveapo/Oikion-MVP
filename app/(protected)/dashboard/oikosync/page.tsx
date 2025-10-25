@@ -9,10 +9,10 @@ import { getActivities } from "@/actions/activities";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ActivityFilters } from "@/components/oikosync/activity-filters";
-import { ActivityFeed } from "@/components/oikosync/activity-feed";
+import { ActivityFeedWrapper } from "@/components/oikosync/activity-feed-wrapper";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata = constructMetadata({
   title: "Oikosync - Oikion",
@@ -53,27 +53,27 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading={t("header.title")}
-          text={t("header.description")}
+          heading={t("header.title") as unknown as string}
+          text={t("header.description") as unknown as string}
         />
 
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="activity" />
-          <EmptyPlaceholder.Title>{t("subscription.title")}</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>{t("subscription.title") as unknown as string}</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            {t("subscription.description")}
+            {t("subscription.description") as unknown as string}
           </EmptyPlaceholder.Description>
-          <Link href="/dashboard/billing">
-            <Button>{t("subscription.viewPlans")}</Button>
+          <Link href="/dashboard/billing" className={buttonVariants({ variant: "default" })}>
+            {t("subscription.viewPlans") as unknown as string}
           </Link>
         </EmptyPlaceholder>
 
         {/* Demo activities for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
           <div className="mx-auto max-w-md text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">{t("subscription.demoTitle")}</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">{t("subscription.demoTitle") as unknown as string}</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {t("subscription.demoDescription")}
+              {t("subscription.demoDescription") as unknown as string}
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded border bg-muted/50 p-3 text-left">
@@ -132,8 +132,8 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading={t("header.title")}
-        text={t("header.description")}
+        heading={t("header.title") as unknown as string}
+        text={t("header.description") as unknown as string}
       />
 
       <ActivityFilters />
@@ -150,10 +150,11 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       ) : (
-        <ActivityFeed 
+        <ActivityFeedWrapper
           activities={activitiesData.activities}
           totalPages={activitiesData.totalPages}
           currentPage={activitiesData.page}
+          organizationId={(user as any).organizationId}
         />
       )}
     </div>

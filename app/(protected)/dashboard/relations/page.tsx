@@ -12,15 +12,15 @@ import { Button } from "@/components/ui/button";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ContactsFilters } from "@/components/relations/contacts-filters";
-import { ContactsList } from "@/components/relations/contacts-list";
+import { ContactsListWrapper } from "@/components/relations/contacts-list-wrapper";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
   const t = await getTranslations('relations');
   
   return constructMetadata({
-    title: `${t('header.title')} - Oikion`,
-    description: t('header.description'),
+    title: `${t('header.title') as unknown as string} - Oikion`,
+    description: t('header.description') as unknown as string,
   });
 }
 
@@ -48,8 +48,8 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading={t('header.title')}
-          text={t('header.description')}
+          heading={t('header.title') as unknown as string}
+          text={t('header.description') as unknown as string}
         >
           {canCreateContent(user.role) && (
             <Button disabled>
@@ -134,8 +134,8 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading={t('header.title') as unknown as string}
+        text={t('header.description') as unknown as string}
       >
         {canCreateContent(user.role) && (
           <Link href="/dashboard/relations/new">
@@ -169,12 +169,13 @@ async function ContactsContent({ searchParams }: ContactsPageProps) {
           )}
         </EmptyPlaceholder>
       ) : (
-        <ContactsList 
-          clients={contactsData.clients}
+        <ContactsListWrapper
+          clients={contactsData.clients as any}
           totalPages={contactsData.totalPages}
           currentPage={contactsData.page}
           userRole={user.role}
           userId={user.id!}
+          organizationId={(user as any).organizationId}
         />
       )}
     </div>

@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import imageCompression from "browser-image-compression";
 import { X, Upload, Image as ImageIcon, AlertCircle } from "lucide-react";
 import Image from "next/image";
+import { placeholderBlurhash } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -234,6 +235,8 @@ export function ImageUpload({ onImagesChange, existingImages = [] }: ImageUpload
                     alt="Property image"
                     fill
                     className="object-cover transition-transform group-hover:scale-105"
+                    placeholder="blur"
+                    blurDataURL={placeholderBlurhash}
                   />
                 </div>
 

@@ -12,7 +12,8 @@ import {
   type ClientFilters 
 } from "@/lib/validations/client";
 import { ActionType, EntityType } from "@prisma/client";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { broadcastLiveUpdate } from "@/lib/live-updates";
 
 // Helper function to create activity log
 async function createActivity(
@@ -35,6 +36,24 @@ async function createActivity(
     });
   } catch (error) {
     console.error("Failed to create activity log:", error);
+  }
+}
+
+// Broadcast client update helper
+async function broadcastClientUpdate(
+  action: "created" | "updated" | "deleted",
+  clientId: string,
+  organizationId: string
+) {
+  try {
+    await broadcastLiveUpdate({
+      entityType: "client",
+      action,
+      entityId: clientId,
+      organizationId,
+    });
+  } catch (error) {
+    console.error("Failed to broadcast client update:", error);
   }
 }
 
@@ -83,7 +102,11 @@ export async function createClient(data: ClientFormData) {
       }
     );
 
+    // Broadcast live update
+    await broadcastClientUpdate("created", client.id, session.user.organizationId);
+
     revalidateTag("clients:list");
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true, clientId: client.id };
   } catch (error) {
@@ -146,8 +169,12 @@ export async function updateClient(id: string, data: Partial<ClientFormData>) {
       }
     );
 
+    // Broadcast live update
+    await broadcastClientUpdate("updated", id, session.user.organizationId);
+
     revalidateTag("clients:list");
     revalidateTag(`clients:detail:${id}`);
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
@@ -190,7 +217,11 @@ export async function deleteClient(id: string) {
       where: { id },
     });
 
+    // Broadcast live update
+    await broadcastClientUpdate("deleted", id, session.user.organizationId);
+
     revalidateTag("clients:list");
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
@@ -236,33 +267,34 @@ export async function getClients(filters: Partial<ClientFilters> = {}) {
       };
     }
 
-    const db = prismaForOrg(session.user.organizationId);
-    const [clients, totalCount] = await Promise.all([
-      db.client.findMany({
-        where,
+    const cached = unstable_cache(
+      async (orgId: string, whereInput: any, page: number, limit: number) => {
+        const [list, count] = await Promise.all([
+          prismaForOrg(orgId).client.findMany({
+            where: whereInput,
         include: {
-          creator: {
-            select: { name: true, email: true },
-          },
-          interactions: {
-            select: { id: true, timestamp: true },
-            orderBy: { timestamp: "desc" },
-            take: 1,
-          },
-          _count: {
-            select: {
-              interactions: true,
-              notes: true,
-              tasks: true,
-            },
-          },
+              creator: { select: { name: true, email: true } },
+              interactions: { select: { id: true, timestamp: true }, orderBy: { timestamp: "desc" }, take: 1 },
+              _count: { select: { interactions: true, notes: true, tasks: true } },
         },
         orderBy: { createdAt: "desc" },
-        skip: (validatedFilters.page - 1) * validatedFilters.limit,
-        take: validatedFilters.limit,
-      }),
-      db.client.count({ where }),
-    ]);
+            skip: (page - 1) * limit,
+            take: limit,
+          }),
+          prismaForOrg(orgId).client.count({ where: whereInput }),
+        ]);
+        return { list, count };
+      },
+      ["clients:getClients"],
+      { tags: ["clients:list"], revalidate: 120 }
+    );
+
+    const { list: clients, count: totalCount } = await cached(
+      session.user.organizationId,
+      where,
+      validatedFilters.page,
+      validatedFilters.limit,
+    );
 
     return {
       clients,

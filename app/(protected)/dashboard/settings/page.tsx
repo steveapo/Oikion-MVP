@@ -1,21 +1,20 @@
 import { redirect } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
 
 import { getCurrentOrganization } from "@/actions/organizations";
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
-import { DeleteAccountSection } from "@/components/dashboard/delete-account";
 import { DeleteOrganizationSection } from "@/components/dashboard/delete-organization";
 import { DashboardHeader } from "@/components/dashboard/header";
-import { OrganizationSettingsForm } from "@/components/forms/organization-settings-form";
-import { UserNameForm } from "@/components/forms/user-name-form";
+import dynamic from "next/dynamic";
+const OrganizationSettingsForm = dynamic(() => import("@/components/forms/organization-settings-form").then(m => m.OrganizationSettingsForm), {
+  loading: () => <div className="h-40 rounded-lg border p-4"><div className="h-4 w-44 bg-muted animate-pulse rounded mb-3" /><div className="h-24 bg-muted animate-pulse rounded" /></div>,
+  ssr: false,
+});
 
 export async function generateMetadata() {
-  const t = await getTranslations('settings');
-  
   return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
+    title: "Agency Settings – Oikion",
+    description: "Manage your organization settings, billing and ownership.",
   });
 }
 
@@ -30,13 +29,12 @@ export default async function SettingsPage() {
   const currentUser = user as NonNullable<typeof user>;
 
   const organization = await getCurrentOrganization();
-  const t = await getTranslations('settings');
 
   return (
     <>
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading="Agency Settings"
+        text="Manage your organization settings, billing and ownership."
       />
       <div className="grid gap-6 pb-10">
         {organization && (
@@ -49,13 +47,9 @@ export default async function SettingsPage() {
             }}
           />
         )}
-        
-        <div className="divide-y divide-muted">
-          <UserNameForm user={{ id: currentUser.id!, name: currentUser.name }} />
-          {/* User role management removed - roles can only be changed by org owners/admins in the Members page */}
-          <DeleteOrganizationSection isPersonalOrg={organization?.isPersonal || false} />
-          <DeleteAccountSection />
-        </div>
+
+        {/* Organization destructive actions */}
+        <DeleteOrganizationSection isPersonalOrg={organization?.isPersonal || false} />
       </div>
     </>
   );

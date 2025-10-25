@@ -14,6 +14,7 @@ import {
 import { ActionType, EntityType, MarketingStatus } from "@prisma/client";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { redirect } from "next/navigation";
+import { broadcastLiveUpdate } from "@/lib/live-updates";
 
 // Helper function to create activity log
 async function createActivity(
@@ -37,6 +38,24 @@ async function createActivity(
   } catch (error) {
     console.error("Failed to create activity log:", error);
     // Don't throw - activity logging shouldn't break the main operation
+  }
+}
+
+// Broadcast property update helper
+async function broadcastPropertyUpdate(
+  action: "created" | "updated" | "deleted",
+  propertyId: string,
+  organizationId: string
+) {
+  try {
+    await broadcastLiveUpdate({
+      entityType: "property",
+      action,
+      entityId: propertyId,
+      organizationId,
+    });
+  } catch (error) {
+    console.error("Failed to broadcast property update:", error);
   }
 }
 
@@ -121,8 +140,12 @@ export async function createProperty(data: PropertyFormData) {
       }
     );
 
+    // Broadcast live update
+    await broadcastPropertyUpdate("created", property.id, session.user.organizationId!);
+
     revalidateTag("properties:list");
     revalidateTag("properties:filters");
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true, propertyId: property.id };
   } catch (error) {
@@ -253,8 +276,12 @@ export async function updateProperty(id: string, data: Partial<PropertyFormData>
       }
     );
 
+    // Broadcast live update
+    await broadcastPropertyUpdate("updated", id, session.user.organizationId!);
+
     revalidateTag("properties:list");
     revalidateTag(`properties:detail:${id}`);
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
@@ -312,8 +339,12 @@ export async function archiveProperty(id: string) {
       session.user.organizationId!
     );
 
+    // Broadcast live update
+    await broadcastPropertyUpdate("updated", id, session.user.organizationId!);
+
     revalidateTag("properties:list");
     revalidateTag(`properties:detail:${id}`);
+    revalidateTag("dashboard:overview");
     revalidateTag("activities:feed");
     return { success: true };
   } catch (error) {
@@ -375,26 +406,35 @@ export async function getProperties(filters: Partial<PropertyFilters> = {}) {
     }
 
     const db = prismaForOrg(session.user.organizationId);
-    const [properties, totalCount] = await Promise.all([
-      db.property.findMany({
-        where,
+    const cached = unstable_cache(
+      async (orgId: string, whereInput: any, page: number, limit: number) => {
+        const [props, count] = await Promise.all([
+          prismaForOrg(orgId).property.findMany({
+            where: whereInput,
         include: {
           address: true,
           listing: true,
-          mediaAssets: {
-            where: { isPrimary: true },
-            take: 1,
-          },
-          creator: {
-            select: { name: true, email: true },
-          },
+              mediaAssets: { where: { isPrimary: true }, take: 1 },
+              creator: { select: { name: true, email: true } },
         },
         orderBy: { createdAt: "desc" },
-        skip: (validatedFilters.page - 1) * validatedFilters.limit,
-        take: validatedFilters.limit,
+            skip: (page - 1) * limit,
+            take: limit,
       }),
-      db.property.count({ where }),
+          prismaForOrg(orgId).property.count({ where: whereInput }),
     ]);
+        return { props, count };
+      },
+      ["properties:getProperties"],
+      { tags: ["properties:list"], revalidate: 120 }
+    );
+
+    const { props: properties, count: totalCount } = await cached(
+      session.user.organizationId,
+      where,
+      validatedFilters.page,
+      validatedFilters.limit,
+    );
 
     // Convert Decimal fields to numbers for client components
     const serializedProperties = properties.map(property => ({
@@ -432,12 +472,10 @@ export async function getProperty(id: string) {
   }
 
   try {
-    const db = prismaForOrg(session.user.organizationId);
-    const property = await db.property.findFirst({
-      where: {
-        id,
-        organizationId: session.user.organizationId,
-      },
+    const cached = unstable_cache(
+      async (orgId: string, propId: string) => {
+        return prismaForOrg(orgId).property.findFirst({
+          where: { id: propId, organizationId: orgId },
       include: {
         address: true,
         listing: true,
@@ -448,40 +486,47 @@ export async function getProperty(id: string) {
             { uploadedAt: "asc" },
           ],
         },
-        creator: {
-          select: { name: true, email: true },
-        },
+            creator: { select: { name: true, email: true } },
         interactions: {
-          include: {
-            client: { select: { name: true } },
-            creator: { select: { name: true } },
-          },
+              include: { client: { select: { name: true } }, creator: { select: { name: true } } },
           orderBy: { timestamp: "desc" },
           take: 10,
         },
         notes: {
-          include: {
-            creator: { select: { name: true } },
-          },
+              include: { creator: { select: { name: true } } },
           orderBy: { createdAt: "desc" },
           take: 10,
         },
         tasks: {
-          include: {
-            creator: { select: { name: true } },
-            assignee: { select: { name: true } },
-          },
+              include: { creator: { select: { name: true } }, assignee: { select: { name: true } } },
           orderBy: { createdAt: "desc" },
           take: 10,
         },
       },
     });
+      },
+      ["properties:getProperty"],
+      { tags: [("properties:detail:" + id) as any], revalidate: 300 }
+    );
+
+    const property = await cached(session.user.organizationId, id);
 
     if (!property) {
       throw new Error("Property not found or access denied");
     }
 
-    return property;
+    // Serialize Decimal fields to numbers for client components
+    const serializedProperty = {
+      ...property,
+      price: Number(property.price),
+      size: property.size ? Number(property.size) : null,
+      listing: property.listing ? {
+        ...property.listing,
+        listPrice: Number(property.listing.listPrice),
+      } : null,
+    };
+
+    return serializedProperty;
   } catch (error) {
     console.error("Failed to get property:", error);
     throw new Error("Failed to get property");

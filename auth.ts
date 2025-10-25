@@ -1,13 +1,33 @@
 import authConfig from "@/auth.config";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { UserRole } from "@prisma/client";
+import { UserRole, EmailAuthInterval } from "@prisma/client";
 import NextAuth, { type DefaultSession } from "next-auth";
 import Resend from "next-auth/providers/resend";
+import Credentials from "next-auth/providers/credentials";
 
 import { env } from "@/env.mjs";
 import { prisma } from "@/lib/db";
 import { sendVerificationRequest } from "@/lib/email";
-import { getUserById } from "@/lib/user";
+import { getUserByIdForSession } from "@/lib/user";
+import { verifyPassword } from "@/lib/password";
+import { loginSchema } from "@/lib/validations/auth";
+
+// Lightweight in-memory cache for session user refreshes (per runtime instance)
+const sessionUserCache = new Map<string, { data: any; expiresAt: number }>();
+
+function getCachedSessionUser(userId: string) {
+  const entry = sessionUserCache.get(userId);
+  if (!entry) return undefined;
+  if (entry.expiresAt <= Date.now()) {
+    sessionUserCache.delete(userId);
+    return undefined;
+  }
+  return entry.data;
+}
+
+function setCachedSessionUser(userId: string, data: any, ttlMs = 30_000) {
+  sessionUserCache.set(userId, { data, expiresAt: Date.now() + ttlMs });
+}
 
 // More info: https://authjs.dev/getting-started/typescript#module-augmentation
 declare module "next-auth" {
@@ -16,6 +36,10 @@ declare module "next-auth" {
       role: UserRole;
       organizationId?: string;
       organizationName?: string;
+      onboardingCompletedAt?: Date | null;
+      emailAuthVerifiedAt?: Date | null;
+      emailAuthNextDueAt?: Date | null;
+      emailAuthInterval?: EmailAuthInterval | null;
     } & DefaultSession["user"];
   }
 }
@@ -31,14 +55,56 @@ export const {
     // error: "/auth/error",
   },
   providers: [
-    // Spread edge-compatible providers from auth.config.ts (Google)
-    ...authConfig.providers,
+    // Google OAuth (from auth.config.ts)
+    ...authConfig.providers.filter((p) => p.id === "google"),
     // Add the Resend email provider here (not in auth.config.ts)
     // This keeps it out of the Edge Runtime middleware bundle
     Resend({
       apiKey: env.RESEND_API_KEY,
       from: env.EMAIL_FROM,
       sendVerificationRequest,
+    }),
+    // Credentials provider for email/password authentication
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        try {
+          // Validate credentials
+          const { email, password } = loginSchema.parse(credentials);
+
+          // Find user by email
+          const user = await prisma.user.findUnique({
+            where: { email: email.toLowerCase() },
+          });
+
+          // Check if user exists and has a password set
+          if (!user || !user.password) {
+            return null;
+          }
+
+          // Verify password
+          const isValid = await verifyPassword(password, user.password);
+
+          if (!isValid) {
+            return null;
+          }
+
+          // Return user object for session
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            image: user.image,
+          };
+        } catch (error) {
+          console.error("Credentials authorization error:", error);
+          return null;
+        }
+      },
     }),
   ],
   events: {
@@ -98,6 +164,17 @@ export const {
 
           if (invitation) {
             // User was invited - create membership for invited organization
+            // Auto-verify email for invited user (trusted link)
+            try {
+              await prisma.user.update({
+                where: { id: user.id },
+                data: { emailVerified: new Date(), emailAuthVerifiedAt: new Date() },
+              });
+            } catch (e) {
+              console.warn("[AUTH] Failed to auto-verify invited user email", e);
+            }
+
+            // Create membership for invited organization
             await prisma.organizationMember.create({
               data: {
                 userId: user.id,
@@ -171,6 +248,22 @@ export const {
           (session.user as any).organizationName = token.organizationName;
         }
 
+        if (token.onboardingCompletedAt !== undefined) {
+          (session.user as any).onboardingCompletedAt = token.onboardingCompletedAt;
+        }
+
+        if (token.emailAuthVerifiedAt !== undefined) {
+          (session.user as any).emailAuthVerifiedAt = token.emailAuthVerifiedAt as any;
+        }
+
+        if (token.emailAuthNextDueAt !== undefined) {
+          (session.user as any).emailAuthNextDueAt = token.emailAuthNextDueAt as any;
+        }
+
+        if (token.emailAuthInterval !== undefined) {
+          (session.user as any).emailAuthInterval = token.emailAuthInterval as any;
+        }
+
         session.user.name = token.name;
         session.user.image = token.picture;
       }
@@ -181,11 +274,35 @@ export const {
     async jwt({ token }) {
       if (!token.sub) return token;
 
-      const dbUser = await getUserById(token.sub);
+      // Throttle DB lookups: refresh essential user/org data at most once per minute
+      const now = Date.now();
+      const lastRefresh = (token as any).dbRefreshedAt as number | undefined;
+      const hasEssential = !!(token as any).role && typeof (token as any).organizationId === "string";
+      const shouldRefresh = !hasEssential || !lastRefresh || now - lastRefresh > 60_000;
+
+      if (!shouldRefresh) {
+        return token;
+      }
+
+      let dbUser = getCachedSessionUser(token.sub);
+      if (!dbUser) {
+        dbUser = await getUserByIdForSession(token.sub);
+        if (dbUser) {
+          setCachedSessionUser(token.sub, dbUser);
+        }
+      }
 
       if (!dbUser) {
         console.error(`[AUTH] User ${token.sub} not found in database - invalidating session`);
         return null;
+      }
+
+      // Log onboarding status changes for debugging
+      const hasCompletedOnboarding = !!dbUser.onboardingCompletedAt;
+      const wasCompletedBefore = !!token.onboardingCompletedAt;
+
+      if (hasCompletedOnboarding !== wasCompletedBefore) {
+        console.log(`[AUTH] Onboarding status changed for user ${dbUser.email}: ${wasCompletedBefore} -> ${hasCompletedOnboarding}`);
       }
 
       // SAFETY CHECK: Verify user's current organization exists
@@ -264,10 +381,53 @@ export const {
             token.role = UserRole.ORG_OWNER;
           }
         } else {
-          // Organization exists - normal flow
-          token.organizationId = dbUser.organizationId;
-          token.organizationName = orgExists.name;
-          token.role = dbUser.role;
+          // Organization exists - verify user still has membership
+          const membership = await prisma.organizationMember.findUnique({
+            where: {
+              userId_organizationId: {
+                userId: dbUser.id,
+                organizationId: dbUser.organizationId,
+              },
+            },
+          });
+
+          if (!membership) {
+            // User was removed from organization! Switch to Personal workspace
+            console.warn(`[AUTH SAFETY] User ${dbUser.email} was removed from org ${dbUser.organizationId} - switching to Personal workspace`);
+            
+            const personalWorkspace = await prisma.organizationMember.findFirst({
+              where: {
+                userId: dbUser.id,
+                organization: {
+                  isPersonal: true,
+                },
+              },
+              include: {
+                organization: true,
+              },
+            });
+
+            if (personalWorkspace) {
+              // Switch user to Personal workspace
+              await prisma.user.update({
+                where: { id: dbUser.id },
+                data: {
+                  organizationId: personalWorkspace.organization.id,
+                  role: personalWorkspace.role,
+                },
+              });
+
+              // Update token with new org info
+              token.organizationId = personalWorkspace.organization.id;
+              token.organizationName = personalWorkspace.organization.name;
+              token.role = personalWorkspace.role;
+            }
+          } else {
+            // Membership exists - normal flow
+            token.organizationId = dbUser.organizationId;
+            token.organizationName = orgExists.name;
+            token.role = dbUser.role;
+          }
         }
       } else {
         // User has no organization set - this shouldn't happen, but handle it
@@ -303,6 +463,13 @@ export const {
       token.name = dbUser.name;
       token.email = dbUser.email;
       token.picture = dbUser.image;
+      token.onboardingCompletedAt = dbUser.onboardingCompletedAt;
+      token.emailAuthVerifiedAt = dbUser.emailAuthVerifiedAt as any;
+      token.emailAuthNextDueAt = dbUser.emailAuthNextDueAt as any;
+      token.emailAuthInterval = dbUser.emailAuthInterval as any;
+
+      // Record refresh timestamp to avoid frequent DB hits
+      (token as any).dbRefreshedAt = now;
 
       return token;
     },

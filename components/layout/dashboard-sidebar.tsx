@@ -25,9 +25,11 @@ import { Icons } from "@/components/shared/icons";
 
 interface DashboardSidebarProps {
   links: SidebarNavItem[];
+  initialCurrentOrg?: { id: string; name: string; isPersonal?: boolean } | null;
+  initialAllOrgs?: { id: string; name: string; isPersonal?: boolean; _count?: { users: number } }[];
 }
 
-export function DashboardSidebar({ links }: DashboardSidebarProps) {
+export function DashboardSidebar({ links, initialCurrentOrg, initialAllOrgs }: DashboardSidebarProps) {
   const path = usePathname();
   const t = useTranslations();
 
@@ -73,7 +75,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
           >
             <div className="flex h-full max-h-screen flex-1 flex-col gap-2">
               <div className="flex h-14 items-center p-4 lg:h-[60px]">
-                {isSidebarExpanded ? <ProjectSwitcher /> : null}
+                {isSidebarExpanded ? <ProjectSwitcher initialCurrentOrg={initialCurrentOrg || undefined} initialAllOrgs={initialAllOrgs || undefined} /> : null}
 
                 <Button
                   variant="ghost"
@@ -179,7 +181,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
   );
 }
 
-export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
+export function MobileSheetSidebar({ links, initialCurrentOrg, initialAllOrgs }: DashboardSidebarProps) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const { isSm, isMobile } = useMediaQuery();
@@ -212,7 +214,7 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
                   </span>
                 </Link>
 
-                <ProjectSwitcher large />
+                <ProjectSwitcher large initialCurrentOrg={initialCurrentOrg || undefined} initialAllOrgs={initialAllOrgs || undefined} />
 
                 {links.map((section) => (
                   <section

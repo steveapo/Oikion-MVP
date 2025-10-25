@@ -2,8 +2,8 @@ import "@/styles/globals.css";
 
 import { fontGeist, fontHeading, fontSans, fontUrban } from "@/assets/fonts";
 import { SessionProvider } from "next-auth/react";
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, getLocale } from 'next-intl/server';
+import { auth } from "@/auth";
+// i18n removed
 import { ThemeProvider } from "next-themes";
 
 import { cn, constructMetadata } from "@/lib/utils";
@@ -19,11 +19,9 @@ interface RootLayoutProps {
 export const metadata = constructMetadata();
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-  
+  const session = await auth();
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head />
       <body
         className={cn(
@@ -34,23 +32,21 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           fontGeist.variable,
         )}
       >
-        <NextIntlClientProvider messages={messages} locale={locale}>
-          <SessionProvider refetchOnWindowFocus={false}>
-            <OrganizationProvider>
-              <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
-              >
-                {children}
-                <Analytics />
-                <Toaster richColors closeButton />
-                <TailwindIndicator />
-              </ThemeProvider>
-            </OrganizationProvider>
-          </SessionProvider>
-        </NextIntlClientProvider>
+        <SessionProvider session={session} refetchOnWindowFocus={false}>
+          <OrganizationProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+              <Analytics />
+              <Toaster richColors closeButton />
+              <TailwindIndicator />
+            </ThemeProvider>
+          </OrganizationProvider>
+        </SessionProvider>
       </body>
     </html>
   );

@@ -4,20 +4,21 @@ import { getTranslations } from "next-intl/server";
 import { auth } from "@/auth";
 import { HeaderSection } from "@/components/shared/header-section";
 import { InviteMemberForm } from "@/components/members/invite-member-form";
-import { MembersList } from "@/components/members/members-list";
+import { MembersListWrapper } from "@/components/members/members-list-wrapper";
 import { PendingInvitations } from "@/components/members/pending-invitations";
 import { canManageMembers } from "@/lib/roles";
 import { getMembers } from "@/actions/members";
 import { getInvitations } from "@/actions/invitations";
+import { getCurrentOrganization } from "@/actions/organizations";
+import { PersonalOrgNotice } from "@/components/members/personal-org-notice";
 import { constructMetadata } from "@/lib/utils";
 
 export async function generateMetadata() {
   const t = await getTranslations('members');
   
-  return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
-  });
+  const title = `${await t('header.title')} – Oikion`;
+  const description = await t('header.description');
+  return constructMetadata({ title, description });
 }
 
 export default async function MembersPage() {
@@ -32,9 +33,10 @@ export default async function MembersPage() {
   const t = await getTranslations('members');
   const canManage = canManageMembers(user.role);
 
-  const [membersResult, invitationsResult] = await Promise.all([
+  const [membersResult, invitationsResult, currentOrg] = await Promise.all([
     getMembers(),
     canManage ? getInvitations() : Promise.resolve({ success: true, invitations: [] }),
+    getCurrentOrganization(),
   ]);
 
   if (!membersResult.success) {
@@ -49,29 +51,60 @@ export default async function MembersPage() {
   const invitations = invitationsResult.invitations || [];
   const pendingInvitations = invitations.filter((inv) => inv.status === "PENDING");
 
+  // Precompute translated strings
+  const headerLabel = await t('header.label');
+  const headerTitle = await t('header.title');
+  const teamMembersTitle = await t('sections.teamMembers');
+  const inviteNewTitle = await t('sections.inviteNew');
+  const pendingTitle = await t('sections.pendingCount', { count: pendingInvitations.length });
+  const subtitleText = members.length === 1 
+    ? await t('header.subtitle', { count: members.length })
+    : await t('header.subtitlePlural', { count: members.length });
+
+  // Personal org: show notice and prevent inviting
+  if (currentOrg?.isPersonal) {
+    return (
+      <div className="space-y-8">
+        <HeaderSection
+          label={headerLabel}
+          title={headerTitle}
+          subtitle={subtitleText}
+        />
+
+        <PersonalOrgNotice />
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">{teamMembersTitle}</h2>
+          <MembersListWrapper
+            initialMembers={members}
+            currentUserId={user.id!}
+            canManage={false}
+            currentUserRole={user.role}
+          organizationId={(user as any).organizationId}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <HeaderSection
-        label={t('header.label')}
-        title={t('header.title')}
-        subtitle={members.length === 1 
-          ? t('header.subtitle', { count: members.length })
-          : t('header.subtitlePlural', { count: members.length })
-        }
+        label={headerLabel}
+        title={headerTitle}
+        subtitle={subtitleText}
       />
 
       {canManage && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold mb-4">{t('sections.inviteNew')}</h2>
+            <h2 className="text-xl font-semibold mb-4">{inviteNewTitle}</h2>
             <InviteMemberForm />
           </div>
 
           {pendingInvitations.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold mb-4">
-                {t('sections.pendingCount', { count: pendingInvitations.length })}
-              </h2>
+              <h2 className="text-xl font-semibold mb-4">{pendingTitle}</h2>
               <PendingInvitations invitations={pendingInvitations} />
             </div>
           )}
@@ -79,12 +112,13 @@ export default async function MembersPage() {
       )}
 
       <div>
-        <h2 className="text-xl font-semibold mb-4">{t('sections.teamMembers')}</h2>
-        <MembersList 
-          members={members} 
+        <h2 className="text-xl font-semibold mb-4">{teamMembersTitle}</h2>
+        <MembersListWrapper
+          initialMembers={members}
           currentUserId={user.id!} 
           canManage={canManage}
           currentUserRole={user.role}
+          organizationId={(user as any).organizationId}
         />
       </div>
     </div>
