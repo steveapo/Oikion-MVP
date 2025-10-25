@@ -56,6 +56,7 @@ See **I18N_QUICKSTART.md** for common translation tasks.
 | **I18N_SETUP_SUMMARY.md** | Complete implementation summary |
 | **I18N_DEPLOYMENT_CHECKLIST.md** | Deployment and testing checklist |
 | **docs/I18N_IMPLEMENTATION.md** | Comprehensive technical guide |
+| **docs/tolgee-integration/index.md** | Tolgee TMS-only (self-hosted) integration & CI sync |
 
 ## 🎯 Current Status
 

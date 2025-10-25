@@ -8,26 +8,9 @@ import Credentials from "next-auth/providers/credentials";
 import { env } from "@/env.mjs";
 import { prisma } from "@/lib/db";
 import { sendVerificationRequest } from "@/lib/email";
-import { getUserByIdForSession } from "@/lib/user";
+import { getUserById } from "@/lib/user";
 import { verifyPassword } from "@/lib/password";
 import { loginSchema } from "@/lib/validations/auth";
-
-// Lightweight in-memory cache for session user refreshes (per runtime instance)
-const sessionUserCache = new Map<string, { data: any; expiresAt: number }>();
-
-function getCachedSessionUser(userId: string) {
-  const entry = sessionUserCache.get(userId);
-  if (!entry) return undefined;
-  if (entry.expiresAt <= Date.now()) {
-    sessionUserCache.delete(userId);
-    return undefined;
-  }
-  return entry.data;
-}
-
-function setCachedSessionUser(userId: string, data: any, ttlMs = 30_000) {
-  sessionUserCache.set(userId, { data, expiresAt: Date.now() + ttlMs });
-}
 
 // More info: https://authjs.dev/getting-started/typescript#module-augmentation
 declare module "next-auth" {
@@ -284,13 +267,7 @@ export const {
         return token;
       }
 
-      let dbUser = getCachedSessionUser(token.sub);
-      if (!dbUser) {
-        dbUser = await getUserByIdForSession(token.sub);
-        if (dbUser) {
-          setCachedSessionUser(token.sub, dbUser);
-        }
-      }
+      const dbUser = await getUserById(token.sub);
 
       if (!dbUser) {
         console.error(`[AUTH] User ${token.sub} not found in database - invalidating session`);

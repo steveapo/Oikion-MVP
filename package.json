@@ -9,7 +9,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "pnpm validate:i18n && pnpm contentlayer:fix && next build",
-    "build:analyze": "ANALYZE=true pnpm build",
     "turbo": "next dev --turbo",
     "start": "next start",
     "lint": "next lint",
@@ -17,7 +16,11 @@
     "postinstall": "prisma generate",
     "email": "email dev --dir emails --port 3333",
     "contentlayer:fix": "contentlayer2 build && node scripts/fix-contentlayer-types.mjs",
-    "validate:i18n": "node scripts/validate-translations.mjs"
+    "validate:i18n": "node scripts/validate-translations.mjs",
+    "tolgee:push": "node scripts/tolgee/push.mjs",
+    "tolgee:pull": "node scripts/tolgee/pull.mjs",
+    "tolgee:prepare:upload": "node scripts/tolgee/push.mjs",
+    "tolgee:prepare:apply": "node scripts/tolgee/pull.mjs"
   },
   "dependencies": {
     "-": "^0.0.1",
@@ -60,6 +63,7 @@
     "@vercel/analytics": "^1.3.1",
     "@vercel/og": "^0.6.2",
     "@vercel/speed-insights": "^1.2.0",
+    "bcryptjs": "^3.0.2",
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

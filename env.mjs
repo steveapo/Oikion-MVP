@@ -18,6 +18,11 @@ export const env = createEnv({
     STRIPE_WEBHOOK_SECRET: z.string().min(1),
     // Optional: Password protect the entire app
     APP_PASSWORD: z.string().optional(),
+    // Tolgee (tooling-only)
+    TOLGEE_API_URL: z.string().url().optional(),
+    TOLGEE_API_KEY_READ: z.string().optional(),
+    TOLGEE_API_KEY_WRITE: z.string().optional(),
+    TOLGEE_PROJECT_ID: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().min(1),
@@ -49,5 +54,10 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_STRIPE_BUSINESS_MONTHLY_PLAN_ID,
     NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID:
       process.env.NEXT_PUBLIC_STRIPE_BUSINESS_YEARLY_PLAN_ID,
+    // Tolgee (tooling-only)
+    TOLGEE_API_URL: process.env.TOLGEE_API_URL,
+    TOLGEE_API_KEY_READ: process.env.TOLGEE_API_KEY_READ,
+    TOLGEE_API_KEY_WRITE: process.env.TOLGEE_API_KEY_WRITE,
+    TOLGEE_PROJECT_ID: process.env.TOLGEE_PROJECT_ID,
   },
 });
