@@ -45,6 +45,7 @@ model User {
   name                   String?
   email                  String?                @unique
   emailVerified          DateTime?
+  password               String?
   image                  String?
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime               @default(now()) @map("updated_at")
@@ -54,7 +55,6 @@ model User {
   stripeCurrentPeriodEnd DateTime?              @map("stripe_current_period_end")
   role                   UserRole               @default(AGENT)
   organizationId         String?                // Current active organization
-  preferredLocale        String?                @default("en") // User's preferred language (en, el, etc.)
   accounts               Account[]
   activities             Activity[]             @relation("ActivityActor")
   createdClients         Client[]               @relation("ClientCreatedBy")

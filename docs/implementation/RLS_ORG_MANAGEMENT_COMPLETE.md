@@ -28,7 +28,7 @@ The RLS and Organization Management systems are now fully implemented and operat
 
 ### 3. Application-Level Isolation (PRIMARY ENFORCEMENT)
 - ✅ `prismaForOrg()` wrapper function implemented in `/lib/org-prisma.ts`
-- ✅ All server actions use org-scoped Prisma client
+- ✅ All tenant-scoped server actions use the org-scoped Prisma client
 - ✅ Session variable `app.current_organization` set per transaction
 - ✅ Verified in: `actions/properties.ts`, `actions/clients.ts`, `actions/activities.ts`
 
@@ -46,13 +46,15 @@ The RLS and Organization Management systems are now fully implemented and operat
 **Enforcement**: ✅ Active and Working  
 **Mechanism**: `prismaForOrg(organizationId)` wrapper
 
-All server actions MUST use:
+All tenant-scoped server actions MUST use:
 ```typescript
 const orgPrisma = prismaForOrg(session.user.organizationId);
 const clients = await orgPrisma.client.findMany({ ... });
 ```
 
 This sets `app.current_organization` session variable for every query, ensuring tenant isolation.
+
+> Note: User/org administration flows (e.g., switching active org, role updates) may use the base `prisma` client with explicit `organizationId` filters when appropriate.
 
 ### Layer 2: Database RLS Policies (DEFENSE-IN-DEPTH)
 **Enforcement**: ⚠️ Configured but NOT enforced due to BYPASSRLS  
@@ -96,7 +98,7 @@ Invitation Table: Created and operational
 Organizations: 1
 Users: 1 (100% with org assignment)
 Invitations: 0 (system ready)
-Server Actions: All use prismaForOrg()
+Server Actions: Tenant-scoped actions use prismaForOrg()
 ```
 
 ---

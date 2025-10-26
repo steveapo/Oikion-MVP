@@ -1,0 +1,473 @@
+# Styling & Design System Conventions
+
+## CSS Framework
+
+### Tailwind CSS
+- Version: 3.4.6
+- Utility-first approach
+- JIT compiler for fast builds
+- Configuration in tailwind.config.ts
+- PostCSS processing
+
+### Why Tailwind
+- Rapid development
+- Consistent spacing/sizing
+- Responsive design built-in
+- Dark mode support
+- Tree-shaking unused styles
+
+## Design Tokens
+
+### Color System
+- CSS variables in globals.css
+- Light and dark mode variants
+- HSL color format for flexibility
+- background, foreground, primary, secondary, etc.
+- Semantic color names
+
+### Color Variables
+- --background: Page background
+- --foreground: Text color
+- --primary: Brand color
+- --secondary: Secondary actions
+- --accent: Highlights
+- --muted: Subdued content
+- --destructive: Errors/warnings
+- --border: Dividers
+- --input: Form fields
+- --ring: Focus indicators
+
+### Spacing Scale
+- Tailwind default scale (0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 56, 64)
+- Consistent spacing throughout
+- Use scale values, avoid arbitrary
+- Padding: p-4, p-6, p-8
+- Margin: m-4, m-6, m-8
+- Gap: gap-4, gap-6
+
+### Typography Scale
+- text-xs: 0.75rem (12px)
+- text-sm: 0.875rem (14px)
+- text-base: 1rem (16px)
+- text-lg: 1.125rem (18px)
+- text-xl: 1.25rem (20px)
+- text-2xl, 3xl, 4xl, 5xl for headings
+- Consistent line-heights
+
+## Font System
+
+### Font Families
+- Default sans-serif stack
+- next/font for optimization
+- System fonts fallback
+- Variable fonts supported
+- Custom fonts loaded optimally
+
+### Font Weights
+- font-light: 300
+- font-normal: 400
+- font-medium: 500
+- font-semibold: 600
+- font-bold: 700
+- Consistent usage per element type
+
+### Typography Classes
+- Headings: text-3xl font-bold
+- Subheadings: text-xl font-semibold
+- Body: text-base
+- Caption: text-sm text-muted-foreground
+- Code: font-mono text-sm
+
+## Responsive Design
+
+### Breakpoints
+- sm: 640px (mobile landscape)
+- md: 768px (tablet)
+- lg: 1024px (laptop)
+- xl: 1280px (desktop)
+- 2xl: 1536px (large desktop)
+
+### Mobile-First Approach
+- Default styles for mobile
+- Add breakpoint modifiers for larger
+- Example: p-4 md:p-6 lg:p-8
+- Test mobile first
+- Progressive enhancement
+
+### Responsive Patterns
+- Stack on mobile: flex flex-col
+- Grid on desktop: md:grid md:grid-cols-2
+- Hide on mobile: hidden md:block
+- Show on mobile: block md:hidden
+- Responsive text: text-sm md:text-base
+
+## Dark Mode
+
+### Implementation
+- next-themes for theme management
+- Class-based dark mode (dark:)
+- CSS variables swap in dark mode
+- System preference respected
+- Toggle in UI
+
+### Dark Mode Classes
+- Background: bg-background (adapts to theme)
+- Text: text-foreground
+- Cards: bg-card
+- Borders: border-border
+- All colors adapt automatically
+
+### Testing Dark Mode
+- Toggle between themes
+- Check all pages
+- Verify contrast ratios
+- Test component variants
+- Ensure images work
+
+## Component Styling
+
+### shadcn/ui Approach
+- Components own their styles
+- CVA for variants
+- Tailwind classes inline
+- cn() utility for merging
+- Customizable by editing component
+
+### Class Variance Authority (CVA)
+- Define base classes
+- Add variant dimensions
+- Compound variants for combinations
+- Default variants
+- Type-safe props
+
+### cn() Utility
+- Merges Tailwind classes
+- Handles conflicts (last wins)
+- From tailwind-merge + clsx
+- Use for conditional classes
+- Consistent class merging
+
+## Layout Patterns
+
+### Container
+- Max width constraints
+- Centered with margins
+- Padding for mobile
+- Responsive max-widths
+- Consistent wrapping
+
+### Grid Layouts
+- grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+- gap-6 for spacing
+- Auto-fit for responsive columns
+- Consistent across app
+- Items stretch by default
+
+### Flex Layouts
+- flex for one-dimensional layout
+- justify-between, items-center common
+- flex-col for vertical stacking
+- gap-4 for spacing
+- Responsive direction changes
+
+### Card Layouts
+- Consistent padding (p-6)
+- Border radius (rounded-lg)
+- Shadow for elevation (shadow-sm)
+- Background (bg-card)
+- Hover states
+
+## Spacing System
+
+### Padding
+- Container padding: p-6 md:p-8
+- Card padding: p-6
+- Button padding: px-4 py-2
+- Input padding: px-3 py-2
+- Section padding: py-12 md:py-24
+
+### Margin
+- Section margin: my-12 md:my-24
+- Element margin: mb-6
+- Avoid margin top (prefer margin bottom)
+- Consistent vertical rhythm
+- Gap over margin in flex/grid
+
+### Gaps
+- Flex/Grid gaps: gap-4, gap-6
+- Cleaner than margins
+- Responsive gaps: gap-4 md:gap-6
+- Consistent spacing
+- Preferred over margins in containers
+
+## Border & Shadow
+
+### Borders
+- border: 1px solid
+- border-2: 2px solid
+- Color: border-border
+- Radius: rounded-md, rounded-lg
+- Focused state: ring-2
+
+### Shadows
+- shadow-sm: Subtle depth
+- shadow-md: Card elevation
+- shadow-lg: Modal/popover
+- shadow-none: Flat design
+- Consistent usage
+
+### Focus Rings
+- ring-2 ring-ring ring-offset-2
+- Visible keyboard focus
+- Consistent across inputs
+- Accessibility requirement
+- Offset from element
+
+## Animation & Transitions
+
+### Tailwind Animations
+- animate-spin: Loading spinners
+- animate-pulse: Loading states
+- animate-bounce: Attention
+- animate-in, animate-out: Enter/exit
+- Subtle animations only
+
+### Transitions
+- transition-colors: Color changes
+- transition-all: Multiple properties
+- duration-200: 200ms default
+- ease-in-out: Smooth easing
+- hover: and focus: states
+
+### Custom Animations
+- Defined in tailwind.config.ts
+- Keyframes for complex
+- CSS animations rare
+- Keep subtle
+- Performance minded
+
+## Accessibility Styling
+
+### Focus States
+- Visible focus indicators
+- ring-2 ring-ring pattern
+- Never outline-none without alternative
+- Test keyboard navigation
+- Consistent focus treatment
+
+### Color Contrast
+- WCAG AA minimum
+- 4.5:1 for normal text
+- 3:1 for large text
+- Test with tools
+- Verify in both themes
+
+### Text Sizing
+- Minimum 16px for body
+- Larger for headings
+- Relative units (rem)
+- Readable line-heights
+- Avoid small text
+
+## Icons
+
+### Lucide React
+- Consistent icon library
+- size prop for sizing
+- className for styling
+- Tree-shakeable imports
+- Semantic icon choices
+
+### Icon Sizing
+- size={16}: Inline with text
+- size={20}: Buttons, labels
+- size={24}: Standalone
+- Consistent throughout
+- Scale with text size
+
+### Icon Colors
+- Inherit text color default
+- className="text-primary"
+- className="text-muted-foreground"
+- Match surrounding context
+- Accessible contrast
+
+## Form Styling
+
+### Input Fields
+- Consistent height (h-10)
+- Border with focus ring
+- Padding: px-3 py-2
+- Rounded corners: rounded-md
+- Error state: red border
+
+### Labels
+- Font weight: font-medium
+- Spacing: mb-2
+- Associated with input
+- Required indicator if needed
+- Clear and concise
+
+### Buttons
+- Distinct variants (primary, secondary, etc.)
+- Consistent padding
+- Active state: scale-[0.98]
+- Disabled state: opacity-50
+- Loading state indicator
+
+## Custom Styles
+
+### When to Use
+- Complex animations
+- Browser-specific fixes
+- CSS not possible in Tailwind
+- Third-party integration
+- Print styles
+
+### Where to Put
+- globals.css for global
+- Component CSS module rarely
+- Prefer Tailwind
+- Document custom styles
+- Minimize custom CSS
+
+### @apply Usage
+- Use sparingly in CSS
+- Prefer Tailwind in JSX
+- Only for repeated complex patterns
+- @layer components for custom
+- Document rationale
+
+## Performance
+
+### Unused CSS
+- Tree-shaken automatically
+- JIT compiler
+- Only used classes in bundle
+- No bloat from unused utilities
+- Fast builds
+
+### Critical CSS
+- Inlined automatically by Next.js
+- Above-fold styles prioritized
+- Streaming HTML includes styles
+- No FOUC (flash of unstyled)
+- Optimized delivery
+
+## Utility Patterns
+
+### Common Combinations
+- Centered content: flex items-center justify-center
+- Card: rounded-lg border bg-card p-6 shadow-sm
+- Section: container mx-auto px-4 py-12
+- Button: inline-flex items-center justify-center rounded-md
+- Input: flex h-10 w-full rounded-md border px-3 py-2
+
+### Responsive Utilities
+- Hidden: hidden md:block
+- Stack/Row: flex flex-col md:flex-row
+- Text size: text-sm md:text-base
+- Spacing: p-4 md:p-6 lg:p-8
+- Grid columns: grid-cols-1 md:grid-cols-2 lg:grid-cols-3
+
+## Design Consistency
+
+### Component Library
+- Use shadcn/ui components
+- Don't reinvent primitives
+- Customize variants as needed
+- Document custom components
+- Maintain design system
+
+### Spacing Consistency
+- Use scale consistently
+- Same spacing for similar elements
+- Vertical rhythm maintained
+- Gaps over arbitrary margins
+- Test on different screens
+
+### Color Usage
+- Semantic colors from theme
+- Primary for brand actions
+- Secondary for secondary actions
+- Destructive for dangerous
+- Muted for less important
+- Consistent meaning
+
+## Print Styles
+
+### Print Media Query
+- Simplify for print
+- Remove navigation
+- Black and white friendly
+- Page break controls
+- Print-specific styles
+
+### Not Implemented Currently
+- Add if printing needed
+- Common for reports
+- Invoice/receipt printing
+- Test actual printing
+- Browser print preview
+
+## Browser Compatibility
+
+### Target Browsers
+- Modern browsers (last 2 versions)
+- ES5 target covers most
+- Autoprefixer handles prefixes
+- Test in major browsers
+- Graceful degradation
+
+### Vendor Prefixes
+- Autoprefixer automatic
+- No manual prefixes needed
+- PostCSS handles
+- Configuration in postcss.config.js
+- Reduces maintenance
+
+## Best Practices Summary
+
+1. Use Tailwind utilities over custom CSS
+2. Follow mobile-first responsive design
+3. Support dark mode throughout
+4. Maintain consistent spacing scale
+5. Use semantic color variables
+6. Provide visible focus states
+7. Ensure WCAG AA contrast ratios
+8. Keep animations subtle and purposeful
+9. Use shadcn/ui components as foundation
+10. Test across breakpoints and themes
+
+## Tools & Configuration
+
+### Tailwind Config
+- tailwind.config.ts: Central configuration
+- Extended colors, spacing, typography
+- Plugins: typography, animate
+- Content paths for purging
+- Theme customization
+
+### PostCSS
+- postcss.config.js: PostCSS setup
+- Tailwind CSS plugin
+- Autoprefixer plugin
+- Minimal configuration
+- Fast processing
+
+### Editor Setup
+- Tailwind CSS IntelliSense extension
+- Class name suggestions
+- Linting for class order
+- Preview colors
+- Documentation on hover
+
+## Library Versions
+
+Tailwind CSS: 3.4.6
+PostCSS: 8.4.39
+Autoprefixer: 10.4.19
+next-themes: 0.3.0
+class-variance-authority: 0.7.0
+tailwind-merge: 2.4.0
+

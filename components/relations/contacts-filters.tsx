@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Search, Filter, X } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,11 +29,8 @@ export function ContactsFilters() {
   const [isOpen, setIsOpen] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    searchParams.get("tags")?.split(",").filter(Boolean) || []
+    (searchParams?.get("tags") ?? "").split(",").filter(Boolean)
   );
-
-  const t = useTranslations("relations.filters");
-  const tClientType = useTranslations("relations.clientType");
 
   useEffect(() => {
     const loadTags = async () => {
@@ -46,7 +41,7 @@ export function ContactsFilters() {
   }, []);
 
   const updateFilters = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams((searchParams?.toString()) || "");
     
     if (value && value !== "all") {
       params.set(key, value);
@@ -61,7 +56,7 @@ export function ContactsFilters() {
   };
 
   const updateTagsFilter = (tags: string[]) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams((searchParams?.toString()) || "");
     
     if (tags.length > 0) {
       params.set("tags", tags.join(","));
@@ -83,10 +78,10 @@ export function ContactsFilters() {
 
   const clearAllFilters = () => {
     setSelectedTags([]);
-    router.push(pathname);
+    router.push(pathname || "/");
   };
 
-  const hasActiveFilters = searchParams.toString() !== "";
+  const hasActiveFilters = (searchParams?.toString() || "") !== "";
 
   return (
     <div className="space-y-4">
@@ -95,9 +90,9 @@ export function ContactsFilters() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder={t("searchPlaceholder")}
+            placeholder={""}
             className="pl-10"
-            defaultValue={searchParams.get("search") ?? ""}
+            defaultValue={searchParams?.get("search") ?? ""}
             onChange={(e) => {
               const value = e.target.value;
               const timeoutId = setTimeout(() => {
@@ -112,7 +107,7 @@ export function ContactsFilters() {
           <CollapsibleTrigger asChild>
             <Button variant="outline" size="sm">
               <Filter className="mr-2 h-4 w-4" />
-              {t("filters")}
+              {""}
               {hasActiveFilters && (
                 <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs text-primary-foreground">
                   !
@@ -125,7 +120,7 @@ export function ContactsFilters() {
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearAllFilters}>
             <X className="mr-2 h-4 w-4" />
-            {t("clearAll")}
+            {""}
           </Button>
         )}
       </div>
@@ -137,18 +132,18 @@ export function ContactsFilters() {
             
             {/* Client Type Filter */}
             <div className="space-y-2">
-              <Label htmlFor="clientType">{t("clientType")}</Label>
+              <Label htmlFor="clientType">{""}</Label>
               <Select
-                defaultValue={searchParams.get("clientType") ?? "all"}
+                defaultValue={searchParams?.get("clientType") ?? "all"}
                 onValueChange={(value) => updateFilters("clientType", value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t("allTypes")} />
+                  <SelectValue placeholder={""} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t("allTypes")}</SelectItem>
-                  <SelectItem value={ClientType.PERSON}>{tClientType("PERSON")}</SelectItem>
-                  <SelectItem value={ClientType.COMPANY}>{tClientType("COMPANY")}</SelectItem>
+                  <SelectItem value="all">{""}</SelectItem>
+                  <SelectItem value={ClientType.PERSON}>Person</SelectItem>
+                  <SelectItem value={ClientType.COMPANY}>Company</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -156,7 +151,7 @@ export function ContactsFilters() {
             {/* Tags Filter */}
             {availableTags.length > 0 && (
               <div className="space-y-2">
-                <Label>{t("tags")}</Label>
+                <Label>{""}</Label>
                 <div className="flex flex-wrap gap-2">
                   {availableTags.map((tag) => (
                     <Badge

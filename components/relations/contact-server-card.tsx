@@ -1,7 +1,5 @@
 import { User, Building, Phone, Mail } from "lucide-react";
 import { ClientType, UserRole } from "@prisma/client";
-import { getTranslations } from "next-intl/server";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -54,9 +52,6 @@ interface ContactServerCardProps {
  * Only interactive elements (dropdown) are client components
  */
 export async function ContactServerCard({ client, userRole, userId }: ContactServerCardProps) {
-  const t = await getTranslations("relations.card");
-  const tClientType = await getTranslations("relations.clientType");
-  
   const canEdit = canCreateContent(userRole);
   const canDelete = canDeleteContent(userRole, client.createdBy === userId);
   
@@ -76,7 +71,7 @@ export async function ContactServerCard({ client, userRole, userId }: ContactSer
               <h3 className="font-semibold text-lg">{client.name}</h3>
               <div className="flex items-center space-x-2 mt-1">
                 <Badge variant="outline" className="text-xs capitalize">
-                  {tClientType(client.clientType)}
+                  {client.clientType === ClientType.PERSON ? "Person" : "Company"}
                 </Badge>
                 {tags.slice(0, 2).map((tag: string) => (
                   <Badge key={tag} variant="secondary" className="text-xs">
@@ -85,7 +80,7 @@ export async function ContactServerCard({ client, userRole, userId }: ContactSer
                 ))}
                 {tags.length > 2 && (
                   <Badge variant="secondary" className="text-xs">
-                    {t("more", { count: tags.length - 2 })}
+                    +{tags.length - 2} more
                   </Badge>
                 )}
               </div>
@@ -126,23 +121,23 @@ export async function ContactServerCard({ client, userRole, userId }: ContactSer
         {/* Statistics */}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex space-x-4">
-            <span>{client._count.interactions} {t("interactions")}</span>
-            <span>{client._count.notes} {t("notes")}</span>
-            <span>{client._count.tasks} {t("tasks")}</span>
+              <span>{client._count.interactions} Interactions</span>
+              <span>{client._count.notes} Notes</span>
+              <span>{client._count.tasks} Tasks</span>
           </div>
         </div>
 
         {/* Last Interaction */}
         {lastInteraction && (
           <div className="text-xs text-muted-foreground">
-            {t("lastContact")}: {formatRelativeDate(new Date(lastInteraction.timestamp))}
+            Last activity: {formatRelativeDate(new Date(lastInteraction.timestamp))}
           </div>
         )}
       </CardContent>
 
       <CardFooter className="flex items-center justify-between pt-3">
         <div className="text-xs text-muted-foreground">
-          {t("by")} {client.creator.name || client.creator.email || t("../detail.unknown")}
+          Created by {client.creator.name || client.creator.email || "Unknown"}
         </div>
         
         <ContactCardActions

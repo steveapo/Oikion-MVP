@@ -1,17 +1,14 @@
 import { Suspense } from "react";
 import { Activity, Rss } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
-
 import { getCurrentUser } from "@/lib/session";
 import { getUserSubscriptionPlan } from "@/lib/subscription";
 import { getActivities } from "@/actions/activities";
 import { constructMetadata } from "@/lib/utils";
 import { DashboardHeader } from "@/components/dashboard/header";
 import { ActivityFilters } from "@/components/oikosync/activity-filters";
-import { ActivityFeed } from "@/components/oikosync/activity-feed";
+import { ActivityFeedWrapper } from "@/components/oikosync/activity-feed-wrapper";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata = constructMetadata({
@@ -32,8 +29,6 @@ interface OikosyncPageProps {
 
 async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   const user = await getCurrentUser();
-  const t = await getTranslations("oikosync");
-  
   if (!user) {
     return null;
   }
@@ -53,27 +48,27 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
     return (
       <div className="space-y-6">
         <DashboardHeader
-          heading={t("header.title")}
-          text={t("header.description")}
+          heading="Activity"
+          text="Stay updated with your organization's activity"
         />
 
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="activity" />
-          <EmptyPlaceholder.Title>{t("subscription.title")}</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>Subscribe to view activity</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
-            {t("subscription.description")}
+            Upgrade your plan to access the activity feed
           </EmptyPlaceholder.Description>
           <Link href="/dashboard/billing">
-            <Button>{t("subscription.viewPlans")}</Button>
+            <Button>View Plans</Button>
           </Link>
         </EmptyPlaceholder>
 
         {/* Demo activities for non-subscribers */}
         <div className="rounded-lg border border-dashed p-8">
           <div className="mx-auto max-w-md text-center">
-            <h3 className="text-lg font-semibold text-muted-foreground">{t("subscription.demoTitle")}</h3>
+            <h3 className="text-lg font-semibold text-muted-foreground">Demo activity</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {t("subscription.demoDescription")}
+              Explore example activity to see how the feed looks
             </p>
             <div className="mt-4 space-y-3">
               <div className="rounded border bg-muted/50 p-3 text-left">
@@ -132,8 +127,8 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
   return (
     <div className="space-y-6">
       <DashboardHeader
-        heading={t("header.title")}
-        text={t("header.description")}
+        heading="Activity"
+        text="Stay updated with your organization's activity"
       />
 
       <ActivityFilters />
@@ -141,16 +136,16 @@ async function OikosyncContent({ searchParams }: OikosyncPageProps) {
       {activitiesData.activities.length === 0 ? (
         <EmptyPlaceholder>
           <EmptyPlaceholder.Icon name="activity" />
-          <EmptyPlaceholder.Title>{t("empty.noResults")}</EmptyPlaceholder.Title>
+          <EmptyPlaceholder.Title>No activity found</EmptyPlaceholder.Title>
           <EmptyPlaceholder.Description>
             {Object.keys(filters).some(key => filters[key as keyof typeof filters])
-              ? t("empty.tryAdjustFilters")
-              : t("empty.noActivitiesInPeriod")
+              ? "No activity matches your current filters"
+              : "No activity in the selected period"
             }
           </EmptyPlaceholder.Description>
         </EmptyPlaceholder>
       ) : (
-        <ActivityFeed 
+        <ActivityFeedWrapper
           activities={activitiesData.activities}
           totalPages={activitiesData.totalPages}
           currentPage={activitiesData.page}

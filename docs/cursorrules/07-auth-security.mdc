@@ -1,0 +1,460 @@
+---
+description: Auth.js v5 authentication, RBAC permissions, session management, and security best practices
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
+
+# Authentication & Security Patterns
+
+## Authentication System
+
+### Auth.js v5 (NextAuth Beta)
+- Version: 5.0.0-beta.19
+- Database session strategy
+- Multiple providers supported
+- Custom credential provider
+- Session management
+
+### Configuration
+- auth.config.ts: Provider configuration
+- auth.ts: Auth.js setup with Prisma adapter
+- middleware.ts: Route protection
+- Protected routes under (protected) group
+
+## Authentication Providers
+
+### Credentials Provider
+- Email and password login
+- bcrypt for password hashing
+- Custom sign-in logic
+- Validation with Zod
+- Rate limiting recommended
+
+### OAuth Providers
+- Google OAuth configured
+- GitHub OAuth available
+- Add more as needed
+- Automatic account linking
+- Profile picture from provider
+
+### Email Provider (Magic Links)
+- Resend integration
+- Token-based authentication
+- Expiring links
+- No password required
+- Better security for some users
+
+## Session Management
+
+### Database Sessions
+- Sessions stored in database
+- Session table in Prisma schema
+- Automatic cleanup of expired sessions
+- Server-side session validation
+- Secure and scalable
+
+### Session Data Structure
+- userId: User ID from database
+- organizationId: Current active organization
+- role: User's role in current organization
+- name, email, image: User profile data
+- expires: Session expiration timestamp
+
+### Accessing Session
+- auth() in Server Components
+- useSession() in Client Components (if needed)
+- Middleware has access to token
+- Session available in server actions
+- Type-safe with TypeScript extensions
+
+## Authorization & Permissions
+
+### Role-Based Access Control (RBAC)
+- Four roles: ORG_OWNER, ADMIN, AGENT, VIEWER
+- Hierarchical permissions
+- Role stored per organization membership
+- Active role from session
+- Role checks before operations
+
+### Permission Helpers
+- canCreateContent(role): AGENT and above
+- canDeleteContent(role): ADMIN and above
+- canManageOrganization(role): ORG_OWNER only
+- Reusable across application
+- Consistent enforcement
+
+### Resource-Based Permissions
+- Ownership checks (createdBy === userId)
+- Organization membership verification
+- Shared resource access rules
+- Explicit permission grants
+- Fail-safe defaults (deny)
+
+### Middleware Protection
+- Protected routes under (protected) group
+- Redirect to login if not authenticated
+- Extract session in middleware
+- Set headers for downstream use
+- Public vs protected paths
+
+## Password Security
+
+### Password Hashing
+- bcrypt library
+- Salt rounds: 10 (configurable)
+- Never store plaintext passwords
+- Hash before database insertion
+- Verify with bcrypt.compare()
+
+### Password Requirements
+- Minimum 8 characters
+- Include uppercase, lowercase, number
+- Special character recommended
+- Enforced via Zod schema
+- Change password flow available
+
+### Password Reset
+- Token-based reset flow
+- Expiring reset tokens
+- Email link to reset page
+- Verify token before password update
+- Invalidate old tokens
+
+## CSRF Protection
+
+### Built-in Protection
+- Auth.js provides CSRF tokens
+- Automatic token validation
+- Form submissions protected
+- API route protection
+- No additional configuration needed
+
+### Custom Forms
+- Server actions automatically protected
+- Form submission includes CSRF token
+- Verified by Auth.js
+- Safe against CSRF attacks
+- No manual handling required
+
+## Multi-Tenancy Security
+
+### Organization Isolation
+- Every query scoped to organizationId
+- prismaForOrg enforces scoping
+- No cross-organization data leaks
+- Verified in server actions
+- Audit logs track organization context
+
+### Organization Switching
+- User can be member of multiple organizations
+- Switch via organization switcher
+- Updates session with new organizationId
+- Verified server-side
+- Consistent experience
+
+### Personal Organization Protection
+- Cannot delete personal organization
+- isPersonal flag prevents deletion
+- One per user (guaranteed)
+- Fallback for organization-less users
+- Special handling in UI
+
+## Input Validation & Sanitization
+
+### All Input Validated
+- Zod schemas for all inputs
+- Server-side validation mandatory
+- Never trust client data
+- Sanitize before database insertion
+- Escape for output
+
+### SQL Injection Prevention
+- Prisma parameterizes queries
+- Never string concatenation
+- Use Prisma query builder
+- Avoid raw queries
+- If raw, use prepared statements
+
+### XSS Prevention
+- React escapes by default
+- Dangerous innerHTML avoided
+- Sanitize user-generated content
+- Content Security Policy headers
+- Validate and escape URLs
+
+## Rate Limiting
+
+### Not Implemented Currently
+- Consider for production
+- Rate limit login attempts
+- Rate limit API endpoints
+- Rate limit expensive operations
+- Use Redis or similar for distributed
+
+### When to Add
+- After repeated abuse
+- Before public launch
+- For expensive operations
+- Protect against DDoS
+- Monitor and adjust limits
+
+## Session Security
+
+### Session Cookies
+- HttpOnly flag (JavaScript cannot access)
+- Secure flag (HTTPS only)
+- SameSite: Lax (CSRF protection)
+- Automatic expiration
+- Renewed on activity
+
+### Session Expiration
+- Configurable max age
+- Idle timeout possible
+- Automatic cleanup
+- Refresh on activity
+- Graceful re-authentication
+
+### Session Invalidation
+- On logout
+- On password change
+- On security event
+- All sessions or single session
+- Immediate effect
+
+## API Security
+
+### Route Handlers
+- Authentication required
+- Organization context verified
+- Input validation
+- CORS configuration
+- Webhook signature verification
+
+### Webhook Security
+- Stripe webhook signatures verified
+- Verify with stripe.webhooks.constructEvent
+- Reject invalid signatures
+- Replay attack prevention
+- Log all webhook events
+
+### API Keys
+- Not used currently
+- If added: Store hashed
+- Rotate regularly
+- Scope permissions
+- Revocable
+
+## Sensitive Data Protection
+
+### Field Encryption
+- prisma-field-encryption for sensitive fields
+- Annotate with /// @encrypted
+- Transparent encryption/decryption
+- Key in environment variable
+- Consider for PII, financial data
+
+### Environment Variables
+- Secrets in .env.local
+- Never commit secrets to git
+- Validate with env.mjs
+- Fail fast on missing secrets
+- Different keys per environment
+
+### Logging
+- Never log passwords
+- Never log full credit card numbers
+- Never log API keys
+- Redact sensitive data
+- Structured logging
+
+## Security Headers
+
+### Next.js Headers
+- X-Frame-Options: DENY
+- X-Content-Type-Options: nosniff
+- X-XSS-Protection: 1; mode=block
+- Referrer-Policy: strict-origin-when-cross-origin
+- Configured in next.config.js if needed
+
+### Content Security Policy
+- Consider adding CSP
+- Restrict resource loading
+- Prevent inline scripts
+- Report violations
+- Test thoroughly
+
+## Third-Party Integrations
+
+### Stripe Security
+- Webhook signatures verified
+- Never store full card numbers
+- Use Stripe.js for PCI compliance
+- API keys in environment
+- Test mode for development
+
+### Email Security
+- Resend API key in environment
+- Verify email domains
+- Rate limit email sending
+- Prevent email injection
+- Log all outbound emails
+
+## Error Handling Security
+
+### Error Messages
+- User-friendly generic messages
+- No stack traces to client
+- No database details exposed
+- Log full errors server-side
+- Different messages for prod vs dev
+
+### Error Logging
+- Server-side logging
+- Include context (user, organization)
+- Structured logs
+- Monitoring and alerting
+- Regular review
+
+## Security Monitoring
+
+### Activity Logging
+- Log all mutations
+- Track user actions
+- Organization context
+- Timestamp all events
+- Queryable audit trail
+
+### Failed Authentication
+- Log failed login attempts
+- Track by IP and email
+- Alert on unusual patterns
+- Temporary lockout on repeated failures
+- Monitor for attacks
+
+### Suspicious Activity
+- Monitor permission violations
+- Track access to sensitive data
+- Alert on abnormal patterns
+- Review regularly
+- Automated responses
+
+## Compliance Considerations
+
+### GDPR
+- User data export capability
+- Account deletion flow
+- Data retention policies
+- Privacy policy
+- Consent management
+
+### Data Retention
+- Define retention periods
+- Automatic data cleanup
+- Soft deletes for audit trail
+- Hard delete after retention
+- Document policies
+
+## Development vs Production
+
+### Development Mode
+- Detailed error messages
+- Email dev mode (no sending)
+- Test Stripe keys
+- Relaxed rate limits
+- Debug logging
+
+### Production Mode
+- Generic error messages
+- Real email sending
+- Live Stripe keys
+- Enforced rate limits
+- Error tracking service
+
+## Security Checklist
+
+### Authentication
+- [ ] Password hashing with bcrypt
+- [ ] Session stored in database
+- [ ] CSRF protection enabled
+- [ ] Session expiration configured
+- [ ] Logout invalidates session
+
+### Authorization
+- [ ] Role-based access control
+- [ ] Resource ownership checks
+- [ ] Organization isolation
+- [ ] Permission checks before mutations
+- [ ] Minimal permission principle
+
+### Data Protection
+- [ ] All input validated
+- [ ] Sensitive data encrypted
+- [ ] Secrets in environment variables
+- [ ] No secrets in code
+- [ ] SQL injection prevented
+
+### Network Security
+- [ ] HTTPS enforced in production
+- [ ] Secure cookies (HttpOnly, Secure)
+- [ ] CORS configured correctly
+- [ ] Security headers set
+- [ ] API endpoints authenticated
+
+### Monitoring
+- [ ] Activity logs for audit trail
+- [ ] Failed authentication logged
+- [ ] Error monitoring active
+- [ ] Alerts for suspicious activity
+- [ ] Regular security reviews
+
+## Common Security Pitfalls
+
+### Trust Client Data
+- Always validate server-side
+- Client validation is UX only
+- Security boundary at server
+- Assume client is compromised
+- Defense in depth
+
+### Missing Organization Check
+- Always verify organizationId
+- Use prismaForOrg helper
+- Check in every server action
+- Prevent cross-org access
+- Test isolation
+
+### Weak Password Policy
+- Enforce strong passwords
+- Prevent common passwords
+- Password strength indicator
+- Regular password rotation
+- Multi-factor authentication option
+
+### Inadequate Logging
+- Log security events
+- Include sufficient context
+- Queryable logs
+- Retention policy
+- Review regularly
+
+## Best Practices Summary
+
+1. Always validate input server-side with Zod
+2. Use prismaForOrg for organization-scoped queries
+3. Check permissions before every mutation
+4. Never trust client data
+5. Hash passwords with bcrypt
+6. Use database sessions for security
+7. Log all security-relevant events
+8. Verify webhook signatures
+9. Keep secrets in environment variables
+10. Test security in development
+
+## Security Tools & Libraries
+
+Auth.js: 5.0.0-beta.19
+bcryptjs: 3.0.2
+Zod: 3.23.8 (validation)
+Prisma: 5.17.0 (parameterized queries)
+prisma-field-encryption: 1.6.0
+

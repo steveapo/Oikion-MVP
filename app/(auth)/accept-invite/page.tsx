@@ -1,7 +1,7 @@
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,

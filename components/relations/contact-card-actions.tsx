@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
-
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,11 +34,8 @@ export function ContactCardActions({
 }: ContactCardActionsProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
-  const t = useTranslations("relations.actions");
-  const tMessages = useTranslations("relations.messages");
-
   const handleDelete = async () => {
-    if (!confirm(tMessages("deleteConfirm", { name: clientName }))) {
+    if (!confirm(`Delete ${clientName}? This cannot be undone.`)) {
       return;
     }
 
@@ -49,10 +44,10 @@ export function ContactCardActions({
     setIsDeleting(true);
     try {
       await deleteClient(clientId);
-      toast.success(tMessages("deleteSuccess"));
+      toast.success("Contact deleted");
       router.refresh();
     } catch (error) {
-      toast.error(tMessages("deleteError"));
+      toast.error("Failed to delete contact");
       setIsDeleting(false);
     }
   };
@@ -61,7 +56,7 @@ export function ContactCardActions({
     <div className="flex items-center gap-2">
       <Link href={`/dashboard/relations/${clientId}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
         <Eye className="mr-2 h-4 w-4" />
-        {t("view")}
+        {""}
       </Link>
       
       {(canEdit || canDelete) && (
@@ -77,7 +72,7 @@ export function ContactCardActions({
                 <DropdownMenuItem asChild>
                   <Link href={`/dashboard/relations/${clientId}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    {t("edit")}
+                    Edit
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -90,7 +85,7 @@ export function ContactCardActions({
                 disabled={isDeleting}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {isDeleting ? t("deleting") : t("delete")}
+                {isDeleting ? "Deleting..." : "Delete"}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

@@ -1,8 +1,7 @@
 "use client";
 
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
-import { useSession } from "next-auth/react";
 
 import { docsConfig } from "@/config/docs";
 import { marketingConfig } from "@/config/marketing";
@@ -10,7 +9,6 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { useScroll } from "@/hooks/use-scroll";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { DocsSearch } from "@/components/docs/search";
 import { Icons } from "@/components/shared/icons";
 import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
@@ -18,11 +16,11 @@ import MaxWidthWrapper from "@/components/shared/max-width-wrapper";
 interface NavBarProps {
   scroll?: boolean;
   large?: boolean;
+  user?: { role?: string | null } | null;
 }
 
-export function NavBar({ scroll = false }: NavBarProps) {
+export function NavBar({ scroll = false, user }: NavBarProps) {
   const scrolled = useScroll(50);
-  const { data: session, status } = useSession();
 
   const selectedLayout = useSelectedLayoutSegment();
   const documentation = selectedLayout === "docs";
@@ -97,9 +95,9 @@ export function NavBar({ scroll = false }: NavBarProps) {
             </div>
           ) : null}
 
-          {session ? (
+          {user ? (
             <Link
-              href={session.user.role === "ADMIN" ? "/admin" : "/dashboard"}
+              href={user.role === "ADMIN" ? "/admin" : "/dashboard"}
               className="hidden md:block"
             >
               <Button
@@ -111,7 +109,7 @@ export function NavBar({ scroll = false }: NavBarProps) {
                 <span>Dashboard</span>
               </Button>
             </Link>
-          ) : status === "unauthenticated" ? (
+          ) : (
             <div className="hidden items-center gap-3 md:flex">
               <Link
                 href="/register"
@@ -133,8 +131,6 @@ export function NavBar({ scroll = false }: NavBarProps) {
                 <Icons.arrowRight className="size-4" />
               </Link>
             </div>
-          ) : (
-            <Skeleton className="hidden h-9 w-28 rounded-full lg:flex" />
           )}
         </div>
       </MaxWidthWrapper>

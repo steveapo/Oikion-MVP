@@ -1,0 +1,463 @@
+---
+description: Next.js 14 App Router patterns, Server Components, routing, and performance best practices
+globs: ["app/**/*.tsx", "app/**/*.ts"]
+alwaysApply: false
+---
+
+# Next.js App Router Patterns & Conventions
+
+## App Router Architecture
+
+### Route Groups
+- (auth): Authentication pages without auth in URL
+- (marketing): Public pages with marketing layout
+- (protected): Dashboard pages requiring authentication
+- (docs): Documentation with specialized layout
+- Route groups don't affect URL structure
+
+### File Conventions
+- page.tsx: Route segments become accessible URLs
+- layout.tsx: Shared UI for route segment and children
+- loading.tsx: Automatic loading UI with Suspense
+- error.tsx: Error boundaries for error handling
+- not-found.tsx: 404 UI for not found routes
+- route.ts: API route handlers (not page.tsx)
+
+### Dynamic Segments
+- [id]: Single dynamic segment (properties/[id])
+- [...slug]: Catch-all segment (docs/[[...slug]])
+- [[...slug]]: Optional catch-all
+- Access via params prop in Server Components
+
+## Server Components (Default)
+
+### When to Use
+- Data fetching from database
+- Accessing backend resources
+- Keeping sensitive data on server
+- Large dependencies that impact bundle size
+- Default choice unless interactivity needed
+
+### Patterns
+- Fetch data directly in component
+- Use async/await at component level
+- No hooks (useState, useEffect, etc.)
+- Can import and use client components
+- Cannot use browser APIs
+
+### Data Fetching
+- Direct Prisma queries in Server Components
+- Use prismaForOrg for organization context
+- Apply unstable_cache for expensive queries
+- Avoid waterfalls with parallel fetches
+- No need for API routes for own data
+
+## Client Components
+
+### When Required
+- Event handlers (onClick, onChange)
+- React hooks (useState, useEffect, custom hooks)
+- Browser APIs (localStorage, navigator)
+- Interactivity and state management
+- Third-party libraries requiring client context
+
+### Directive Placement
+- "use client" at top of file (before imports)
+- Marks boundary between server and client
+- Children are automatically client components
+- Minimize client component scope
+- Push "use client" down component tree
+
+### Best Practices
+- Keep client components small and focused
+- Pass serializable props from server components
+- Use composition to minimize client boundary
+- Server Components can import Client Components
+- Client Components cannot import Server Components
+
+## Server Actions
+
+### Action Declaration
+- "use server" directive at top of file
+- Exported async functions
+- Called from forms or useTransition
+- Return ActionResult<T> pattern
+- Never throw, always return error result
+
+### Form Integration
+- Use action prop on form element
+- FormData automatically passed
+- Progressive enhancement works without JS
+- Call action in startTransition for pending state
+- useFormStatus for loading states
+
+### Revalidation
+- revalidatePath for route revalidation
+- revalidateTag for tagged cache invalidation
+- Granular invalidation over broad paths
+- Revalidate after mutations
+- Redirect after successful mutation
+
+### Security
+- Server actions execute on server
+- Access to server-side resources
+- Authentication checked via session
+- Organization context enforced
+- Input validation with Zod schemas
+
+## Layouts & Templates
+
+### Layout Files
+- Share UI across multiple pages
+- Maintain state during navigation
+- Do not re-render on navigation
+- Can be nested for composition
+- Access to params and searchParams
+
+### Root Layout
+- Required at app root
+- Contains html and body tags
+- Wraps entire application
+- Global providers here
+- Theme, auth, toast providers
+
+### Nested Layouts
+- Dashboard layout for protected routes
+- Marketing layout for public pages
+- Docs layout for documentation
+- Compose to build complex UIs
+- Each adds its shell/chrome
+
+## Loading & Streaming
+
+### Loading Files
+- Automatic loading UI with Suspense
+- Shows while route segment loads
+- Instant feedback to users
+- loading.tsx at any route level
+- Fallback for entire segment
+
+### Suspense Boundaries
+- Wrap async components in Suspense
+- Granular loading states
+- Progressive rendering
+- Stream content as ready
+- Multiple boundaries for different areas
+
+### Skeleton Components
+- Custom loading skeletons
+- Match real component layout
+- Provide visual structure
+- Reusable across features
+- Improve perceived performance
+
+## Error Handling
+
+### Error Boundaries
+- error.tsx catches errors in segment
+- Automatic error boundary
+- Can recover by resetting
+- Access to error and reset props
+- Client component required
+
+### Not Found Handling
+- not-found.tsx for 404s
+- Call notFound() to trigger
+- Can be at any level
+- Custom 404 per section
+- Root not-found as fallback
+
+### Global Error
+- global-error.tsx at root
+- Catches errors in root layout
+- Must include html and body
+- Last resort error handler
+- Rare to need
+
+## Metadata & SEO
+
+### Static Metadata
+- Export metadata object from page/layout
+- Title, description, openGraph, etc.
+- Type-safe with Metadata type
+- Merged from layouts to page
+- Per-route customization
+
+### Dynamic Metadata
+- Export generateMetadata async function
+- Access to params and searchParams
+- Fetch data to build metadata
+- Await data fetching
+- Return Metadata object
+
+### Image Generation
+- opengraph-image.tsx for OG images
+- Use @vercel/og for dynamic images
+- Export as Route Handler
+- ImageResponse API
+- Automatic optimization
+
+## Caching Strategies
+
+### Default Behavior
+- GET route handlers cached by default
+- Server Components rendered once
+- Aggressive caching in production
+- Force-dynamic to opt out
+- revalidate option for time-based
+
+### Cache Tags
+- Use tags with unstable_cache
+- Granular invalidation
+- Revalidate specific queries
+- Tags by entity (properties, clients)
+- Clean cache invalidation
+
+### Data Cache
+- fetch() automatically cached
+- dedupe: true by default
+- Cache per request
+- Revalidate with revalidateTag
+- no-store to bypass cache
+
+## Middleware
+
+### When to Use
+- Authentication redirects
+- Locale detection
+- Request modification
+- Logging and analytics
+- Run before routes match
+
+### Matcher Configuration
+- Specify which paths to run on
+- Exclude static assets
+- Include only what's needed
+- Performance impact of broad matchers
+- Test middleware carefully
+
+### Response Modification
+- Set headers
+- Redirect to different routes
+- Rewrite to different paths
+- Return early responses
+- Modify request context
+
+## Route Handlers (API Routes)
+
+### File Location
+- app/api/*/route.ts
+- Named exports for HTTP methods
+- GET, POST, PUT, PATCH, DELETE
+- One handler per HTTP method
+- No page.tsx in api folder
+
+### When to Use
+- Webhooks from external services
+- OAuth callbacks
+- Public APIs
+- Non-HTML responses
+- Prefer server actions for mutations
+
+### Request & Response
+- NextRequest and NextResponse types
+- Access to cookies, headers
+- JSON responses with NextResponse.json()
+- Streaming responses supported
+- Error handling with try/catch
+
+## Routing & Navigation
+
+### Link Component
+- Use next/link for navigation
+- Prefetching enabled by default
+- Client-side navigation
+- Preserves scroll position
+- href prop required
+
+### useRouter Hook
+- Client Component only
+- Programmatic navigation
+- router.push, router.back, router.refresh
+- Access to pathname, searchParams
+- Use sparingly, prefer Link
+
+### Redirects
+- redirect() in Server Components
+- Throws NEXT_REDIRECT error
+- Caught by Next.js automatically
+- Use after mutations
+- Client side use router.push instead
+
+## Parallel Routes
+
+### Slot Convention
+- @folder for named slots
+- Rendered in parent layout
+- Independent navigation
+- Separate loading/error states
+- Complex dashboard layouts
+
+### Use Cases
+- Split views
+- Modals without route change
+- Conditional rendering
+- Independent data fetching
+- Advanced composition patterns
+
+## Intercepting Routes
+
+### Convention
+- (.) same level
+- (..) one level up
+- Use with parallel routes
+- Modal patterns
+- Soft navigation vs hard navigation
+
+### Modal Pattern
+- Intercept route for modal
+- Show modal on soft navigation
+- Show full page on hard navigation
+- Best of both worlds
+- Shareable URLs
+
+## Static & Dynamic Rendering
+
+### Static Rendering (Default)
+- Rendered at build time
+- Cached and reused
+- Fastest performance
+- Good for content pages
+- Metadata generated once
+
+### Dynamic Rendering
+- Rendered per request
+- Use dynamic functions to opt in
+- cookies(), headers(), searchParams
+- Real-time data
+- Personalized content
+
+### Partial Prerendering (Experimental)
+- Combine static and dynamic
+- Shell static, content dynamic
+- Stream dynamic parts
+- Best of both worlds
+- Experimental feature
+
+## Image Optimization
+
+### Next Image Component
+- Automatic optimization
+- Responsive sizing
+- Lazy loading by default
+- Priority for above fold
+- Blur placeholder support
+
+### Configuration
+- Device sizes in next.config.js
+- Image sizes for srcset
+- Remote patterns for external images
+- Formats: AVIF, WebP
+- Cache TTL configuration
+
+## Font Optimization
+
+### next/font
+- Automatic font optimization
+- Self-hosting Google Fonts
+- Zero layout shift
+- Preload critical fonts
+- Variable fonts supported
+
+### Usage
+- Import from next/font/google
+- Apply className
+- CSS variable for global use
+- Subset for smaller size
+- Swap strategy configurable
+
+## Performance Best Practices
+
+### Bundle Size
+- Keep client components small
+- Use dynamic imports for large components
+- Tree shaking for unused exports
+- Monitor with bundle analyzer
+- Modular imports for icons
+
+### React Server Components
+- Default to Server Components
+- Minimize client JavaScript
+- Progressive enhancement
+- Stream HTML to client
+- Parallel data fetching
+
+### Code Splitting
+- Automatic by route
+- Dynamic imports with next/dynamic
+- Lazy load below fold content
+- Component-level splitting
+- Critical CSS inline
+
+## Development Workflow
+
+### Hot Module Replacement
+- Fast refresh for React
+- Preserves component state
+- Instant feedback
+- Automatic on save
+- Turbopack option for faster builds
+
+### TypeScript Support
+- Built-in TypeScript support
+- Type checking in editor
+- Build-time type checks
+- Route typings generated
+- Zero configuration
+
+## Common Pitfalls
+
+### Client/Server Boundary
+- Understand serialization limits
+- Functions cannot cross boundary
+- Date objects become strings
+- Undefined vs null matters
+- Pass serializable props only
+
+### Data Fetching
+- Avoid waterfalls in server components
+- Parallel fetch when possible
+- Use Suspense for streaming
+- Cache expensive queries
+- Don't fetch in loops
+
+### Caching Issues
+- Understand default caching behavior
+- Revalidate after mutations
+- Use cache tags effectively
+- Force dynamic when needed
+- Test caching in production mode
+
+## Deployment Considerations
+
+### Vercel Deployment
+- Automatic deployments
+- Edge and Node.js runtimes
+- Environment variables
+- Preview deployments
+- Analytics and monitoring
+
+### Build Output
+- Static pages (HTML)
+- Server-rendered pages (SSR)
+- API routes (serverless functions)
+- Edge functions
+- Assets (images, fonts)
+
+## Version & Updates
+
+Next.js Version: 14.2.5
+App Router: Stable
+React: 18.3.1 (Server Components)
+Update Strategy: Follow stable releases
+

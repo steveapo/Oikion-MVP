@@ -1,0 +1,334 @@
+# Prisma & Database Conventions
+
+## Schema Organization
+
+### File Structure
+- Single schema.prisma file in prisma/directory
+- Models organized by domain (User, Organization, Property, Client)
+- Enums defined above models that use them
+- Clear separation between auth, core, and feature models
+
+### Model Naming
+- PascalCase singular (User, Property, Client, not Users/Properties)
+- Table names via @@map: snake_case plural (@@map("users"))
+- Relation fields: camelCase descriptive names
+- ID fields: Always named "id", type String, @id @default(cuid())
+
+### Field Naming
+- camelCase for all field names
+- Database column names via @map: snake_case
+- Dates suffixed with At (createdAt, updatedAt)
+- Boolean fields prefixed with is/has (isPersonal, hasPermission)
+
+## Data Types
+
+### Primary Keys
+- Always use String with @id @default(cuid())
+- Consistent across all models
+- cuid() provides sortable, unique IDs
+- Never use auto-increment integers for public IDs
+
+### Timestamps
+- createdAt: DateTime @default(now()) @map("created_at")
+- updatedAt: DateTime @default(now()) @updatedAt @map("updated_at")
+- Always include both on main entities
+- Consistent mapping across all models
+
+### Enums
+- Define in schema, use from @prisma/client
+- SCREAMING_SNAKE_CASE for enum values
+- UserRole: ORG_OWNER, ADMIN, AGENT, VIEWER
+- MarketingStatus: FOR_SALE, FOR_RENT, SOLD, RENTED, OFF_MARKET
+- ActionType: CREATED, UPDATED, DELETED, etc.
+
+### Nullable Fields
+- Use ? for optional fields
+- Clearly distinguish between null and empty string
+- Required fields without ? or default
+- Use @default() for fields that should have defaults
+
+## Relationships
+
+### One-to-Many
+- Parent has array field (properties Property[])
+- Child has scalar field + relation (organizationId String, organization Organization)
+- Always add @relation attribute for clarity
+- Foreign key field separate from relation field
+
+### Many-to-Many
+- Use explicit join table (OrganizationMember)
+- Two one-to-many relationships
+- Additional metadata on join table (role, joinedAt)
+- @@unique constraint on combined keys
+
+### One-to-One
+- Rare in this schema
+- Use unique constraint on foreign key
+- Optional on one side typically
+- Consider if many-to-many is better long-term
+
+### Relation Names
+- Explicit @relation(name: "RelationName") when ambiguous
+- Descriptive names (PropertyCreatedBy, ActivityActor)
+- Required when multiple relations between models
+- Consistent naming pattern
+
+## Indexes
+
+### Single Field Indexes
+- @@index([field]): Non-unique indexes for lookups
+- Common on foreign keys (@@index([userId]))
+- Improve query performance
+- Add for frequently filtered fields
+
+### Composite Indexes
+- @@index([field1, field2]): Multi-column indexes
+- Order matters for query performance
+- Use for common query patterns
+- Example: @@index([organizationId, status])
+
+### Unique Constraints
+- @unique on single field level
+- @@unique([field1, field2]) at model level
+- Enforce business rules in database
+- Example: @@unique([userId, organizationId])
+
+## Multi-Tenancy Pattern
+
+### Organization Isolation
+- Every tenant data model has organizationId field
+- Always filter by organizationId in queries
+- Use prismaForOrg helper for automatic filtering
+- Row-level security enforced at query level
+
+### Prisma Client Extension
+- prismaForOrg(organizationId) returns scoped client
+- Automatically includes where: { organizationId }
+- Prevents cross-organization data leaks
+- Use for all multi-tenant queries
+
+### Personal Organizations
+- isPersonal flag on Organization model
+- Cannot be deleted (enforced in application)
+- One per user created automatically
+- Different business rules apply
+
+## Query Patterns
+
+### Basic Queries
+- findUnique: Single record by unique field
+- findFirst: First matching record
+- findMany: Multiple records with filtering
+- Always use typed where conditions
+- Leverage TypeScript inference
+
+### Filtering
+- where clause for conditions
+- AND, OR, NOT for complex logic
+- Comparison operators: equals, in, gt, lt, contains
+- Relation filters: some, every, none
+- Case sensitivity on contains with mode: 'insensitive'
+
+### Sorting & Pagination
+- orderBy for sorting (single or multiple fields)
+- take and skip for pagination
+- cursor-based pagination for large datasets
+- Always provide stable sort order (include id)
+
+### Including Relations
+- include for eager loading
+- select for specific fields
+- Nested includes for multi-level
+- Balance between over-fetching and N+1
+- Use with for filtering included relations
+
+## Transactions
+
+### withOrgContext Helper
+- Batch operations in single transaction
+- Shared organization context
+- All operations use same organizationId
+- Rollback on any failure
+- Improved performance over separate queries
+
+### Manual Transactions
+- $transaction for multiple operations
+- All succeed or all fail (ACID)
+- Use array syntax for simple cases
+- Use callback syntax for complex logic
+- Avoid long-running transactions
+
+### Optimistic Concurrency
+- Not implemented currently
+- Consider version fields for critical updates
+- Retry logic for conflict errors
+- Last write wins by default
+
+## Migrations
+
+### Development Workflow
+- prisma migrate dev: Create and apply migration
+- Names should be descriptive (add_properties_table)
+- Review generated SQL before applying
+- Commit migrations to version control
+- Never edit applied migrations
+
+### Production Workflow
+- prisma migrate deploy: Apply pending migrations
+- Run as part of deployment process
+- No interactive prompts
+- Fails if migrations diverged
+- Rollback requires new migration
+
+### Schema Changes
+- Additive changes safe (new fields, models)
+- Renames require data migration
+- Deletes lose data (backup first)
+- Type changes may require transformation
+- Test migrations on staging first
+
+## Seed Data
+
+### Seeding Strategy
+- Scripts in prisma/seed.ts
+- Run with prisma db seed
+- Idempotent (safe to run multiple times)
+- Create test organizations, users, properties
+- Use for development environment
+
+### Data Requirements
+- Initial user accounts
+- Sample organizations
+- Example properties and clients
+- Development-only data
+- Reset between test runs
+
+## Performance Optimization
+
+### Query Optimization
+- Select only needed fields
+- Use indexes for filtered fields
+- Avoid N+1 queries with include
+- Batch operations when possible
+- Monitor slow queries in logs
+
+### Connection Pooling
+- Managed automatically by Prisma
+- Connection limit in DATABASE_URL
+- Reuse connections across requests
+- Serverless concerns (connection limits)
+- Consider PgBouncer for high traffic
+
+### Caching Strategy
+- unstable_cache for expensive queries
+- Cache at application level
+- Invalidate on mutations
+- Tag-based invalidation
+- Balance freshness and performance
+
+## Type Safety
+
+### Generated Types
+- Run prisma generate after schema changes
+- Types in node_modules/@prisma/client
+- Import types: Property, User, etc.
+- Import utility types: Prisma.PropertyCreateInput
+- Never manually create types that Prisma provides
+
+### Type Imports
+- Named imports from @prisma/client
+- Prisma namespace for utility types
+- Enums directly as types
+- Include/Select types for queries
+- Type-safe everywhere
+
+## Field-Level Encryption
+
+### Sensitive Data
+- Use prisma-field-encryption for sensitive fields
+- Annotated with /// @encrypted in schema
+- Transparent encryption/decryption
+- Keys in environment variables
+- Audit encrypted field access
+
+### When to Encrypt
+- Personally identifiable information (PII)
+- Payment information
+- Sensitive notes
+- Consider compliance requirements (GDPR, HIPAA)
+
+## Soft Deletes
+
+### Implementation
+- deletedAt field: DateTime? @map("deleted_at")
+- Filter deleted records: where: { deletedAt: null }
+- Restore by setting deletedAt to null
+- Hard delete after retention period
+- Audit log maintains history
+
+### Cascade Behavior
+- onDelete: Cascade for hard deletes
+- onDelete: SetNull for soft deletes
+- Depends on business requirements
+- Document deletion behavior
+- Consider data retention policies
+
+## Common Patterns
+
+### Finding or Creating
+- Use upsert for find-or-create pattern
+- Atomic operation
+- Provide where clause for lookup
+- Provide create and update data
+- Handles race conditions
+
+### Counting Records
+- Use count for totals
+- Supports same where filters
+- More efficient than findMany().length
+- Useful for pagination metadata
+- Can count distinct values
+
+### Aggregations
+- aggregate for sum, avg, min, max
+- groupBy for grouped aggregations
+- Type-safe aggregation results
+- More efficient than client-side aggregation
+- Use for analytics queries
+
+## Error Handling
+
+### Known Prisma Errors
+- P2002: Unique constraint violation
+- P2025: Record not found
+- P2003: Foreign key constraint failed
+- Check error code with error.code
+- Provide user-friendly messages
+
+### Connection Errors
+- Retry transient failures
+- Exponential backoff
+- Log connection issues
+- Monitor connection pool
+- Alert on sustained failures
+
+## Best Practices
+
+1. Always filter by organizationId in multi-tenant queries
+2. Use prismaForOrg helper for automatic scoping
+3. Include indexes on frequently filtered fields
+4. Select only needed fields to reduce payload
+5. Use transactions for multi-step operations
+6. Run migrations in deployment pipeline
+7. Never edit applied migrations
+8. Import types from @prisma/client
+9. Keep schema organized and documented
+10. Monitor query performance in production
+
+## Prisma Version
+
+Current: 5.17.0
+Client: Generated from schema
+Update Strategy: Follow stable releases
+Breaking Changes: Review migration guide
+

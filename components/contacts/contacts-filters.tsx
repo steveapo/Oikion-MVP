@@ -30,7 +30,9 @@ export function ContactsFilters() {
   const [isOpen, setIsOpen] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>(
-    searchParams.get("tags")?.split(",").filter(Boolean) || []
+    (searchParams?.get("tags") ?? "")
+      .split(",")
+      .filter(Boolean)
   );
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function ContactsFilters() {
   }, []);
 
   const updateFilters = (key: string, value: string | null) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams((searchParams?.toString()) || "");
     
     if (value && value !== "all") {
       params.set(key, value);
@@ -57,7 +59,7 @@ export function ContactsFilters() {
   };
 
   const updateTagsFilter = (tags: string[]) => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams((searchParams?.toString()) || "");
     
     if (tags.length > 0) {
       params.set("tags", tags.join(","));
@@ -79,10 +81,10 @@ export function ContactsFilters() {
 
   const clearAllFilters = () => {
     setSelectedTags([]);
-    router.push(pathname);
+    router.push(pathname ?? "/");
   };
 
-  const hasActiveFilters = searchParams.toString() !== "";
+  const hasActiveFilters = (searchParams?.toString() || "") !== "";
 
   return (
     <div className="space-y-4">
@@ -93,7 +95,7 @@ export function ContactsFilters() {
           <Input
             placeholder="Search by name, email, or phone..."
             className="pl-10"
-            defaultValue={searchParams.get("search") ?? ""}
+            defaultValue={searchParams?.get("search") ?? ""}
             onChange={(e) => {
               const value = e.target.value;
               const timeoutId = setTimeout(() => {
@@ -135,7 +137,7 @@ export function ContactsFilters() {
             <div className="space-y-2">
               <Label htmlFor="clientType">Client Type</Label>
               <Select
-                defaultValue={searchParams.get("clientType") ?? "all"}
+                defaultValue={searchParams?.get("clientType") ?? "all"}
                 onValueChange={(value) => updateFilters("clientType", value)}
               >
                 <SelectTrigger>

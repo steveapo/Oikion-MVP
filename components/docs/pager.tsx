@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/navigation"
+import Link from "next/link"
 import { Doc } from "contentlayer/generated"
 
 import { docsConfig } from "@/config/docs"

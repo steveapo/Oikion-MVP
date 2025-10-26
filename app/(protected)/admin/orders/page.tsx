@@ -1,6 +1,4 @@
-import { redirect } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
-
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -8,11 +6,9 @@ import { DashboardHeader } from "@/components/dashboard/header";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
 
 export async function generateMetadata() {
-  const t = await getTranslations('admin.orders');
-  
   return constructMetadata({
-    title: `${t('header.title')} – Oikion`,
-    description: t('header.description'),
+    title: "Orders - Oikion",
+    description: "Manage subscription orders and billing",
   });
 }
 
@@ -20,21 +16,19 @@ export default async function OrdersPage() {
   // const user = await getCurrentUser();
   // if (!user || user.role !== "ADMIN") redirect("/login");
   
-  const t = await getTranslations('admin.orders');
-
   return (
     <>
       <DashboardHeader
-        heading={t('header.title')}
-        text={t('header.description')}
+        heading="Orders"
+        text="Manage subscription orders and billing"
       />
       <EmptyPlaceholder>
         <EmptyPlaceholder.Icon name="package" />
-        <EmptyPlaceholder.Title>{t('empty.title')}</EmptyPlaceholder.Title>
+        <EmptyPlaceholder.Title>No orders yet</EmptyPlaceholder.Title>
         <EmptyPlaceholder.Description>
-          {t('empty.description')}
+          Orders will appear here when customers make purchases
         </EmptyPlaceholder.Description>
-        <Button>{t('empty.button')}</Button>
+        <Button>View Documentation</Button>
       </EmptyPlaceholder>
     </>
   );

@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { MessageSquare, Phone, Calendar, Eye, CheckCircle, FileText, User } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
 

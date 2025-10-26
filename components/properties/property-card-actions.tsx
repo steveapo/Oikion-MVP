@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MoreHorizontal, Edit, Archive, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -36,18 +34,16 @@ export function PropertyCardActions({
 }: PropertyCardActionsProps) {
   const router = useRouter();
   const [isArchiving, setIsArchiving] = useState(false);
-  const t = useTranslations('properties.actions');
-
   const handleArchive = async () => {
     if (isArchiving) return;
     
     setIsArchiving(true);
     try {
       await archiveProperty(propertyId);
-      toast.success(t('archiveSuccess'));
+      toast.success("");
       router.refresh();
     } catch (error) {
-      toast.error(t('archiveError'));
+      toast.error("");
     } finally {
       setIsArchiving(false);
     }
@@ -58,7 +54,7 @@ export function PropertyCardActions({
       <Link href={`/dashboard/properties/${propertyId}`}>
         <Button variant="outline" size="sm">
           <Eye className="mr-2 h-4 w-4" />
-          {t('view')}
+          {""}
         </Button>
       </Link>
       
@@ -75,7 +71,7 @@ export function PropertyCardActions({
                 <DropdownMenuItem asChild>
                   <Link href={`/dashboard/properties/${propertyId}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    {t('edit')}
+                    {""}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -88,7 +84,7 @@ export function PropertyCardActions({
                 disabled={isArchiving}
               >
                 <Archive className="mr-2 h-4 w-4" />
-                {isArchiving ? t('archiving') : t('archive')}
+                {isArchiving ? "" : ""}
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

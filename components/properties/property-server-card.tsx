@@ -1,6 +1,6 @@
 import Image from "next/image";
+import { placeholderBlurhash } from "@/lib/utils";
 import { PropertyStatus, PropertyType, TransactionType, UserRole } from "@prisma/client";
-import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -101,6 +101,8 @@ export function PropertyServerCard({ property, userRole, userId, translations }:
               alt={`Property in ${displayLocation}`}
               fill
               className="object-cover"
+              placeholder="blur"
+              blurDataURL={placeholderBlurhash}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute right-2 top-2">

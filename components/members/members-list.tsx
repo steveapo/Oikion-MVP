@@ -4,8 +4,6 @@ import { useState } from "react";
 import { UserRole } from "@prisma/client";
 import { toast } from "sonner";
 import { MoreHorizontal } from "lucide-react";
-import { useTranslations } from "next-intl";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,9 +59,6 @@ export function MembersList({
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isRemoveDialogOpen, setIsRemoveDialogOpen] = useState(false);
-  const t = useTranslations("members.membersList");
-  const tRoles = useTranslations("members.roles");
-
   const handleChangeRole = (member: Member) => {
     setSelectedMember(member);
     setIsRoleDialogOpen(true);
@@ -101,11 +96,11 @@ export function MembersList({
     <>
       <Card>
         <CardHeader>
-          <CardTitle>{t("title")}</CardTitle>
+          <CardTitle>{""}</CardTitle>
           <CardDescription>
             {members.length === 1 
-              ? t("description", { count: members.length })
-              : t("descriptionPlural", { count: members.length })
+              ? ""
+              : ""
             }
           </CardDescription>
         </CardHeader>
@@ -113,9 +108,9 @@ export function MembersList({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t("tableHeaders.member")}</TableHead>
-                <TableHead>{t("tableHeaders.role")}</TableHead>
-                <TableHead>{t("tableHeaders.joined")}</TableHead>
+                <TableHead>Member</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Joined</TableHead>
                 {canManage && <TableHead className="w-[70px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -133,9 +128,9 @@ export function MembersList({
                       />
                       <div className="flex flex-col">
                         <span className="font-medium">
-                          {member.name || t("noName")}
+                          {member.name || ""}
                           {member.id === currentUserId && (
-                            <span className="ml-2 text-xs text-muted-foreground">{t("you")}</span>
+                            <span className="ml-2 text-xs text-muted-foreground">{""}</span>
                           )}
                         </span>
                         <span className="text-sm text-muted-foreground">
@@ -146,7 +141,7 @@ export function MembersList({
                   </TableCell>
                   <TableCell>
                     <Badge variant={getRoleBadgeVariant(member.role)}>
-                      {tRoles(member.role)}
+                      {member.role}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -165,15 +160,15 @@ export function MembersList({
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
                               <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">{t("openMenu")}</span>
+                              <span className="sr-only">{""}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+                            <DropdownMenuLabel>{""}</DropdownMenuLabel>
                             {canChangeMemberRole(member) && (
                               <>
                                 <DropdownMenuItem onClick={() => handleChangeRole(member)}>
-                                  {t("changeRole")}
+                                  {""}
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                               </>
@@ -182,7 +177,7 @@ export function MembersList({
                               onClick={() => handleRemove(member)}
                               className="text-destructive focus:text-destructive"
                             >
-                              {t("removeFromOrg")}
+                              {""}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -197,7 +192,7 @@ export function MembersList({
           {members.length === 0 && (
             <div className="flex min-h-[200px] items-center justify-center text-center">
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{t("noMembers")}</p>
+                <p className="text-sm text-muted-foreground">{""}</p>
               </div>
             </div>
           )}

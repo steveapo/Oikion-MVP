@@ -1,0 +1,99 @@
+action,relpath,reason,new_path
+delete,I18N_404_FIX.md,i18n documentation - no longer needed,
+delete,I18N_ARCHITECTURE.md,i18n documentation - no longer needed,
+delete,I18N_CRITICAL_FIX.md,i18n documentation - no longer needed,
+delete,I18N_DEPLOYMENT_CHECKLIST.md,i18n documentation - no longer needed,
+delete,I18N_DEPRECATION_FIX.md,i18n documentation - no longer needed,
+delete,I18N_DOCUMENTATION_INDEX.md,i18n documentation - no longer needed,
+delete,I18N_FILES_MANIFEST.md,i18n documentation - no longer needed,
+delete,I18N_FINAL_REPORT.md,i18n documentation - no longer needed,
+delete,I18N_FIX_SUMMARY.md,i18n documentation - no longer needed,
+delete,I18N_HANDOFF.md,i18n documentation - no longer needed,
+delete,I18N_IMPLEMENTATION_COMPLETE.md,i18n documentation - no longer needed,
+delete,I18N_INSTALLATION.md,i18n documentation - no longer needed,
+delete,I18N_MIGRATION_COMPLETE.md,i18n documentation - no longer needed,
+delete,I18N_QUICK_REFERENCE.md,i18n documentation - no longer needed,
+delete,I18N_QUICKSTART.md,i18n documentation - no longer needed,
+delete,I18N_README.md,i18n documentation - no longer needed,
+delete,I18N_ROUTING_EXPLAINED.md,i18n documentation - no longer needed,
+delete,I18N_SETUP_SUMMARY.md,i18n documentation - no longer needed,
+delete,I18N_START_HERE.md,i18n documentation - no longer needed,
+delete,I18N_TASK_COMPLETION.md,i18n documentation - no longer needed,
+delete,docs/I18N_IMPLEMENTATION.md,i18n documentation - no longer needed,
+delete,LOCALE_INSTANT_SWITCH_FIX.md,locale/i18n documentation - no longer needed,
+delete,LOCALE_OPTIMIZATION_CHECKLIST.md,locale/i18n documentation - no longer needed,
+delete,LOCALE_OPTIMIZATION_DIAGRAM.md,locale/i18n documentation - no longer needed,
+delete,LOCALE_PERFORMANCE_SUMMARY.md,locale/i18n documentation - no longer needed,
+delete,LOCALE_TOAST_NOTIFICATION.md,locale/i18n documentation - no longer needed,
+delete,BLAZING_FAST_LOCALE_SWITCH.md,locale/i18n documentation - no longer needed,
+delete,QUICK_TEST_LOCALE_SWITCH.md,locale/i18n documentation - no longer needed,
+delete,PROTECTED_PAGES_I18N_IMPLEMENTATION.md,translation documentation - no longer needed,
+delete,PROTECTED_PAGES_TRANSLATION_GUIDE.md,translation documentation - no longer needed,
+delete,PROTECTED_PAGES_TRANSLATIONS_COMPLETE.md,translation documentation - no longer needed,
+delete,PROPERTIES_PAGE_GREEK_TRANSLATIONS.md,translation documentation - no longer needed,
+delete,RELATIONS_CARDS_TRANSLATIONS_COMPLETE.md,translation documentation - no longer needed,
+delete,RELATIONS_HOME_PAGE_TRANSLATIONS_COMPLETE.md,translation documentation - no longer needed,
+delete,RELATIONS_PAGE_TRANSLATION_VERIFICATION.md,translation documentation - no longer needed,
+delete,OIKOSYNC_TRANSLATIONS_IMPLEMENTATION.md,translation documentation - no longer needed,
+delete,OIKOSYNC_MEMBERS_TRANSLATIONS_COMPLETE.md,translation documentation - no longer needed,
+delete,SIDEBAR_TRANSLATION_IMPLEMENTATION.md,translation documentation - no longer needed,
+delete,COMPREHENSIVE_TRANSLATIONS_SUMMARY.md,translation documentation - no longer needed,
+delete,SEO_LOCALIZATION_IMPLEMENTATION.md,SEO localization/i18n documentation - no longer needed,
+archive,docs/implementation/SPEED_SECURITY_SPRINT_README.md,completed sprint log - historical reference,docs/.archive/2025-10-cleanup/implementation-logs/SPEED_SECURITY_SPRINT_README.md
+archive,docs/implementation/SPEED_SECURITY_SPRINT_SUMMARY.md,completed sprint summary - historical reference,docs/.archive/2025-10-cleanup/implementation-logs/SPEED_SECURITY_SPRINT_SUMMARY.md
+archive,docs/implementation/SPEED_SECURITY_QUICK_REFERENCE.md,completed sprint reference - historical,docs/.archive/2025-10-cleanup/implementation-logs/SPEED_SECURITY_QUICK_REFERENCE.md
+archive,docs/implementation/SPEED_SECURITY_IMPLEMENTATION_LOG.md,completed sprint log - historical,docs/.archive/2025-10-cleanup/implementation-logs/SPEED_SECURITY_IMPLEMENTATION_LOG.md
+archive,docs/implementation/PHASE1_RLS_STATUS.md,phase 1 status - superseded by complete docs,docs/.archive/2025-10-cleanup/implementation-logs/PHASE1_RLS_STATUS.md
+archive,docs/implementation/PHASE1_SUMMARY.md,phase 1 summary - superseded by complete docs,docs/.archive/2025-10-cleanup/implementation-logs/PHASE1_SUMMARY.md
+archive,CLEANUP_SUMMARY.md,previous cleanup summary - historical,docs/.archive/2025-10-cleanup/implementation-logs/CLEANUP_SUMMARY.md
+archive,CLEANUP_AND_SESSION_FIX.md,cleanup/session fix log - historical,docs/.archive/2025-10-cleanup/implementation-logs/CLEANUP_AND_SESSION_FIX.md
+archive,IMPLEMENTATION_SUMMARY.md,implementation summary - superseded by complete docs,docs/.archive/2025-10-cleanup/implementation-logs/IMPLEMENTATION_SUMMARY.md
+archive,DASHBOARD_PROPERTIES_DISPLAY_UPDATE.md,dashboard update log - historical,docs/.archive/2025-10-cleanup/implementation-logs/DASHBOARD_PROPERTIES_DISPLAY_UPDATE.md
+archive,DASHBOARD_RECENT_ITEMS_IMPLEMENTATION.md,dashboard implementation log - historical,docs/.archive/2025-10-cleanup/implementation-logs/DASHBOARD_RECENT_ITEMS_IMPLEMENTATION.md
+archive,OIKOSYNC_ACTIVITY_LAYOUT_UPDATE.md,activity layout update log - historical,docs/.archive/2025-10-cleanup/implementation-logs/OIKOSYNC_ACTIVITY_LAYOUT_UPDATE.md
+archive,ORG_RELOAD_OPTIMIZATION.md,org reload optimization log - historical,docs/.archive/2025-10-cleanup/implementation-logs/ORG_RELOAD_OPTIMIZATION.md
+archive,LOADING_STATES_IMPLEMENTATION.md,loading states implementation log - historical,docs/.archive/2025-10-cleanup/implementation-logs/LOADING_STATES_IMPLEMENTATION.md
+archive,LOADING_STATES_INDEX.md,loading states index - historical,docs/.archive/2025-10-cleanup/implementation-logs/LOADING_STATES_INDEX.md
+move,AGENCY_RENAME_GUIDE.md,active guide - consolidate to guides,docs/guides/agency-rename-guide.md
+move,PERFORMANCE_OPTIMIZATION_COMPLETE.md,active guide - consolidate to guides,docs/guides/performance-optimization.md
+move,BUNDLE_ANALYSIS_REPORT.md,active guide - consolidate to guides,docs/guides/bundle-analysis.md
+move,OPTIMIZED_IMPORTS_GUIDE.md,active guide - consolidate to guides,docs/guides/optimized-imports.md
+move,QUICK_TEST_PERFORMANCE.md,active guide - consolidate to guides,docs/guides/quick-test-performance.md
+move,CSRF_SIGNOUT_RESOLUTION.md,troubleshooting doc - consolidate properly,docs/troubleshooting/csrf-signout.md
+move,docs/AUTH_SIGNOUT_CSRF_FIX.md,troubleshooting doc - move to subdirectory,docs/troubleshooting/auth-signout-csrf-fix.md
+move,VERCEL_DEPLOYMENT_FIX.md,troubleshooting doc - consolidate properly,docs/troubleshooting/vercel-deployment.md
+move,TESTING_ORG_RELOAD_FIX.md,troubleshooting doc - consolidate properly,docs/troubleshooting/testing-org-reload-fix.md
+move,INVITATION-LINK-FIX.md,troubleshooting doc - consolidate properly,docs/troubleshooting/invitation-link-fix.md
+move,DUPLICATE-WORKSPACE-FIX.md,troubleshooting doc - consolidate properly,docs/troubleshooting/duplicate-workspace-fix.md
+move,DECIMAL_SERIALIZATION_FIX.md,troubleshooting doc - consolidate properly,docs/troubleshooting/decimal-serialization-fix.md
+move,test-invitation-flow.md,feature documentation - consolidate properly,docs/features/invitations.md
+move,PERSONAL_ORG_SUMMARY.md,feature documentation - consolidate properly,docs/features/personal-workspaces.md
+move,docs/PERSONAL_ORG_QUICK_REF.md,feature reference - consolidate properly,docs/features/personal-workspaces-reference.md
+move,SKELETON_COMPONENTS_GUIDE.md,feature documentation - consolidate properly,docs/features/skeleton-loading.md
+move,SEO_IMPLEMENTATION_SUMMARY.md,feature documentation - consolidate properly,docs/features/seo-implementation.md
+move,SEO_TESTING_GUIDE.md,active guide - consolidate to guides,docs/guides/seo-testing.md
+keep,README.md,root project readme - keep in place,
+keep,LICENSE.md,license file - keep in place,
+keep,docs/README.md,documentation index - enhanced in place,
+keep,docs/STRUCTURE.md,new structure documentation - created,
+keep,docs/backend/index.md,backend architecture docs - properly organized,
+keep,docs/backend/database.md,backend architecture docs - properly organized,
+keep,docs/backend/api-routes.md,backend architecture docs - properly organized,
+keep,docs/backend/server-actions.md,backend architecture docs - properly organized,
+keep,docs/backend/auth-and-integrations.md,backend architecture docs - properly organized,
+keep,docs/setup/ENVIRONMENT_SETUP_GUIDE.md,setup documentation - properly organized,
+keep,docs/setup/DEV_EMAIL_TESTING.md,setup documentation - properly organized,
+keep,docs/setup/QUICKSTART_MEMBERS.md,setup documentation - properly organized,
+keep,docs/setup/RESEND_DEV_MODE.md,setup documentation - properly organized,
+keep,docs/implementation/IMPLEMENTATION_COMPLETE.md,active implementation doc - keep,
+keep,docs/implementation/SECURITY_MULTI_TENANCY_PLAN.md,active implementation doc - keep,
+keep,docs/implementation/RLS_ORG_MANAGEMENT_COMPLETE.md,active implementation doc - keep,
+keep,docs/implementation/ORG_INVITATIONS_IMPLEMENTATION.md,active implementation doc - keep,
+keep,docs/implementation/PERSONAL_ORG_PROTECTION.md,active implementation doc - keep,
+keep,docs/implementation/DELETED_ORG_SAFETY.md,active implementation doc - keep,
+keep,docs/implementation/EMAIL_SETUP_COMPLETE.md,active implementation doc - keep,
+keep,docs/implementation/MIGRATION_SUMMARY.md,active implementation doc - keep,
+keep,docs/troubleshooting/WEBPACK_FIX.md,troubleshooting doc - properly organized,
+keep,docs/troubleshooting/ROLE_FILTERING_FIX.md,troubleshooting doc - properly organized,
+keep,docs/QODER_AGENT_RULES.md,AI agent guidelines - properly organized,
+

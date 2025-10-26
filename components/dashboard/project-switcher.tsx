@@ -8,6 +8,7 @@ import { useSession } from "next-auth/react";
 import { getCurrentOrganization, getUserOrganizations, switchOrganization, createOrganization } from "@/actions/organizations";
 import { cn } from "@/lib/utils";
 import { useOrganizationContext } from "@/lib/organization-context";
+import { subscribeToLiveUpdates } from "@/lib/live-updates";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Popover,
@@ -37,21 +38,25 @@ type OrganizationType = {
 
 export default function ProjectSwitcher({
   large = false,
+  initialCurrentOrg,
+  initialAllOrgs,
 }: {
   large?: boolean;
+  initialCurrentOrg?: OrganizationType | null;
+  initialAllOrgs?: OrganizationType[];
 }) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const { eventCounter, triggerReload } = useOrganizationContext();
   const [openPopover, setOpenPopover] = useState(false);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [currentOrg, setCurrentAgency] = useState<OrganizationType | null>(null);
-  const [allOrgs, setAllAgencies] = useState<OrganizationType[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [currentOrg, setCurrentAgency] = useState<OrganizationType | null>(initialCurrentOrg || null);
+  const [allOrgs, setAllAgencies] = useState<OrganizationType[]>(initialAllOrgs || []);
+  const [loading, setLoading] = useState(!initialCurrentOrg);
   const [creating, setCreating] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [newOrgName, setNewAgencyName] = useState("");
-  const hasLoadedOnce = useRef(false);
+  const hasLoadedOnce = useRef(Boolean(initialCurrentOrg) || (initialAllOrgs && initialAllOrgs.length > 0));
 
   // Only load organizations on initial mount or when eventCounter changes
   // This prevents unnecessary reloads on window focus/tab changes
@@ -89,6 +94,40 @@ export default function ProjectSwitcher({
     // We only reload when actual org operations occur (tracked by eventCounter)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, eventCounter]);
+
+  // Subscribe to member removal events to update org list when user is kicked
+  useEffect(() => {
+    if (!session?.user?.id || !session?.user?.organizationId) return;
+
+    console.log('[ProjectSwitcher] Subscribing to member events');
+
+    const unsubscribe = subscribeToLiveUpdates(
+      "member",
+      session.user.organizationId,
+      (event) => {
+        console.log('[ProjectSwitcher] Received member event:', event);
+        
+        // If the current user was removed, refresh the org list
+        if (
+          event.action === "removed" && 
+          event.metadata?.userId === session.user.id
+        ) {
+          console.log('[ProjectSwitcher] Current user was removed, reloading orgs');
+          
+          // Trigger a reload of organizations
+          triggerReload("update");
+          
+          // Also refresh the router to update session
+          router.refresh();
+        }
+      }
+    );
+
+    return () => {
+      console.log('[ProjectSwitcher] Unsubscribing from member events');
+      unsubscribe();
+    };
+  }, [session?.user?.id, session?.user?.organizationId, triggerReload, router]);
 
   const handleSwitchOrg = async (agencyId: string) => {
     if (agencyId === currentOrg?.id) return;

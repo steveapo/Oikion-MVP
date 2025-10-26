@@ -1,0 +1,595 @@
+---
+description: Testing approach, quality gates, manual testing checklists, and best practices
+alwaysApply: false
+---
+
+# Testing & Quality Assurance Standards
+
+## Testing Philosophy
+
+### Current Approach
+- Manual testing primary method
+- No automated test suite currently
+- Comprehensive manual checklists
+- Staging environment for validation
+- User acceptance testing
+
+### Future Considerations
+- Jest for unit testing
+- React Testing Library for component tests
+- Playwright for E2E tests
+- When team grows or complexity increases
+- ROI of automated testing
+
+## Manual Testing Checklist
+
+### Feature Testing
+- Test happy path with valid data
+- Test edge cases and boundaries
+- Test error conditions
+- Test permission variations
+- Test across user roles
+
+### Cross-Browser Testing
+- Chrome (primary)
+- Firefox
+- Safari (macOS/iOS)
+- Edge
+- Mobile browsers
+
+### Responsive Testing
+- Mobile (375px, 414px)
+- Tablet (768px, 1024px)
+- Desktop (1280px, 1920px)
+- Test portrait and landscape
+- Touch vs mouse interactions
+
+### Accessibility Testing
+- Keyboard navigation only
+- Screen reader (VoiceOver, NVDA)
+- Color contrast checker
+- Focus indicators visible
+- ARIA attributes correct
+
+## Development Workflow
+
+### Code Quality Tools
+- ESLint for code linting
+- Prettier for code formatting
+- TypeScript for type checking
+- Husky for pre-commit hooks
+- Commitlint for commit messages
+
+### Pre-Commit Checks
+- Prettier formats code
+- ESLint checks for issues
+- TypeScript compiles successfully
+- Automated via Husky
+- Fast feedback loop
+
+### Build Validation
+- pnpm build must succeed
+- No TypeScript errors
+- No ESLint errors
+- Bundle size acceptable
+- All routes compile
+
+## Code Review Process
+
+### Review Checklist
+- Code follows conventions
+- TypeScript types correct
+- Error handling present
+- Security considerations addressed
+- Performance implications understood
+- Accessibility maintained
+- Documentation updated
+
+### Security Review
+- Input validation present
+- Authorization checks in place
+- Organization isolation verified
+- SQL injection prevented
+- XSS vulnerabilities checked
+- Sensitive data protected
+
+### Performance Review
+- Database queries optimized
+- N+1 queries avoided
+- Caching strategy appropriate
+- Bundle size impact minimal
+- Images optimized
+- Loading states present
+
+## Feature Testing Guide
+
+### Authentication Flow
+- Registration with valid email
+- Login with correct credentials
+- Login with wrong credentials
+- Password reset flow
+- OAuth provider login
+- Session persistence
+- Logout functionality
+
+### Multi-Tenancy
+- Create new organization
+- Switch between organizations
+- Invite member to organization
+- Accept invitation
+- Verify data isolation
+- Role-based permissions
+- Personal organization protection
+
+### CRUD Operations
+- Create with valid data
+- Create with invalid data
+- Read/view details
+- Update existing record
+- Delete record
+- Verify in database
+- Check activity log
+
+### Form Validation
+- Submit empty required fields
+- Submit invalid format (email, URL)
+- Submit out of range values
+- Test custom validation rules
+- Verify error messages
+- Test field character limits
+- Verify success feedback
+
+### File Uploads
+- Upload valid image
+- Upload invalid file type
+- Upload oversized file
+- Multiple file upload
+- Image preview
+- Delete uploaded file
+- Verify stored correctly
+
+## Database Testing
+
+### Data Integrity
+- Foreign key constraints work
+- Unique constraints enforced
+- Required fields enforced
+- Enum values validated
+- Timestamps auto-updated
+- Cascade deletes work
+
+### Query Performance
+- Monitor slow queries
+- Check explain plans
+- Verify index usage
+- Test with realistic data volumes
+- Identify N+1 queries
+- Optimize as needed
+
+### Migration Testing
+- Test migration up
+- Test migration down (if applicable)
+- Verify data transformation
+- No data loss
+- Backup before migration
+- Test on staging first
+
+## Security Testing
+
+### Authentication
+- Cannot access protected routes without auth
+- Session expires appropriately
+- Logout invalidates session
+- Password requirements enforced
+- OAuth flow secure
+- CSRF protection works
+
+### Authorization
+- Role permissions enforced
+- Resource ownership verified
+- Organization isolation maintained
+- Cannot escalate privileges
+- API endpoints protected
+- Audit logs capture attempts
+
+### Input Validation
+- SQL injection attempts fail
+- XSS attempts sanitized
+- Path traversal prevented
+- File upload restrictions work
+- Email validation correct
+- URL validation correct
+
+### Sensitive Data
+- Passwords hashed
+- API keys not exposed
+- Logs don't contain secrets
+- Error messages generic
+- Environment variables protected
+- Encryption works
+
+## Performance Testing
+
+### Page Load Performance
+- First Contentful Paint < 1.8s
+- Time to Interactive < 3.9s
+- Lighthouse score > 90
+- Core Web Vitals passing
+- No layout shifts
+- Images lazy loaded
+
+### API Response Times
+- Server actions < 500ms typical
+- Database queries optimized
+- No slow queries (> 1s)
+- Concurrent request handling
+- Caching effective
+- Bundle size reasonable
+
+### Stress Testing
+- Many simultaneous users
+- Large datasets
+- Concurrent operations
+- Memory usage stable
+- No memory leaks
+- Graceful degradation
+
+## Accessibility Testing
+
+### Keyboard Navigation
+- Tab order logical
+- All interactive elements focusable
+- Focus indicators visible
+- Escape closes modals
+- Enter submits forms
+- Arrow keys where appropriate
+
+### Screen Reader Testing
+- Landmarks present and labeled
+- Headings hierarchical
+- Images have alt text
+- Forms labeled correctly
+- Errors announced
+- Status updates announced
+
+### WCAG Compliance
+- Color contrast AA minimum
+- Text resizable to 200%
+- No keyboard traps
+- Time limits extendable
+- Skip links present
+- Error identification clear
+
+## Staging Environment
+
+### Purpose
+- Pre-production testing
+- Client demos
+- UAT testing
+- Data migration testing
+- Performance testing
+- Integration testing
+
+### Configuration
+- Mirrors production
+- Test database
+- Test Stripe account
+- Test email (Resend dev mode)
+- Same infrastructure
+- Separate API keys
+
+### Deployment
+- Automatic on merge to staging branch
+- Preview deployments for PRs
+- Quick rollback capability
+- Monitor for errors
+- Test before production
+
+## Production Monitoring
+
+### Error Tracking
+- Server errors logged
+- Client errors tracked
+- Error aggregation
+- Alert on critical errors
+- Daily error review
+- Trend analysis
+
+### Performance Monitoring
+- Vercel Analytics
+- Core Web Vitals
+- API response times
+- Database query performance
+- Bundle size tracking
+- Uptime monitoring
+
+### User Analytics
+- Vercel Analytics (privacy-friendly)
+- Feature usage tracking
+- User flows
+- Conversion funnels
+- A/B testing (if needed)
+- Privacy compliant
+
+## Regression Testing
+
+### After Major Changes
+- Run through manual checklist
+- Test affected features
+- Test related features
+- Verify no breakage
+- Check edge cases
+- Validate on staging
+
+### Before Releases
+- Complete feature testing
+- Security review
+- Performance check
+- Accessibility audit
+- Browser compatibility
+- Mobile responsiveness
+
+## Bug Tracking
+
+### Issue Documentation
+- Clear reproduction steps
+- Expected vs actual behavior
+- Environment details
+- Screenshots/video if applicable
+- User impact severity
+- Priority assignment
+
+### Bug Triage
+- Critical: Security, data loss
+- High: Blocking functionality
+- Medium: Degraded experience
+- Low: Minor issues, cosmetic
+- Enhancement: New feature requests
+
+### Bug Lifecycle
+- Reported → Triaged → In Progress → Fixed → Verified → Closed
+- Track in issue tracker
+- Link to fix commit
+- Verify fix on staging
+- Verify fix in production
+- Document in release notes
+
+## Release Process
+
+### Pre-Release Checklist
+- All tests passing
+- Code review approved
+- Staging tested
+- Documentation updated
+- Migration plan ready
+- Rollback plan ready
+- Changelog drafted
+
+### Deployment Steps
+- Tag release version
+- Run database migrations
+- Deploy application
+- Verify deployment
+- Smoke test critical paths
+- Monitor for errors
+- Announce release
+
+### Post-Release
+- Monitor error rates
+- Check performance metrics
+- Review user feedback
+- Address critical issues immediately
+- Document lessons learned
+- Update runbooks
+
+## Code Quality Metrics
+
+### Maintainability
+- Clear code structure
+- Consistent naming
+- DRY principle followed
+- Small focused functions
+- Minimal complexity
+- Good documentation
+
+### Type Safety
+- TypeScript strict mode
+- No any types
+- Proper error handling
+- Type-safe APIs
+- Correct inference
+- Generic types used appropriately
+
+### Performance
+- No obvious inefficiencies
+- Appropriate caching
+- Optimized queries
+- Minimal re-renders
+- Bundle size reasonable
+- Images optimized
+
+## Testing Best Practices
+
+### Manual Testing
+1. Test on staging before production
+2. Use realistic test data
+3. Test happy path and edge cases
+4. Verify error handling
+5. Check all user roles
+6. Test on multiple browsers/devices
+7. Verify accessibility
+8. Check performance
+9. Review security implications
+10. Document test results
+
+### Code Review
+1. Review for correctness
+2. Check error handling
+3. Verify security measures
+4. Assess performance impact
+5. Ensure type safety
+6. Check for code smells
+7. Verify documentation
+8. Test edge cases
+9. Validate accessibility
+10. Approve only when confident
+
+## Common Testing Scenarios
+
+### User Registration
+- Valid email and password
+- Duplicate email
+- Weak password
+- Invalid email format
+- Email verification flow
+- Personal organization created
+- Welcome email sent
+
+### Property Creation
+- Complete all required fields
+- Upload property images
+- Save draft
+- Publish property
+- Edit published property
+- Archive property
+- Delete property
+
+### Organization Management
+- Create organization
+- Invite members
+- Accept invitation
+- Change member role
+- Remove member
+- Update organization settings
+- Delete organization
+
+### Subscription
+- View pricing plans
+- Upgrade subscription
+- Downgrade subscription
+- Cancel subscription
+- Billing portal access
+- Webhook handling
+- Plan limits enforced
+
+## Quality Gates
+
+### Development
+- TypeScript compiles
+- ESLint passes
+- Prettier formatted
+- Manual testing complete
+- Code reviewed
+- Staging deployed
+
+### Staging
+- All features work
+- No console errors
+- Performance acceptable
+- Accessibility checked
+- Security reviewed
+- Ready for production
+
+### Production
+- Deployment successful
+- Smoke tests pass
+- Monitoring active
+- No error spikes
+- Performance stable
+- Rollback plan ready
+
+## Documentation Quality
+
+### Code Documentation
+- Complex logic explained
+- Public APIs documented
+- Type definitions clear
+- Examples provided
+- Edge cases noted
+- Assumptions stated
+
+### User Documentation
+- Features documented
+- Screenshots/videos
+- Step-by-step guides
+- Troubleshooting section
+- FAQ maintained
+- Up to date
+
+### Technical Documentation
+- Architecture documented
+- Deployment process
+- Environment setup
+- Database schema
+- API endpoints
+- Configuration options
+
+## Continuous Improvement
+
+### Feedback Loop
+- User feedback collected
+- Error patterns analyzed
+- Performance monitored
+- Feature requests tracked
+- Pain points identified
+- Improvements prioritized
+
+### Process Refinement
+- Retrospectives regular
+- Bottlenecks identified
+- Tools evaluated
+- Workflows optimized
+- Documentation updated
+- Team alignment
+
+## Testing Tools
+
+### Current Tools
+- Chrome DevTools
+- React DevTools
+- Vercel Analytics
+- Prisma Studio
+- Browser Inspector
+- Manual checklist
+
+### Potential Future Tools
+- Jest (unit testing)
+- React Testing Library
+- Playwright (E2E)
+- Lighthouse CI
+- Bundle analyzer
+- Performance profiling
+
+## Quality Commitment
+
+1. Manual testing before all releases
+2. Code review for all changes
+3. Security considerations always
+4. Accessibility not optional
+5. Performance monitored
+6. Errors tracked and fixed
+7. User feedback valued
+8. Documentation maintained
+9. Staging environment used
+10. Production monitored continuously
+
+## Best Practices Summary
+
+1. Test thoroughly on staging before production
+2. Maintain comprehensive manual testing checklists
+3. Code review all changes
+4. Monitor production for errors
+5. Track and fix bugs promptly
+6. Validate accessibility
+7. Check performance impact
+8. Verify security measures
+9. Document changes clearly
+10. Learn from incidents
+
+## Version Information
+
+Testing Approach: Manual + Checklists
+Planned Automation: Jest + Playwright
+Monitoring: Vercel Analytics
+Error Tracking: Server logs + monitoring
+

@@ -1,6 +1,6 @@
 import * as React from "react";
 import NextImage, { ImageProps } from "next/image";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { useMDXComponent } from "next-contentlayer2/hooks";
 
 import { cn } from "@/lib/utils";

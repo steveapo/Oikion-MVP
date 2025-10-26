@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 import { UserRole } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { z } from "zod";
 
 /**
@@ -22,8 +22,10 @@ export async function getCurrentOrganization() {
       return null;
     }
 
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationId },
+    const getCached = unstable_cache(
+      async (orgId: string) => {
+        return prisma.organization.findUnique({
+          where: { id: orgId },
       select: {
         id: true,
         name: true,
@@ -32,6 +34,12 @@ export async function getCurrentOrganization() {
         createdAt: true,
       },
     });
+      },
+      ["org:getCurrent"],
+      { tags: ["org:current"], revalidate: 300 }
+    );
+
+    const organization = await getCached(organizationId);
 
     return organization;
   } catch (error) {
@@ -54,9 +62,11 @@ export async function getUserOrganizations() {
     }
 
     // Get all organizations where user is a member (via OrganizationMember table)
-    const memberships = await prisma.organizationMember.findMany({
+    const getCached = unstable_cache(
+      async (userId: string) => {
+        return prisma.organizationMember.findMany({
       where: {
-        userId: session.user.id,
+            userId,
       },
       include: {
         organization: {
@@ -75,10 +85,16 @@ export async function getUserOrganizations() {
         },
       },
       orderBy: [
-        { organization: { isPersonal: "desc" } }, // Personal organizations first
+            { organization: { isPersonal: "desc" } },
         { organization: { createdAt: "desc" } },
       ],
     });
+      },
+      ["org:getUserList"],
+      { tags: ["org:list"], revalidate: 300 }
+    );
+
+    const memberships = await getCached(session.user.id);
 
     // Extract and format the organizations
     const organizations = memberships.map(membership => ({
@@ -165,6 +181,8 @@ export async function createOrganization(
       },
     });
 
+    revalidateTag("org:current");
+    revalidateTag("org:list");
     revalidatePath("/dashboard");
 
     return { success: true, organizationId: organization.id };
@@ -215,6 +233,8 @@ export async function updateOrganization(
       data: validated,
     });
 
+    revalidateTag("org:current");
+    revalidateTag("org:list");
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/settings");
 
@@ -268,6 +288,8 @@ export async function switchOrganization(
       },
     });
 
+    revalidateTag("org:current");
+    revalidateTag("org:list");
     revalidatePath("/dashboard");
 
     return { success: true };
@@ -356,6 +378,8 @@ export async function deleteOrganization(): Promise<{
       },
     });
 
+    revalidateTag("org:current");
+    revalidateTag("org:list");
     revalidatePath("/dashboard");
 
     return { 
